@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <title>MABIRH POIN</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MABIRH POIN">
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #3b82f6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --dark: #1e293b;
+            --light: #f1f5f9;
+            --white: #ffffff;
+            --text: #334155;
+            --gold: #eab308;
+            --silver: #94a3b8;
+            --bronze: #b45309;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background-color: var(--light); color: var(--text); overflow-x: hidden; }
+
+        /* App Container & Swipe Logic */
+        #app { width: 100vw; height: 100vh; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        #swipe-container { display: flex; height: calc(100vh - 60px); transition: transform 0.3s ease-out; will-change: transform; }
+        .page { min-width: 100vw; height: 100%; overflow-y: auto; background: var(--light); padding-bottom: 80px; }
+
+        /* Headers */
+        .header { background: var(--primary); color: var(--white); padding: 15px 20px; position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header-title { font-size: 1.2rem; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+        .header-stats { display: flex; justify-content: space-between; margin-top: 10px; font-size: 0.85rem; background: rgba(255,255,255,0.1); padding: 8px; border-radius: 8px; }
+        .stat-item { text-align: center; }
+        .stat-item span { display: block; font-weight: 700; font-size: 1rem; }
+
+        /* Bottom Nav */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--white); display: flex; justify-content: space-around; padding: 10px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 20; }
+        .nav-item { background: none; border: none; color: var(--text); font-size: 1.5rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; }
+        .nav-item span { font-size: 0.7rem; margin-top: 4px; font-weight: 500; }
+        .nav-item.active { color: var(--primary); }
+
+        /* Cards & Lists */
+        .container { padding: 15px; }
+        .card { background: var(--white); border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: relative; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+        .card-title { font-weight: 600; font-size: 1rem; color: var(--dark); display: flex; align-items: center; gap: 8px; flex-wrap: wrap;}
+        .badge { background: var(--light); padding: 3px 8px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; color: var(--primary); }
+        
+        /* Inputs & Buttons */
+        input, select { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; font-size: 0.9rem; }
+        input:focus, select:focus { border-color: var(--primary); }
+        .btn { padding: 10px 15px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; font-size: 0.9rem; width: 100%; margin-top: 5px; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); }
+        .btn-icon { background: none; border: none; color: var(--text); font-size: 1.2rem; cursor: pointer; padding: 5px; }
+        .btn-icon.red { color: var(--danger); }
+        .btn-icon.blue { color: var(--primary); }
+        .btn-icon.green { color: var(--success); }
+
+        /* Flex Utilities */
+        .flex-row { display: flex; gap: 10px; align-items: center; }
+        
+        /* Modals */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal-content { background: var(--white); width: 95%; max-width: 550px; border-radius: 12px; padding: 20px; max-height: 90vh; overflow-y: auto; transition: all 0.3s; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        
+        /* Search Bar */
+        .search-box { background: var(--white); display: flex; align-items: center; padding: 0 15px; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 15px; }
+        .search-box input { border: none; margin: 0; padding: 10px; background: transparent; }
+        
+        /* Setor Table */
+        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .setor-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; min-width: 450px; }
+        .setor-table th, .setor-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .setor-table th { background: var(--primary); color: white; white-space: nowrap; }
+        .setor-table td { white-space: nowrap; }
+        
+        /* Indicators */
+        .page-indicator { display: flex; justify-content: center; gap: 5px; padding: 10px; background: var(--light); }
+        .dot { width: 8px; height: 8px; background: #cbd5e1; border-radius: 50%; transition: 0.3s; }
+        .dot.active { background: var(--primary); width: 16px; border-radius: 4px; }
+
+        /* Manual Inputs for Laporan */
+        .laporan-input { border: none; border-bottom: 1px dashed gray; background: transparent; text-align: center; font-weight: bold; outline: none; margin: 0; padding: 2px; }
+        .laporan-input:focus { border-bottom: 1px solid var(--primary); }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <div id="swipe-container"></div>
+    <div class="page-indicator" id="page-indicator"></div>
+
+    <div class="bottom-nav">
+        <button class="nav-item active" onclick="goToPage(0)"><i class="fas fa-home"></i><span>Utama</span></button>
+        <button class="nav-item" onclick="openModal('modal-add-route')"><i class="fas fa-route"></i><span>+ Jalur</span></button>
+        <button class="nav-item" onclick="openModal('modal-add-warung')"><i class="fas fa-store"></i><span>+ Warung</span></button>
+        <button class="nav-item" onclick="openModal('modal-settings')"><i class="fas fa-cog"></i><span>Pengaturan</span></button>
+    </div>
+</div>
+
+<div class="modal" id="modal-add-route" onclick="closeModalOnBackdrop(event, 'modal-add-route')">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-route"></i> Tambah Jalur</h3>
+            <button class="btn-icon" onclick="closeModal('modal-add-route')"><i class="fas fa-times"></i></button>
+        </div>
+        <input type="text" id="input-route-name" placeholder="Nama Jalur (Misal: J1)">
+        <button class="btn btn-primary" onclick="addRoute()">Simpan Jalur</button>
+    </div>
+</div>
+
+<div class="modal" id="modal-add-warung" onclick="closeModalOnBackdrop(event, 'modal-add-warung')">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-store"></i> Tambah Warung</h3>
+            <button class="btn-icon" onclick="closeModal('modal-add-warung')"><i class="fas fa-times"></i></button>
+        </div>
+        <select id="select-route-add">
+            <option value="">-- Pilih Jalur Dulu --</option>
+        </select>
+        <input type="text" id="input-warung-name" placeholder="Nama Warung">
+        <input type="text" id="input-warung-maps" placeholder="Link Google Maps (Opsional)">
+        <button class="btn btn-primary" onclick="addWarung()">Simpan Warung</button>
+    </div>
+</div>
+
+<div class="modal" id="modal-warung-action" onclick="closeModalOnBackdrop(event, 'modal-warung-action')">
+    <div class="modal-content" style="border-top: 5px solid var(--primary); max-width: 400px;">
+        <div class="modal-header">
+            <h3 id="action-warung-title" style="color: var(--dark);">Nama Warung</h3>
+            <button class="btn-icon" onclick="closeModal('modal-warung-action')"><i class="fas fa-times"></i></button>
+        </div>
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <div style="flex: 1; text-align: center; background: var(--light); padding: 10px; border-radius: 8px;">
+                <small style="color:gray; font-size: 0.75rem;">Poin Utama</small><br>
+                <strong id="action-warung-points" style="font-size: 1.3rem; color: var(--primary);">0</strong>
+            </div>
+            <div style="flex: 1; text-align: center; background: var(--light); padding: 10px; border-radius: 8px;">
+                <small style="color:gray; font-size: 0.75rem;">Angka (Setor)</small><br>
+                <strong id="action-warung-setor" style="font-size: 1.3rem; color: var(--success);">0 Pcs</strong>
+            </div>
+        </div>
+        
+        <label style="font-size: 0.85rem; font-weight: 600;">Masukkan Angka Input Poin/Pcs :</label>
+        <input type="number" id="input-action-pt" placeholder="Contoh: 10" style="font-size: 1.1rem; text-align: center;">
+        
+        <div class="flex-row" style="margin-top: 10px; gap: 10px;">
+            <button class="btn btn-primary" onclick="executeAddPoints(false)" style="flex: 1; height: 45px;"><i class="fas fa-plus"></i> Tambah Poin</button>
+            <button class="btn btn-success" onclick="executeAddPoints(true)" style="flex: 1; height: 45px; background: #eab308; color: black;"><i class="fas fa-dollar-sign"></i> Tombol $</button>
+        </div>
+        
+        <hr style="margin: 15px 0; border: 0; border-top: 1px solid #cbd5e1;">
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <button class="btn btn-outline" id="btn-action-maps"><i class="fas fa-map-marker-alt"></i> Edit Maps</button>
+            <button class="btn btn-outline" id="btn-action-order"><i class="fas fa-sort-numeric-up"></i> Urutan</button>
+            <button class="btn btn-outline" style="color: var(--danger); border-color: var(--danger);" id="btn-action-reset"><i class="fas fa-undo"></i> Reset Poin</button>
+            <button class="btn btn-danger" id="btn-action-delete"><i class="fas fa-trash"></i> Hapus Warung</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="modal-setor" onclick="closeModalOnBackdrop(event, 'modal-setor')">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-money-bill-wave"></i> Menu Setor</h3>
+            <button class="btn-icon" onclick="closeModal('modal-setor')"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="setor-capture-area" style="background: white; padding: 10px; width: 100%;">
+            <div style="text-align: center; margin-bottom: 15px;">
+                <h4 id="setor-date" style="margin-bottom: 8px; font-size: 1.1rem;">Laporan Setoran</h4>
+                <div style="display: flex; justify-content: center; align-items: center; gap: 5px; font-size: 0.9rem; margin-bottom: 5px;">
+                    <label>Nama Sales:</label>
+                    <input type="text" class="laporan-input" placeholder="Ketik disini..." style="width: 150px;">
+                </div>
+                <div style="display: flex; justify-content: center; align-items: center; gap: 15px; font-size: 0.9rem;">
+                    <div><label>Terpal:</label> <input type="number" class="laporan-input" placeholder="0" style="width: 50px;"></div>
+                    <div><label>Sisa:</label> <input type="number" class="laporan-input" placeholder="0" style="width: 50px;"></div>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="setor-table" id="table-setor">
+                    <thead>
+                        <tr>
+                            <th style="width: 5%;">No</th>
+                            <th>Warung</th>
+                            <th style="text-align:center;">Terjual</th>
+                            <th>Rp</th>
+                            <th style="text-align:center;">Sisa</th>
+                            <th style="text-align:center; width: 5%;" class="no-print">
+                                <button class="btn-icon" style="color: white; padding: 0;" onclick="deleteAllSetor()" title="Hapus Semua Data Setor"><i class="fas fa-trash-alt"></i></button>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="setor-tbody"></tbody>
+                </table>
+            </div>
+            
+            <div style="margin-top: 15px; border-top: 2px dashed #cbd5e1; padding-top: 10px; text-align: right; font-size: 0.95rem; line-height: 1.6;">
+                <div>Total Setor : <span id="setor-grand-total" style="font-weight: 700; font-size: 1.1rem; color: var(--dark);">Rp0</span></div>
+                <div>Total Terjual : <span id="setor-total-terjual" style="font-weight: 700; color: var(--primary);">0 Pcs</span></div>
+                <div>Total Sisa : <span id="setor-total-sisa" style="font-weight: 700; color: var(--danger);">0 Pcs</span></div>
+            </div>
+        </div>
+        
+        <div class="flex-row" style="margin-top: 15px; gap: 8px;">
+            <button class="btn btn-success" style="margin:0; flex: 1;" onclick="selesaikanSetor()"><i class="fas fa-image"></i> Simpan JPG</button>
+            <button class="btn" style="margin:0; flex: 1; background: #16a34a; color: white;" onclick="exportToExcel()"><i class="fas fa-file-excel"></i> Simpan Excel</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="modal-settings" onclick="closeModalOnBackdrop(event, 'modal-settings')">
+    <div class="modal-content" style="max-width: 400px;">
+        <div class="modal-header">
+            <h3><i class="fas fa-cog"></i> Pengaturan</h3>
+            <button class="btn-icon" onclick="closeModal('modal-settings')"><i class="fas fa-times"></i></button>
+        </div>
+        <label>Nilai Konversi Utama (1 Poin = Rp)</label>
+        <input type="number" id="input-conv-main" placeholder="30">
+        <label>Nilai Konversi Setor (1 Poin = Rp)</label>
+        <input type="number" id="input-conv-setor" placeholder="1200">
+        <button class="btn btn-primary" onclick="saveSettings()">Simpan Pengaturan</button>
+        
+        <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+        <h4 style="margin-bottom: 10px; font-size: 1rem;"><i class="fas fa-database"></i> Data Aplikasi</h4>
+        <button class="btn btn-success" onclick="backupData()"><i class="fas fa-download"></i> Pencadangan (Backup)</button>
+        <label for="restore-file" class="btn btn-outline" style="text-align: center; display: block; margin-top: 10px; cursor: pointer;">
+            <i class="fas fa-upload"></i> Pemulihan (Restore)
+        </label>
+        <input type="file" id="restore-file" style="display: none;" accept=".json" onchange="restoreData(event)">
+    </div>
+</div>
+
+<script>
+    // --- STATE MANAGEMENT ---
+    let state = JSON.parse(localStorage.getItem('warungApp')) || { mainConversion: 30, setorConversion: 1200, routes: [] };
+    let currentPage = 0; let activeRouteId = null; let activeWarungId = null;
+    
+    state.routes.forEach(r => {
+        if(!r.warungs) r.warungs = [];
+        r.warungs.forEach(w => { if(w.setorPoints === undefined) w.setorPoints = 0; });
+    });
+    
+    function saveData() { localStorage.setItem('warungApp', JSON.stringify(state)); renderApp(); }
+    function formatRp(angka) { return "Rp" + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
+    function openMapsLink(event, url) { event.stopPropagation(); if (url && url.trim() !== "") window.open(url.trim(), '_blank'); }
+
+    // --- RENDER LOGIC ---
+    function renderApp() {
+        const container = document.getElementById('swipe-container');
+        container.innerHTML = ''; 
+        renderMainPage(container);
+        state.routes.forEach((route, index) => renderRoutePage(container, route, index + 1));
+        updateRouteDropdowns(); updateIndicators(); goToPage(currentPage);
+    }
+
+    function renderMainPage(container) {
+        let totalWarung = 0, totalPoin = 0;
+        let allWarungs = [];
+        state.routes.forEach(r => {
+            totalWarung += r.warungs.length;
+            r.warungs.forEach(w => { totalPoin += w.points; allWarungs.push({ routeName: r.name, ...w }); });
+        });
+        let totalRp = totalPoin * state.mainConversion;
+
+        allWarungs.sort((a, b) => b.points - a.points);
+        let top5 = allWarungs.slice(0, 5);
+        let top5Html = top5.map((w, i) => {
+            let badgeColor = '#e2e8f0'; let textColor = 'var(--text)';
+            if(i === 0) { badgeColor = 'var(--gold)'; textColor = 'white'; }
+            else if(i === 1) { badgeColor = 'var(--silver)'; textColor = 'white'; }
+            else if(i === 2) { badgeColor = 'var(--bronze)'; textColor = 'white'; }
+            
+            return `
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span class="badge" style="background: ${badgeColor}; color: ${textColor}; min-width: 25px; text-align: center; border-radius: 5px;">#${i+1}</span>
+                        <div><span style="font-weight: 600; display: block; line-height: 1.2;">${w.name}</span><small style="color: gray; font-size: 0.75rem;">Jalur: ${w.routeName}</small></div>
+                    </div>
+                    <div style="font-weight: 700; color: var(--primary); font-size: 1rem;">${w.points} <span style="font-size: 0.7rem; font-weight: normal; color: gray;">Pts</span></div>
+                </div>`;
+        }).join('');
+        if(top5.length === 0) top5Html = '<p style="font-size:0.8rem; color:gray; text-align:center; padding: 10px;">Belum ada data warung.</p>';
+
+        const div = document.createElement('div'); div.className = 'page';
+        div.innerHTML = `
+            <div class="header">
+                <div class="header-title"><span><i class="fas fa-chart-pie"></i> MABIRH POIN</span><button class="btn btn-success" style="width: auto; padding: 5px 10px; font-size: 0.8rem; margin:0;" onclick="openSetorModal()"><i class="fas fa-cash-register"></i> Menu Setor</button></div>
+                <div class="header-stats">
+                    <div class="stat-item">Warung<span>${totalWarung}</span></div><div class="stat-item">Poin<span>${totalPoin}</span></div><div class="stat-item">Total Rp<span>${formatRp(totalRp)}</span></div>
+                </div>
+            </div>
+            <div class="container">
+                <div class="search-box">
+                    <i class="fas fa-search" style="color: #94a3b8;"></i>
+                    <select id="main-search-route" style="border:none; width:40%; background:transparent; font-size:0.8rem;" onchange="updateMainWarungSearch()"><option value="">Pilih Jalur</option>${state.routes.map(r => `<option value="${r.id}">${r.name}</option>`).join('')}</select>
+                    <select id="main-search-warung" style="border:none; width:50%; background:transparent; font-size:0.8rem;" onchange="executeMainSearch()"><option value="">Pilih Warung</option></select>
+                </div>
+                <div id="main-search-result"></div>
+                <div class="card" style="margin-top: 15px;">
+                    <div class="card-header" style="margin-bottom: 5px;"><h3 style="font-size: 1rem; color: var(--dark); display: flex; align-items: center; gap: 8px;"><i class="fas fa-trophy" style="color: var(--gold);"></i> Top 5 Poin Terbanyak</h3></div>
+                    <div id="top-5-warung">${top5Html}</div>
+                </div>
+            </div>`;
+        container.appendChild(div);
+    }
+
+    function renderRoutePage(container, route, pageIndex) {
+        route.warungs.sort((a, b) => a.order - b.order);
+        let rWarung = route.warungs.length; let rPoin = route.warungs.reduce((sum, w) => sum + w.points, 0); let rRp = rPoin * state.mainConversion;
+        const div = document.createElement('div'); div.className = 'page';
+        div.innerHTML = `
+            <div class="header" style="background: var(--secondary);">
+                <div class="header-title"><span><i class="fas fa-route"></i> Jalur: ${route.name}</span><button class="btn-icon" onclick="editRouteName('${route.id}')" style="color:white;"><i class="fas fa-edit"></i></button></div>
+                <div class="header-stats"><div class="stat-item">Warung<span>${rWarung}</span></div><div class="stat-item">Poin<span>${rPoin}</span></div><div class="stat-item">Total Rp<span>${formatRp(rRp)}</span></div></div>
+            </div>
+            <div class="container">
+                <div class="search-box"><i class="fas fa-search" style="color: #94a3b8;"></i><input type="text" placeholder="Cari nama warung..." onkeyup="filterRouteWarung('${route.id}', this.value)"></div>
+                <div id="list-warung-${route.id}">${route.warungs.map((w, index) => generateWarungCard(route.id, w, index)).join('')}</div>
+            </div>`;
+        container.appendChild(div);
+    }
+
+    function generateWarungCard(routeId, w, index) {
+        if (w.setorPoints === undefined) w.setorPoints = 0;
+        const totalRpUtama = w.points * state.mainConversion;
+        const mapsButton = w.maps && w.maps.trim() !== "" 
+            ? `<button class="btn-icon" onclick="openMapsLink(event, '${w.maps}')" style="color: #ef4444; padding: 0 4px; font-size: 1.1rem; display: inline-flex; align-items: center;"><i class="fas fa-map-marker-alt"></i></button>`
+            : `<button class="btn-icon" style="color: #cbd5e1; padding: 0 4px; font-size: 1.1rem; cursor: not-allowed; display: inline-flex; align-items: center;" disabled><i class="fas fa-map-marker-alt"></i></button>`;
+        return `
+            <div class="card warung-item" data-name="${w.name.toLowerCase()}" onclick="openWarungActionModal('${routeId}', '${w.id}')" style="cursor: pointer;">
+                <div class="card-header" style="border-bottom:none; margin-bottom:0; padding-bottom:0;">
+                    <div class="card-title" style="flex: 1;"><span class="badge">${index + 1}</span> <span style="word-break: break-word;">${w.name}</span>${mapsButton} <span style="font-size: 0.75rem; color: var(--text); font-weight: 500;">(${formatRp(totalRpUtama)})</span></div>
+                    <i class="fas fa-chevron-right" style="color: #cbd5e1; font-size: 0.85rem; margin-left: 10px;"></i>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; background: #f8fafc; padding: 6px 12px; border-radius: 8px;">
+                    <div><span style="font-size: 0.7rem; color: gray; display:block;">Poin Utama</span><strong style="font-size: 1rem; color: var(--primary);">${w.points}</strong></div>
+                    <div><span style="font-size: 0.7rem; color: gray; display:block;">Angka Setor</span><strong style="font-size: 1rem; color: var(--success);">${w.setorPoints} Pcs</strong></div>
+                </div>
+            </div>`;
+    }
+
+    // --- INTERAKSI MENGAMBANG ---
+    function openWarungActionModal(routeId, warungId) {
+        activeRouteId = routeId; activeWarungId = warungId;
+        const route = state.routes.find(r => r.id === routeId); const w = route.warungs.find(w => w.id === warungId);
+        if (!w) return;
+        document.getElementById('action-warung-title').innerText = `${w.name} (${route.name})`;
+        document.getElementById('action-warung-points').innerText = w.points;
+        document.getElementById('action-warung-setor').innerText = (w.setorPoints || 0) + ' Pcs';
+        document.getElementById('input-action-pt').value = '';
+
+        document.getElementById('btn-action-maps').onclick = () => { editMaps(routeId, warungId); refreshActionModal(routeId, warungId); };
+        document.getElementById('btn-action-order').onclick = () => { changeOrder(routeId, warungId); refreshActionModal(routeId, warungId); };
+        document.getElementById('btn-action-reset').onclick = () => { resetPoints(routeId, warungId); refreshActionModal(routeId, warungId); };
+        document.getElementById('btn-action-delete').onclick = () => { deleteWarung(routeId, warungId); closeModal('modal-warung-action'); };
+        openModal('modal-warung-action');
+    }
+
+    // --- SISANYA TETAP SAMA SEPERTI KODE ASLI ANDA ---
+    function refreshActionModal(routeId, warungId) {
+        const w = state.routes.find(r => r.id === routeId).warungs.find(w => w.id === warungId);
+        if (w) { document.getElementById('action-warung-points').innerText = w.points; document.getElementById('action-warung-setor').innerText = (w.setorPoints || 0) + ' Pcs'; }
+    }
+
+    function executeAddPoints(isDollarButton) {
+        const ptInput = document.getElementById('input-action-pt'); const pt = parseInt(ptInput.value);
+        if (isNaN(pt) || pt <= 0) return alert("Masukkan jumlah angka yang valid!");
+        const w = state.routes.find(r => r.id === activeRouteId).warungs.find(w => w.id === activeWarungId);
+        w.points += pt;
+        if (isDollarButton) { if (w.setorPoints === undefined) w.setorPoints = 0; w.setorPoints += pt; }
+        saveData(); refreshActionModal(activeRouteId, activeWarungId); ptInput.value = '';
+        if(document.getElementById('main-search-warung').value === activeWarungId) executeMainSearch();
+    }
+
+    let startX = 0, isDragging = false; const swipeContainer = document.getElementById('swipe-container');
+    swipeContainer.addEventListener('touchstart', (e) => { if(['INPUT', 'BUTTON', 'SELECT', 'A', 'I', 'LABEL'].includes(e.target.tagName)) return; startX = e.touches[0].clientX; isDragging = true; });
+    swipeContainer.addEventListener('touchend', (e) => {
+        if (!isDragging) return; isDragging = false;
+        const diff = e.changedTouches[0].clientX - startX;
+        if (diff > 50 && currentPage > 0) currentPage--;
+        else if (diff < -50 && currentPage < state.routes.length) currentPage++;
+        goToPage(currentPage);
+    });
+
+    function goToPage(index) {
+        currentPage = index; const totalPages = state.routes.length + 1;
+        if(currentPage >= totalPages) currentPage = totalPages - 1;
+        swipeContainer.style.transform = `translateX(-${currentPage * 100}vw)`;
+        updateIndicators(); document.querySelectorAll('.nav-item').forEach((el, i) => el.classList.toggle('active', currentPage === 0));
+    }
+
+    function updateIndicators() {
+        let html = ''; for(let i = 0; i < state.routes.length + 1; i++) html += `<div class="dot ${i === currentPage ? 'active' : ''}"></div>`;
+        document.getElementById('page-indicator').innerHTML = html;
+    }
+
+    function addRoute() {
+        const name = document.getElementById('input-route-name').value;
+        if (!name) return alert("Nama jalur tidak boleh kosong!");
+        state.routes.push({ id: 'r_' + Date.now(), name: name, warungs: [] }); document.getElementById('input-route-name').value = ''; closeModal('modal-add-route'); saveData(); goToPage(state.routes.length);
+    }
+    function editRouteName(routeId) { const route = state.routes.find(r => r.id === routeId); const newName = prompt("Masukkan nama baru:", route.name); if (newName && newName.trim() !== '') { route.name = newName.trim(); saveData(); } }
+    function editMaps(rId, wId) { const w = state.routes.find(r => r.id === rId).warungs.find(w => w.id === wId); const newLink = prompt("Edit Maps:", w.maps || ""); if (newLink !== null) { w.maps = newLink.trim(); saveData(); } }
+    function updateRouteDropdowns() { const select = document.getElementById('select-route-add'); if(select) select.innerHTML = '<option value="">-- Pilih Jalur --</option>' + state.routes.map(r => `<option value="${r.id}">${r.name}</option>`).join(''); }
+    function addWarung() {
+        const routeId = document.getElementById('select-route-add').value; const name = document.getElementById('input-warung-name').value; const maps = document.getElementById('input-warung-maps').value;
+        if (!routeId || !name) return alert("Pilih jalur dan isi nama warung!");
+        const route = state.routes.find(r => r.id === routeId);
+        route.warungs.push({ id: 'w_' + Date.now(), name: name, points: 0, setorPoints: 0, maps: maps, order: route.warungs.length + 1 });
+        document.getElementById('input-warung-name').value = ''; document.getElementById('input-warung-maps').value = ''; closeModal('modal-add-warung'); saveData();
+    }
+    function resetPoints(rId, wId) { if(confirm("Reset poin menjadi 0?")) { state.routes.find(r => r.id === rId).warungs.find(w => w.id === wId).points = 0; saveData(); } }
+    function deleteWarung(rId, wId) { if(confirm("Hapus warung?")) { const r = state.routes.find(r => r.id === rId); r.warungs = r.warungs.filter(w => w.id !== wId); r.warungs.sort((a,b) => a.order - b.order).forEach((w, i) => w.order = i + 1); saveData(); } }
+    function changeOrder(rId, wId) {
+        const route = state.routes.find(r => r.id === rId); const cw = route.warungs.find(w => w.id === wId);
+        let newOrder = parseInt(prompt(`Pindah ke urutan nomor berapa? (1 - ${route.warungs.length})`));
+        if (isNaN(newOrder) || newOrder < 1 || newOrder > route.warungs.length || newOrder === cw.order) return;
+        const tw = route.warungs.find(w => w.order === newOrder); if(tw) tw.order = cw.order;
+        cw.order = newOrder; saveData();
+    }
+
+    function updateMainWarungSearch() {
+        const rId = document.getElementById('main-search-route').value; const wSelect = document.getElementById('main-search-warung');
+        if (!rId) { wSelect.innerHTML = '<option value="">Pilih Warung</option>'; return; }
+        wSelect.innerHTML = '<option value="">Pilih Warung</option>' + state.routes.find(r => r.id === rId).warungs.map(w => `<option value="${w.id}">${w.name}</option>`).join('');
+    }
+    function executeMainSearch() {
+        const rId = document.getElementById('main-search-route').value; const wId = document.getElementById('main-search-warung').value; const resDiv = document.getElementById('main-search-result');
+        if (!rId || !wId) { resDiv.innerHTML = ''; return; }
+        const r = state.routes.find(r => r.id === rId); const w = r.warungs.find(w => w.id === wId);
+        resDiv.innerHTML = `<div class="card" style="border: 2px solid var(--primary); background: white; margin-bottom: 20px;" onclick="openWarungActionModal('${rId}', '${w.id}')"><div class="card-header"><div class="card-title"><span style="word-break: break-word;">${w.name}</span><span class="badge" style="background:var(--primary); color:white;">${r.name}</span></div><i class="fas fa-expand-alt" style="color: var(--primary);"></i></div></div>`;
+    }
+    function filterRouteWarung(rId, keyword) { const kw = keyword.toLowerCase(); document.querySelectorAll(`#list-warung-${rId} .warung-item`).forEach(item => { item.style.display = item.getAttribute('data-name').includes(kw) ? 'block' : 'none'; }); }
+
+    function openSetorModal() {
+        const tbody = document.getElementById('setor-tbody'); tbody.innerHTML = ''; let grandTotal = 0, totalTerjual = 0, totalSisa = 0, count = 1;
+        state.routes.forEach(route => { route.warungs.forEach(w => {
+            if (w.setorPoints && w.setorPoints > 0) {
+                let rp = w.setorPoints * state.setorConversion; let sisa = 50 - w.setorPoints; grandTotal += rp; totalTerjual += w.setorPoints; totalSisa += sisa;
+                tbody.innerHTML += `<tr><td>${count++}</td><td><b>${route.name} ${w.name}</b></td><td style="text-align:center; color: var(--primary);"><b>${w.setorPoints}</b></td><td>${formatRp(rp)}</td><td style="text-align:center; font-weight:600; color: var(--danger);">${sisa}</td><td style="text-align:center;" class="no-print"><button class="btn-icon red" onclick="deleteSetorRow('${route.id}', '${w.id}')"><i class="fas fa-times-circle"></i></button></td></tr>`;
+            }
+        });});
+        if(count === 1) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:gray; padding:20px;">Belum ada data disetor.</td></tr>';
+        document.getElementById('setor-grand-total').innerText = formatRp(grandTotal); document.getElementById('setor-total-terjual').innerText = totalTerjual + " Pcs"; document.getElementById('setor-total-sisa').innerText = totalSisa + " Pcs";
+        let today = new Date(); document.getElementById('setor-date').innerText = `Laporan Setoran (${today.getDate()}/${today.getMonth()+1}/${today.getFullYear()})`;
+        openModal('modal-setor');
+    }
+    function deleteSetorRow(rId, wId) { state.routes.find(r => r.id === rId).warungs.find(w => w.id === wId).setorPoints = 0; saveData(); openSetorModal(); }
+    function deleteAllSetor() { if(confirm("Hapus semua data setor?")) { state.routes.forEach(r => r.warungs.forEach(w => w.setorPoints = 0)); saveData(); openSetorModal(); } }
+    
+    function selesaikanSetor() {
+        const clone = document.getElementById('setor-capture-area').cloneNode(true);
+        clone.querySelectorAll('.no-print').forEach(el => el.style.display = 'none');
+        clone.style.position = 'absolute'; clone.style.top = '-9999px'; clone.style.left = '0'; clone.style.width = 'max-content'; clone.style.background = '#ffffff'; clone.style.padding = '20px'; clone.style.boxSizing = 'border-box';
+        document.body.appendChild(clone);
+        html2canvas(clone, { scale: 2, useCORS: true, backgroundColor: "#ffffff", windowWidth: clone.scrollWidth, windowHeight: clone.scrollHeight }).then(canvas => {
+            const link = document.createElement('a'); let today = new Date(); link.download = `Setoran_${today.getDate()}-${today.getMonth()+1}-${today.getFullYear()}.jpg`; link.href = canvas.toDataURL('image/jpeg', 0.9); link.click(); alert("Gambar berhasil disimpan!");
+        }).finally(() => document.body.removeChild(clone));
+    }
+    function exportToExcel() {
+        if(document.getElementById('setor-tbody').innerHTML.includes('Belum ada data')) return;
+        let html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"></head><body><h2>Laporan Setoran</h2><table border="1"><thead><tr style="background-color: #2563eb; color: white;"><th>No</th><th>Warung</th><th>Terjual</th><th>Rp</th><th>Sisa</th></tr></thead><tbody>`;
+        let count = 1, gt = 0, tt = 0, ts = 0;
+        state.routes.forEach(r => r.warungs.forEach(w => { if (w.setorPoints && w.setorPoints > 0) { let rp = w.setorPoints * state.setorConversion; let sisa = 50 - w.setorPoints; gt += rp; tt += w.setorPoints; ts += sisa; html += `<tr><td>${count++}</td><td>${r.name} ${w.name}</td><td>${w.setorPoints}</td><td>${rp}</td><td>${sisa}</td></tr>`; }}));
+        html += `<tr><td colspan="3">Total Setor</td><td colspan="2">Rp${gt}</td></tr></tbody></table></body></html>`;
+        let blob = new Blob([html], { type: 'application/vnd.ms-excel' }); let url = window.URL.createObjectURL(blob); let a = document.createElement('a'); a.href = url; a.download = 'Setoran_Warung.xls'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    }
+    
+    function saveSettings() { const m = parseInt(document.getElementById('input-conv-main').value); const s = parseInt(document.getElementById('input-conv-setor').value); if(m>0) state.mainConversion = m; if(s>0) state.setorConversion = s; saveData(); closeModal('modal-settings'); alert("Tersimpan!"); }
+    function backupData() { const a = document.createElement('a'); a.href = window.URL.createObjectURL(new Blob([JSON.stringify(state)], { type: "application/json" })); a.download = "Backup_Warung.json"; document.body.appendChild(a); a.click(); document.body.removeChild(a); }
+    function restoreData(e) { const r = new FileReader(); r.onload = (ev) => { try { state = JSON.parse(ev.target.result); saveData(); alert("Berhasil dipulihkan!"); closeModal('modal-settings'); } catch(err) { alert("Format salah!"); }}; if(e.target.files[0]) r.readAsText(e.target.files[0]); }
+    function openModal(id) { if(id === 'modal-settings') { document.getElementById('input-conv-main').value = state.mainConversion; document.getElementById('input-conv-setor').value = state.setorConversion; } document.getElementById(id).classList.add('active'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+    function closeModalOnBackdrop(e, id) { if(e.target.id === id) closeModal(id); }
+
+    // Init Application
+    renderApp();
+</script>
+
+<script>
+    // Registrasi Service Worker Diperbarui
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then(reg => console.log('PWA Service Worker aktif:', reg.scope))
+                .catch(err => console.error('Gagal memuat Service Worker:', err));
+        });
+    }
+</script>
+
+</body>
+</html>
