@@ -28,6 +28,7 @@
             --gold: #eab308;
             --silver: #94a3b8;
             --bronze: #b45309;
+            --purple: #8b5cf6;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
@@ -230,6 +231,92 @@
     </div>
 </div>
 
+<!-- Menu Keuangan Modal -->
+<div class="modal" id="modal-keuangan" onclick="closeModalOnBackdrop(event, 'modal-keuangan')">
+    <div class="modal-content" style="max-width: 550px;">
+        <div class="modal-header">
+            <h3><i class="fas fa-wallet"></i> Menu Keuangan</h3>
+            <button class="btn-icon" onclick="closeModal('modal-keuangan')"><i class="fas fa-times"></i></button>
+        </div>
+        
+        <div style="background: var(--light); padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9rem;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                <span>Total Barang Terjual:</span>
+                <strong id="keq-total-terjual">0 Pcs</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                <span>Keuntungan Sales (<span id="keq-conv-label">300</span>/Pcs):</span>
+                <strong id="keq-total-profit" style="color: var(--success);">Rp0</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                <span>Saldo / Sisa Sebelumnya:</span>
+                <strong id="keq-saldo-awal">Rp0</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                <span>Total Pengeluaran:</span>
+                <strong id="keq-total-expense" style="color: var(--danger);">Rp0</strong>
+            </div>
+            <hr style="margin: 8px 0; border: 0; border-top: 1px solid #cbd5e1;">
+            <div style="display: flex; justify-content: space-between; font-size: 1.05rem;">
+                <span><strong>Sisa Saldo / Pendapatan Bersih:</strong></span>
+                <strong id="keq-sisa-saldo" style="color: var(--primary);">Rp0</strong>
+            </div>
+        </div>
+
+        <h4 style="font-size: 0.95rem; margin-bottom: 8px;"><i class="fas fa-minus-circle"></i> Tambah Pengeluaran</h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+            <select id="input-expense-category">
+                <option value="Makan">Makan</option>
+                <option value="Minum">Minum</option>
+                <option value="Rokok">Rokok</option>
+                <option value="Bensin">Bensin</option>
+                <option value="Pokok">Pokok</option>
+                <option value="Obat">Obat</option>
+                <option value="Takterduga">Takterduga</option>
+                <option value="Serba-serbi">Serba-serbi</option>
+            </select>
+            <input type="number" id="input-expense-amount" placeholder="Nominal (Rp)" style="margin:0;">
+        </div>
+        <input type="text" id="input-expense-note" placeholder="Keterangan tambahan (Opsional)" style="margin-top:0; margin-bottom: 8px;">
+        <button class="btn btn-danger" onclick="addExpense()" style="margin-top:0; margin-bottom: 15px;"><i class="fas fa-plus"></i> Tambah Pengeluaran</button>
+
+        <h4 style="font-size: 0.95rem; margin-bottom: 8px;"><i class="fas fa-list"></i> Daftar Pengeluaran Hari Ini</h4>
+        <div class="table-responsive" style="max-height: 150px; overflow-y: auto; margin-bottom: 15px;">
+            <table class="setor-table">
+                <thead>
+                    <tr>
+                        <th>Kategori</th>
+                        <th>Keterangan</th>
+                        <th>Nominal</th>
+                        <th style="width: 40px; text-align:center;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="expense-tbody"></tbody>
+            </table>
+        </div>
+
+        <div class="flex-row" style="gap: 10px; margin-bottom: 15px;">
+            <button class="btn btn-success" onclick="finishDailyActivity()" style="flex: 1; background: var(--success);"><i class="fas fa-check-circle"></i> Selesai (Simpan Aktivitas Hari Ini)</button>
+        </div>
+
+        <h4 style="font-size: 0.95rem; margin-bottom: 8px; border-top: 1px solid #eee; padding-top: 15px;"><i class="fas fa-history"></i> Riwayat Keuangan Selesai</h4>
+        <div class="table-responsive" style="max-height: 180px; overflow-y: auto;">
+            <table class="setor-table">
+                <thead>
+                    <tr>
+                        <th>Tanggal</th>
+                        <th>Keuntungan</th>
+                        <th>Pengeluaran</th>
+                        <th>Saldo Akhir</th>
+                        <th style="width: 40px; text-align:center;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="history-tbody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
 <div class="modal" id="modal-settings" onclick="closeModalOnBackdrop(event, 'modal-settings')">
     <div class="modal-content" style="max-width: 400px;">
         <div class="modal-header">
@@ -252,6 +339,8 @@
             <input type="number" id="input-conv-setor" placeholder="1200">
             <label>Nilai Konversi Terpal (1 Terpal = Pcs)</label>
             <input type="number" id="input-conv-terpal" placeholder="Contoh: 50">
+            <label>Nilai Konversi Keuntungan Sales (1 Pcs = Rp)</label>
+            <input type="number" id="input-conv-profit" placeholder="Contoh: 300">
             
             <button class="btn btn-primary" style="margin-top: 15px;" onclick="saveSettings()">Simpan Pengaturan</button>
             
@@ -268,9 +357,24 @@
 
 <script>
     // --- STATE MANAGEMENT ---
-    let state = JSON.parse(localStorage.getItem('warungApp')) || { mainConversion: 30, setorConversion: 1200, terpalConversion: 50, routes: [], salesName: "" };
+    let state = JSON.parse(localStorage.getItem('warungApp')) || { 
+        mainConversion: 30, 
+        setorConversion: 1200, 
+        terpalConversion: 50, 
+        profitConversion: 300,
+        saldo: 0,
+        expenses: [],
+        history: [],
+        routes: [], 
+        salesName: "" 
+    };
+    
     if(state.salesName === undefined) state.salesName = ""; 
     if(state.terpalConversion === undefined) state.terpalConversion = 50; 
+    if(state.profitConversion === undefined) state.profitConversion = 300;
+    if(state.saldo === undefined) state.saldo = 0;
+    if(state.expenses === undefined) state.expenses = [];
+    if(state.history === undefined) state.history = [];
 
     let currentPage = 0; let activeRouteId = null; let activeWarungId = null;
     
@@ -333,7 +437,10 @@
                         <span style="display: block;"><i class="fas fa-chart-pie"></i> MABIRH POIN</span>
                         <span style="font-size: 0.75rem; font-weight: normal; color: #e2e8f0;"><i class="fas fa-user-tie"></i> Sales: ${state.salesName ? state.salesName : '-'}</span>
                     </div>
-                    <button class="btn btn-success" style="width: auto; padding: 5px 10px; font-size: 0.8rem; margin:0; align-self: center;" onclick="openSetorModal()"><i class="fas fa-cash-register"></i> Menu Setor</button>
+                    <div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-end;">
+                        <button class="btn btn-success" style="width: auto; padding: 5px 10px; font-size: 0.8rem; margin:0;" onclick="openSetorModal()"><i class="fas fa-cash-register"></i> Menu Setor</button>
+                        <button class="btn" style="width: auto; padding: 5px 10px; font-size: 0.8rem; margin:0; background: var(--purple); color: white;" onclick="openKeuanganModal()"><i class="fas fa-wallet"></i> Menu Keuangan</button>
+                    </div>
                 </div>
                 <div class="header-stats" style="margin-top: 15px;">
                     <div class="stat-item">Warung<span>${totalWarung}</span></div><div class="stat-item">Poin<span>${totalPoin}</span></div><div class="stat-item">Total Rp<span>${formatRp(totalRp)}</span></div>
@@ -499,7 +606,8 @@
     function filterRouteWarung(rId, keyword) { const kw = keyword.toLowerCase(); document.querySelectorAll(`#list-warung-${rId} .warung-item`).forEach(item => { item.style.display = item.getAttribute('data-name').includes(kw) ? 'block' : 'none'; }); }
 
     // --- LOGIKA LAPORAN SETOR ---
-    function openSetorModal() {
+    function populateSetorData() {
+        // Fungsi ini bertugas memuat/merender elemen data terbaru di tabel Setor
         const tbody = document.getElementById('setor-tbody'); tbody.innerHTML = ''; let count = 1;
         const maxPcs = state.terpalConversion || 50; 
 
@@ -514,11 +622,14 @@
         if(count === 1) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:gray; padding:20px;">Belum ada data disetor.</td></tr>';
         
         document.getElementById('laporan-sales-name').value = state.salesName || '';
-        document.getElementById('input-laporan-terpal').value = '';
-        
         let today = new Date(); document.getElementById('setor-date').innerText = `Laporan Setoran (${today.getDate()}/${today.getMonth()+1}/${today.getFullYear()})`;
         
         calculateSetorTotals();
+    }
+
+    function openSetorModal() {
+        document.getElementById('input-laporan-terpal').value = '';
+        populateSetorData();
         openModal('modal-setor');
     }
 
@@ -553,28 +664,40 @@
         document.getElementById('setor-total-sisa').innerText = totalSisa + " Pcs";
     }
 
-    function deleteSetorRow(rId, wId) { state.routes.find(r => r.id === rId).warungs.find(w => w.id === wId).setorPoints = 0; saveData(); openSetorModal(); }
-    function deleteAllSetor() { if(confirm("Hapus semua data setor?")) { state.routes.forEach(r => r.warungs.forEach(w => w.setorPoints = 0)); saveData(); openSetorModal(); } }
+    function deleteSetorRow(rId, wId) { state.routes.find(r => r.id === rId).warungs.find(w => w.id === wId).setorPoints = 0; saveData(); populateSetorData(); }
+    function deleteAllSetor() { if(confirm("Hapus semua data setor?")) { state.routes.forEach(r => r.warungs.forEach(w => w.setorPoints = 0)); saveData(); populateSetorData(); } }
     
-    function selesaikanSetor() {
-        const clone = document.getElementById('setor-capture-area').cloneNode(true);
-        clone.querySelectorAll('.no-print').forEach(el => el.style.display = 'none');
-        clone.style.position = 'absolute'; clone.style.top = '-9999px'; clone.style.left = '0'; clone.style.width = 'max-content'; clone.style.background = '#ffffff'; clone.style.padding = '20px'; clone.style.boxSizing = 'border-box';
-        
-        const originalInputs = document.getElementById('setor-capture-area').querySelectorAll('input');
-        const cloneInputs = clone.querySelectorAll('input');
-        originalInputs.forEach((input, index) => {
-            cloneInputs[index].setAttribute('value', input.value);
-            cloneInputs[index].style.border = 'none'; 
-        });
+    // Fungsi ini diubah menjadi Promise (Asynchronous) agar bisa ditunggu (await) saat mode Auto-Save
+    function selesaikanSetor(isAuto = false) {
+        return new Promise((resolve, reject) => {
+            const clone = document.getElementById('setor-capture-area').cloneNode(true);
+            clone.querySelectorAll('.no-print').forEach(el => el.style.display = 'none');
+            clone.style.position = 'absolute'; clone.style.top = '-9999px'; clone.style.left = '0'; clone.style.width = 'max-content'; clone.style.background = '#ffffff'; clone.style.padding = '20px'; clone.style.boxSizing = 'border-box';
+            
+            const originalInputs = document.getElementById('setor-capture-area').querySelectorAll('input');
+            const cloneInputs = clone.querySelectorAll('input');
+            originalInputs.forEach((input, index) => {
+                cloneInputs[index].setAttribute('value', input.value);
+                cloneInputs[index].style.border = 'none'; 
+            });
 
-        document.body.appendChild(clone);
-        html2canvas(clone, { scale: 2, useCORS: true, backgroundColor: "#ffffff", windowWidth: clone.scrollWidth, windowHeight: clone.scrollHeight }).then(canvas => {
-            const link = document.createElement('a'); let today = new Date(); 
-            let sName = state.salesName && state.salesName.trim() !== '' ? state.salesName.replace(/\s+/g, '_') : 'Laporan';
-            link.download = `Setoran_${sName}_${today.getDate()}-${today.getMonth()+1}-${today.getFullYear()}.jpg`; 
-            link.href = canvas.toDataURL('image/jpeg', 0.9); link.click(); alert("Gambar berhasil disimpan!");
-        }).finally(() => document.body.removeChild(clone));
+            document.body.appendChild(clone);
+            html2canvas(clone, { scale: 2, useCORS: true, backgroundColor: "#ffffff", windowWidth: clone.scrollWidth, windowHeight: clone.scrollHeight }).then(canvas => {
+                const link = document.createElement('a'); let today = new Date(); 
+                let sName = state.salesName && state.salesName.trim() !== '' ? state.salesName.replace(/\s+/g, '_') : 'Laporan';
+                link.download = `Setoran_${sName}_${today.getDate()}-${today.getMonth()+1}-${today.getFullYear()}.jpg`; 
+                link.href = canvas.toDataURL('image/jpeg', 0.9); link.click(); 
+                
+                if(!isAuto) alert("Gambar JPG berhasil disimpan!");
+                resolve(); // Memberi sinyal bahwa proses image selesai
+            }).catch(err => {
+                console.error("Gagal generate JPG:", err);
+                if(!isAuto) alert("Gagal menyimpan gambar!");
+                resolve(); // Tetap di-resolve agar proses keuangan tidak mandek (macet)
+            }).finally(() => {
+                document.body.removeChild(clone);
+            });
+        });
     }
 
     function exportToExcel() {
@@ -612,16 +735,166 @@
         
         document.body.appendChild(a); a.click(); document.body.removeChild(a);
     }
+
+    // --- LOGIKA MENU KEUANGAN ---
+    function openKeuanganModal() {
+        document.getElementById('keq-conv-label').innerText = formatRp(state.profitConversion || 300);
+        document.getElementById('input-expense-amount').value = '';
+        document.getElementById('input-expense-note').value = '';
+        
+        renderKeuanganData();
+        openModal('modal-keuangan');
+    }
+
+    function getTotalTerjualPcs() {
+        let total = 0;
+        state.routes.forEach(r => {
+            r.warungs.forEach(w => {
+                if (w.setorPoints && w.setorPoints > 0) total += w.setorPoints;
+            });
+        });
+        return total;
+    }
+
+    function renderKeuanganData() {
+        const totalPcs = getTotalTerjualPcs();
+        const profitRate = state.profitConversion || 300;
+        const totalProfit = totalPcs * profitRate;
+        const saldoAwal = state.saldo || 0;
+
+        let totalExpense = 0;
+        state.expenses.forEach(e => { totalExpense += Number(e.amount); });
+
+        const sisaSaldo = totalProfit + saldoAwal - totalExpense;
+
+        document.getElementById('keq-total-terjual').innerText = totalPcs + " Pcs";
+        document.getElementById('keq-total-profit').innerText = formatRp(totalProfit);
+        document.getElementById('keq-saldo-awal').innerText = formatRp(saldoAwal);
+        document.getElementById('keq-total-expense').innerText = formatRp(totalExpense);
+        document.getElementById('keq-sisa-saldo').innerText = formatRp(sisaSaldo);
+
+        // Render Expense Table
+        const expTbody = document.getElementById('expense-tbody');
+        expTbody.innerHTML = '';
+        if (state.expenses.length === 0) {
+            expTbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:gray; padding:10px;">Belum ada pengeluaran.</td></tr>';
+        } else {
+            state.expenses.forEach((ex, idx) => {
+                expTbody.innerHTML += `<tr>
+                    <td><b>${ex.category}</b></td>
+                    <td>${ex.note || '-'}</td>
+                    <td style="color:var(--danger);">${formatRp(ex.amount)}</td>
+                    <td style="text-align:center;"><button class="btn-icon red" onclick="deleteExpense(${idx})"><i class="fas fa-times-circle"></i></button></td>
+                </tr>`;
+            });
+        }
+
+        // Render History Table
+        const histTbody = document.getElementById('history-tbody');
+        histTbody.innerHTML = '';
+        if (!state.history || state.history.length === 0) {
+            histTbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:gray; padding:10px;">Belum ada riwayat aktivitas.</td></tr>';
+        } else {
+            state.history.slice().reverse().forEach((h, idx) => {
+                let actualIndex = state.history.length - 1 - idx;
+                histTbody.innerHTML += `<tr>
+                    <td>${h.date}</td>
+                    <td>${formatRp(h.profit)}</td>
+                    <td>${formatRp(h.totalExpense)}</td>
+                    <td><b>${formatRp(h.finalSaldo)}</b></td>
+                    <td style="text-align:center;"><button class="btn-icon red" onclick="deleteHistory(${actualIndex})" title="Hapus Riwayat"><i class="fas fa-trash-alt"></i></button></td>
+                </tr>`;
+            });
+        }
+    }
+
+    function addExpense() {
+        const category = document.getElementById('input-expense-category').value;
+        const amount = parseInt(document.getElementById('input-expense-amount').value);
+        const note = document.getElementById('input-expense-note').value.trim();
+
+        if (isNaN(amount) || amount <= 0) return alert("Masukkan nominal pengeluaran yang valid!");
+
+        state.expenses.push({ category, amount, note });
+        saveData();
+        renderKeuanganData();
+        document.getElementById('input-expense-amount').value = '';
+        document.getElementById('input-expense-note').value = '';
+    }
+
+    function deleteExpense(index) {
+        state.expenses.splice(index, 1);
+        saveData();
+        renderKeuanganData();
+    }
+
+    // Diubah menjadi fungsi async untuk menunggu unduhan JPG otomatis
+    async function finishDailyActivity() {
+        if (!confirm("Selesaikan aktivitas penjualan hari ini?\n\nLaporan Setor (JPG) akan otomatis diunduh sebelum saldo akhir dicatat dan angka setor di-reset.")) return;
+
+        // 1. Refresh Data UI Setor agar akurat (meskipun menu Setor tidak pernah dibuka hari itu)
+        populateSetorData();
+
+        // 2. Jalankan Auto-Save JPG dan tunggu (await) sampai prosesnya benar-benar tuntas
+        await selesaikanSetor(true);
+
+        // 3. Setelah gambar aman terunduh, lanjutkan proses kalkulasi keuangan
+        const totalPcs = getTotalTerjualPcs();
+        const profitRate = state.profitConversion || 300;
+        const profit = totalPcs * profitRate;
+        const saldoAwal = state.saldo || 0;
+        
+        let totalExpense = 0;
+        state.expenses.forEach(e => { totalExpense += Number(e.amount); });
+
+        const finalSaldo = profit + saldoAwal - totalExpense;
+        let today = new Date();
+        let dateStr = `${today.getDate()}/${today.getMonth()+1}/${today.getFullYear()}`;
+
+        state.history.push({
+            date: dateStr,
+            profit: profit,
+            totalExpense: totalExpense,
+            finalSaldo: finalSaldo,
+            expenses: [...state.expenses]
+        });
+
+        // 4. Update saldo tersimpan dan bersihkan pengeluaran
+        state.saldo = finalSaldo;
+        state.expenses = [];
+
+        // 5. Reset data setor menjadi 0 dengan aman!
+        state.routes.forEach(r => {
+            r.warungs.forEach(w => {
+                w.setorPoints = 0;
+            });
+        });
+
+        saveData();
+        renderKeuanganData();
+        renderApp();
+        alert("Gambar JPG berhasil diunduh otomatis!\n\nAktivitas hari ini selesai, dicatat ke riwayat, dan data setor telah direset.");
+    }
+
+    function deleteHistory(index) {
+        if(confirm("Hapus catatan riwayat ini?")) {
+            state.history.splice(index, 1);
+            saveData();
+            renderKeuanganData();
+        }
+    }
     
     function saveSettings() { 
         const m = parseInt(document.getElementById('input-conv-main').value); 
         const s = parseInt(document.getElementById('input-conv-setor').value); 
         const t = parseInt(document.getElementById('input-conv-terpal').value); 
+        const p = parseInt(document.getElementById('input-conv-profit').value);
         const sales = document.getElementById('input-setting-sales').value;
         
         if(m > 0) state.mainConversion = m; 
         if(s > 0) state.setorConversion = s; 
         if(!isNaN(t) && t > 0) state.terpalConversion = t; 
+        if(!isNaN(p) && p >= 0) state.profitConversion = p;
         state.salesName = sales;
         
         saveData(); 
@@ -632,7 +905,6 @@
     // --- CEK HAK AKSES ADMIN UNTUK PENGATURAN KONVERSI ---
     function checkAdminAccess(salesNameValue) {
         const adminSection = document.getElementById('admin-settings-section');
-        // Pengecekan case-insensitive (bisa "admin", "Admin", "ADMIN")
         if (salesNameValue.trim().toLowerCase() === 'admin') {
             adminSection.style.display = 'block';
         } else {
@@ -660,9 +932,9 @@
             document.getElementById('input-conv-main').value = state.mainConversion; 
             document.getElementById('input-conv-setor').value = state.setorConversion; 
             document.getElementById('input-conv-terpal').value = state.terpalConversion || 50; 
+            document.getElementById('input-conv-profit').value = state.profitConversion || 300;
             document.getElementById('input-setting-sales').value = currentSales;
             
-            // Evaluasi hak akses saat modal settings dibuka
             checkAdminAccess(currentSales);
         } 
         document.getElementById(id).classList.add('active'); 
