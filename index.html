@@ -115,6 +115,7 @@
     </div>
 </div>
 
+<!-- Modals -->
 <div class="modal" id="modal-add-route" onclick="closeModalOnBackdrop(event, 'modal-add-route')">
     <div class="modal-content">
         <div class="modal-header">
@@ -188,10 +189,10 @@
                 <h4 id="setor-date" style="margin-bottom: 8px; font-size: 1.1rem;">Laporan Setoran</h4>
                 <div style="display: flex; justify-content: center; align-items: center; gap: 5px; font-size: 0.9rem; margin-bottom: 5px;">
                     <label>Nama Sales:</label>
-                    <input type="text" class="laporan-input" placeholder="Ketik disini..." style="width: 150px;">
+                    <input type="text" id="laporan-sales-name" class="laporan-input" placeholder="Ketik disini..." style="width: 150px;" onchange="updateSalesName(this.value)">
                 </div>
                 <div style="display: flex; justify-content: center; align-items: center; gap: 15px; font-size: 0.9rem;">
-                    <div><label>Terpal:</label> <input type="number" class="laporan-input" placeholder="0" style="width: 50px;"></div>
+                    <div><label>Terpal:</label> <input type="number" id="input-laporan-terpal" class="laporan-input" placeholder="0" style="width: 50px;" oninput="calculateSetorTotals()"></div>
                     <div><label>Sisa:</label> <input type="number" class="laporan-input" placeholder="0" style="width: 50px;"></div>
                 </div>
             </div>
@@ -215,6 +216,7 @@
             </div>
             
             <div style="margin-top: 15px; border-top: 2px dashed #cbd5e1; padding-top: 10px; text-align: right; font-size: 0.95rem; line-height: 1.6;">
+                <div id="setor-terpal-info" style="display:none;">Total Terpal : <span id="setor-total-terpal" style="font-weight: 600; color: var(--bronze);">Rp0</span></div>
                 <div>Total Setor : <span id="setor-grand-total" style="font-weight: 700; font-size: 1.1rem; color: var(--dark);">Rp0</span></div>
                 <div>Total Terjual : <span id="setor-total-terjual" style="font-weight: 700; color: var(--primary);">0 Pcs</span></div>
                 <div>Total Sisa : <span id="setor-total-sisa" style="font-weight: 700; color: var(--danger);">0 Pcs</span></div>
@@ -234,25 +236,42 @@
             <h3><i class="fas fa-cog"></i> Pengaturan</h3>
             <button class="btn-icon" onclick="closeModal('modal-settings')"><i class="fas fa-times"></i></button>
         </div>
-        <label>Nilai Konversi Utama (1 Poin = Rp)</label>
-        <input type="number" id="input-conv-main" placeholder="30">
-        <label>Nilai Konversi Setor (1 Poin = Rp)</label>
-        <input type="number" id="input-conv-setor" placeholder="1200">
-        <button class="btn btn-primary" onclick="saveSettings()">Simpan Pengaturan</button>
         
-        <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
-        <h4 style="margin-bottom: 10px; font-size: 1rem;"><i class="fas fa-database"></i> Data Aplikasi</h4>
-        <button class="btn btn-success" onclick="backupData()"><i class="fas fa-download"></i> Pencadangan (Backup)</button>
-        <label for="restore-file" class="btn btn-outline" style="text-align: center; display: block; margin-top: 10px; cursor: pointer;">
-            <i class="fas fa-upload"></i> Pemulihan (Restore)
-        </label>
-        <input type="file" id="restore-file" style="display: none;" accept=".json" onchange="restoreData(event)">
+        <h4 style="margin-bottom: 5px; font-size: 0.95rem;"><i class="fas fa-user-tie"></i> Profil</h4>
+        <label>Nama Sales</label>
+        <input type="text" id="input-setting-sales" placeholder="Masukkan Nama Sales" oninput="checkAdminAccess(this.value)">
+        
+        <!-- Bagian Pengaturan Konversi & Backup yang di-hide jika bukan Admin -->
+        <div id="admin-settings-section" style="display: none;">
+            <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
+            
+            <h4 style="margin-bottom: 5px; font-size: 0.95rem;"><i class="fas fa-calculator"></i> Konversi</h4>
+            <label>Nilai Konversi Utama (1 Poin = Rp)</label>
+            <input type="number" id="input-conv-main" placeholder="30">
+            <label>Nilai Konversi Setor (1 Pcs = Rp)</label>
+            <input type="number" id="input-conv-setor" placeholder="1200">
+            <label>Nilai Konversi Terpal (1 Terpal = Pcs)</label>
+            <input type="number" id="input-conv-terpal" placeholder="Contoh: 50">
+            
+            <button class="btn btn-primary" style="margin-top: 15px;" onclick="saveSettings()">Simpan Pengaturan</button>
+            
+            <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+            <h4 style="margin-bottom: 10px; font-size: 0.95rem;"><i class="fas fa-database"></i> Data Aplikasi</h4>
+            <button class="btn btn-success" onclick="backupData()"><i class="fas fa-download"></i> Pencadangan (Backup)</button>
+            <label for="restore-file" class="btn btn-outline" style="text-align: center; display: block; margin-top: 10px; cursor: pointer;">
+                <i class="fas fa-upload"></i> Pemulihan (Restore)
+            </label>
+            <input type="file" id="restore-file" style="display: none;" accept=".json" onchange="restoreData(event)">
+        </div>
     </div>
 </div>
 
 <script>
     // --- STATE MANAGEMENT ---
-    let state = JSON.parse(localStorage.getItem('warungApp')) || { mainConversion: 30, setorConversion: 1200, routes: [] };
+    let state = JSON.parse(localStorage.getItem('warungApp')) || { mainConversion: 30, setorConversion: 1200, terpalConversion: 50, routes: [], salesName: "" };
+    if(state.salesName === undefined) state.salesName = ""; 
+    if(state.terpalConversion === undefined) state.terpalConversion = 50; 
+
     let currentPage = 0; let activeRouteId = null; let activeWarungId = null;
     
     state.routes.forEach(r => {
@@ -263,6 +282,11 @@
     function saveData() { localStorage.setItem('warungApp', JSON.stringify(state)); renderApp(); }
     function formatRp(angka) { return "Rp" + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
     function openMapsLink(event, url) { event.stopPropagation(); if (url && url.trim() !== "") window.open(url.trim(), '_blank'); }
+    
+    function updateSalesName(val) {
+        state.salesName = val;
+        saveData();
+    }
 
     // --- RENDER LOGIC ---
     function renderApp() {
@@ -304,8 +328,14 @@
         const div = document.createElement('div'); div.className = 'page';
         div.innerHTML = `
             <div class="header">
-                <div class="header-title"><span><i class="fas fa-chart-pie"></i> MABIRH POIN</span><button class="btn btn-success" style="width: auto; padding: 5px 10px; font-size: 0.8rem; margin:0;" onclick="openSetorModal()"><i class="fas fa-cash-register"></i> Menu Setor</button></div>
-                <div class="header-stats">
+                <div class="header-title" style="align-items: flex-start;">
+                    <div>
+                        <span style="display: block;"><i class="fas fa-chart-pie"></i> MABIRH POIN</span>
+                        <span style="font-size: 0.75rem; font-weight: normal; color: #e2e8f0;"><i class="fas fa-user-tie"></i> Sales: ${state.salesName ? state.salesName : '-'}</span>
+                    </div>
+                    <button class="btn btn-success" style="width: auto; padding: 5px 10px; font-size: 0.8rem; margin:0; align-self: center;" onclick="openSetorModal()"><i class="fas fa-cash-register"></i> Menu Setor</button>
+                </div>
+                <div class="header-stats" style="margin-top: 15px;">
                     <div class="stat-item">Warung<span>${totalWarung}</span></div><div class="stat-item">Poin<span>${totalPoin}</span></div><div class="stat-item">Total Rp<span>${formatRp(totalRp)}</span></div>
                 </div>
             </div>
@@ -344,12 +374,15 @@
         if (w.setorPoints === undefined) w.setorPoints = 0;
         const totalRpUtama = w.points * state.mainConversion;
         const mapsButton = w.maps && w.maps.trim() !== "" 
-            ? `<button class="btn-icon" onclick="openMapsLink(event, '${w.maps}')" style="color: #ef4444; padding: 0 4px; font-size: 1.1rem; display: inline-flex; align-items: center;"><i class="fas fa-map-marker-alt"></i></button>`
+            ? `<button class="btn-icon" onclick="openMapsLink(event, '${w.maps}')" style="color: #ef4444; padding: 0 4px; font-size: 1.1rem; display: inline-flex; align-items: center;" title="Buka Maps"><i class="fas fa-map-marker-alt"></i></button>`
             : `<button class="btn-icon" style="color: #cbd5e1; padding: 0 4px; font-size: 1.1rem; cursor: not-allowed; display: inline-flex; align-items: center;" disabled><i class="fas fa-map-marker-alt"></i></button>`;
+        
+        const renameBtn = `<button class="btn-icon" onclick="event.stopPropagation(); renameWarung('${routeId}', '${w.id}')" style="color: #3b82f6; padding: 0 4px; font-size: 0.95rem; display: inline-flex; align-items: center;" title="Edit Nama Warung"><i class="fas fa-pencil-alt"></i></button>`;
+
         return `
             <div class="card warung-item" data-name="${w.name.toLowerCase()}" onclick="openWarungActionModal('${routeId}', '${w.id}')" style="cursor: pointer;">
                 <div class="card-header" style="border-bottom:none; margin-bottom:0; padding-bottom:0;">
-                    <div class="card-title" style="flex: 1;"><span class="badge">${index + 1}</span> <span style="word-break: break-word;">${w.name}</span>${mapsButton} <span style="font-size: 0.75rem; color: var(--text); font-weight: 500;">(${formatRp(totalRpUtama)})</span></div>
+                    <div class="card-title" style="flex: 1;"><span class="badge">${index + 1}</span> <span style="word-break: break-word;">${w.name}</span> ${renameBtn} ${mapsButton} <span style="font-size: 0.75rem; color: var(--text); font-weight: 500;">(${formatRp(totalRpUtama)})</span></div>
                     <i class="fas fa-chevron-right" style="color: #cbd5e1; font-size: 0.85rem; margin-left: 10px;"></i>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; background: #f8fafc; padding: 6px 12px; border-radius: 8px;">
@@ -376,7 +409,6 @@
         openModal('modal-warung-action');
     }
 
-    // --- SISANYA TETAP SAMA SEPERTI KODE ASLI ANDA ---
     function refreshActionModal(routeId, warungId) {
         const w = state.routes.find(r => r.id === routeId).warungs.find(w => w.id === warungId);
         if (w) { document.getElementById('action-warung-points').innerText = w.points; document.getElementById('action-warung-setor').innerText = (w.setorPoints || 0) + ' Pcs'; }
@@ -419,9 +451,22 @@
         if (!name) return alert("Nama jalur tidak boleh kosong!");
         state.routes.push({ id: 'r_' + Date.now(), name: name, warungs: [] }); document.getElementById('input-route-name').value = ''; closeModal('modal-add-route'); saveData(); goToPage(state.routes.length);
     }
+    
     function editRouteName(routeId) { const route = state.routes.find(r => r.id === routeId); const newName = prompt("Masukkan nama baru:", route.name); if (newName && newName.trim() !== '') { route.name = newName.trim(); saveData(); } }
+    
+    function renameWarung(rId, wId) {
+        const w = state.routes.find(r => r.id === rId).warungs.find(w => w.id === wId);
+        const newName = prompt("Ubah Nama Warung:", w.name);
+        if (newName && newName.trim() !== '') {
+            w.name = newName.trim();
+            saveData();
+        }
+    }
+    
     function editMaps(rId, wId) { const w = state.routes.find(r => r.id === rId).warungs.find(w => w.id === wId); const newLink = prompt("Edit Maps:", w.maps || ""); if (newLink !== null) { w.maps = newLink.trim(); saveData(); } }
+    
     function updateRouteDropdowns() { const select = document.getElementById('select-route-add'); if(select) select.innerHTML = '<option value="">-- Pilih Jalur --</option>' + state.routes.map(r => `<option value="${r.id}">${r.name}</option>`).join(''); }
+    
     function addWarung() {
         const routeId = document.getElementById('select-route-add').value; const name = document.getElementById('input-warung-name').value; const maps = document.getElementById('input-warung-maps').value;
         if (!routeId || !name) return alert("Pilih jalur dan isi nama warung!");
@@ -429,6 +474,7 @@
         route.warungs.push({ id: 'w_' + Date.now(), name: name, points: 0, setorPoints: 0, maps: maps, order: route.warungs.length + 1 });
         document.getElementById('input-warung-name').value = ''; document.getElementById('input-warung-maps').value = ''; closeModal('modal-add-warung'); saveData();
     }
+    
     function resetPoints(rId, wId) { if(confirm("Reset poin menjadi 0?")) { state.routes.find(r => r.id === rId).warungs.find(w => w.id === wId).points = 0; saveData(); } }
     function deleteWarung(rId, wId) { if(confirm("Hapus warung?")) { const r = state.routes.find(r => r.id === rId); r.warungs = r.warungs.filter(w => w.id !== wId); r.warungs.sort((a,b) => a.order - b.order).forEach((w, i) => w.order = i + 1); saveData(); } }
     function changeOrder(rId, wId) {
@@ -452,19 +498,61 @@
     }
     function filterRouteWarung(rId, keyword) { const kw = keyword.toLowerCase(); document.querySelectorAll(`#list-warung-${rId} .warung-item`).forEach(item => { item.style.display = item.getAttribute('data-name').includes(kw) ? 'block' : 'none'; }); }
 
+    // --- LOGIKA LAPORAN SETOR ---
     function openSetorModal() {
-        const tbody = document.getElementById('setor-tbody'); tbody.innerHTML = ''; let grandTotal = 0, totalTerjual = 0, totalSisa = 0, count = 1;
+        const tbody = document.getElementById('setor-tbody'); tbody.innerHTML = ''; let count = 1;
+        const maxPcs = state.terpalConversion || 50; 
+
         state.routes.forEach(route => { route.warungs.forEach(w => {
             if (w.setorPoints && w.setorPoints > 0) {
-                let rp = w.setorPoints * state.setorConversion; let sisa = 50 - w.setorPoints; grandTotal += rp; totalTerjual += w.setorPoints; totalSisa += sisa;
+                let rp = w.setorPoints * state.setorConversion; 
+                let sisa = maxPcs - w.setorPoints; 
                 tbody.innerHTML += `<tr><td>${count++}</td><td><b>${route.name} ${w.name}</b></td><td style="text-align:center; color: var(--primary);"><b>${w.setorPoints}</b></td><td>${formatRp(rp)}</td><td style="text-align:center; font-weight:600; color: var(--danger);">${sisa}</td><td style="text-align:center;" class="no-print"><button class="btn-icon red" onclick="deleteSetorRow('${route.id}', '${w.id}')"><i class="fas fa-times-circle"></i></button></td></tr>`;
             }
         });});
+        
         if(count === 1) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:gray; padding:20px;">Belum ada data disetor.</td></tr>';
-        document.getElementById('setor-grand-total').innerText = formatRp(grandTotal); document.getElementById('setor-total-terjual').innerText = totalTerjual + " Pcs"; document.getElementById('setor-total-sisa').innerText = totalSisa + " Pcs";
+        
+        document.getElementById('laporan-sales-name').value = state.salesName || '';
+        document.getElementById('input-laporan-terpal').value = '';
+        
         let today = new Date(); document.getElementById('setor-date').innerText = `Laporan Setoran (${today.getDate()}/${today.getMonth()+1}/${today.getFullYear()})`;
+        
+        calculateSetorTotals();
         openModal('modal-setor');
     }
+
+    function calculateSetorTotals() {
+        let grandTotal = 0, totalTerjual = 0, totalSisa = 0;
+        const maxPcs = state.terpalConversion || 50; 
+
+        state.routes.forEach(route => { 
+            route.warungs.forEach(w => {
+                if (w.setorPoints && w.setorPoints > 0) {
+                    grandTotal += (w.setorPoints * state.setorConversion);
+                    totalTerjual += w.setorPoints;
+                    totalSisa += (maxPcs - w.setorPoints); 
+                }
+            });
+        });
+        
+        const terpalQty = parseInt(document.getElementById('input-laporan-terpal').value) || 0;
+        const terpalPcs = terpalQty * maxPcs; 
+        const terpalRp = terpalPcs * state.setorConversion;
+        
+        const terpalInfo = document.getElementById('setor-terpal-info');
+        if(terpalRp > 0 || terpalQty > 0) {
+            terpalInfo.style.display = 'block';
+            document.getElementById('setor-total-terpal').innerText = formatRp(terpalRp) + ` (${terpalQty} Terpal = ${terpalPcs} Pcs)`;
+        } else {
+            terpalInfo.style.display = 'none';
+        }
+
+        document.getElementById('setor-grand-total').innerText = formatRp(grandTotal + terpalRp); 
+        document.getElementById('setor-total-terjual').innerText = (totalTerjual + terpalPcs) + " Pcs"; 
+        document.getElementById('setor-total-sisa').innerText = totalSisa + " Pcs";
+    }
+
     function deleteSetorRow(rId, wId) { state.routes.find(r => r.id === rId).warungs.find(w => w.id === wId).setorPoints = 0; saveData(); openSetorModal(); }
     function deleteAllSetor() { if(confirm("Hapus semua data setor?")) { state.routes.forEach(r => r.warungs.forEach(w => w.setorPoints = 0)); saveData(); openSetorModal(); } }
     
@@ -472,24 +560,114 @@
         const clone = document.getElementById('setor-capture-area').cloneNode(true);
         clone.querySelectorAll('.no-print').forEach(el => el.style.display = 'none');
         clone.style.position = 'absolute'; clone.style.top = '-9999px'; clone.style.left = '0'; clone.style.width = 'max-content'; clone.style.background = '#ffffff'; clone.style.padding = '20px'; clone.style.boxSizing = 'border-box';
+        
+        const originalInputs = document.getElementById('setor-capture-area').querySelectorAll('input');
+        const cloneInputs = clone.querySelectorAll('input');
+        originalInputs.forEach((input, index) => {
+            cloneInputs[index].setAttribute('value', input.value);
+            cloneInputs[index].style.border = 'none'; 
+        });
+
         document.body.appendChild(clone);
         html2canvas(clone, { scale: 2, useCORS: true, backgroundColor: "#ffffff", windowWidth: clone.scrollWidth, windowHeight: clone.scrollHeight }).then(canvas => {
-            const link = document.createElement('a'); let today = new Date(); link.download = `Setoran_${today.getDate()}-${today.getMonth()+1}-${today.getFullYear()}.jpg`; link.href = canvas.toDataURL('image/jpeg', 0.9); link.click(); alert("Gambar berhasil disimpan!");
+            const link = document.createElement('a'); let today = new Date(); 
+            let sName = state.salesName && state.salesName.trim() !== '' ? state.salesName.replace(/\s+/g, '_') : 'Laporan';
+            link.download = `Setoran_${sName}_${today.getDate()}-${today.getMonth()+1}-${today.getFullYear()}.jpg`; 
+            link.href = canvas.toDataURL('image/jpeg', 0.9); link.click(); alert("Gambar berhasil disimpan!");
         }).finally(() => document.body.removeChild(clone));
     }
+
     function exportToExcel() {
         if(document.getElementById('setor-tbody').innerHTML.includes('Belum ada data')) return;
-        let html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"></head><body><h2>Laporan Setoran</h2><table border="1"><thead><tr style="background-color: #2563eb; color: white;"><th>No</th><th>Warung</th><th>Terjual</th><th>Rp</th><th>Sisa</th></tr></thead><tbody>`;
+        const maxPcs = state.terpalConversion || 50; 
+
+        let html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"></head><body><h2>Laporan Setoran</h2><p>Nama Sales: <b>${state.salesName || '-'}</b></p><table border="1"><thead><tr style="background-color: #2563eb; color: white;"><th>No</th><th>Warung</th><th>Terjual</th><th>Rp</th><th>Sisa</th></tr></thead><tbody>`;
         let count = 1, gt = 0, tt = 0, ts = 0;
-        state.routes.forEach(r => r.warungs.forEach(w => { if (w.setorPoints && w.setorPoints > 0) { let rp = w.setorPoints * state.setorConversion; let sisa = 50 - w.setorPoints; gt += rp; tt += w.setorPoints; ts += sisa; html += `<tr><td>${count++}</td><td>${r.name} ${w.name}</td><td>${w.setorPoints}</td><td>${rp}</td><td>${sisa}</td></tr>`; }}));
-        html += `<tr><td colspan="3">Total Setor</td><td colspan="2">Rp${gt}</td></tr></tbody></table></body></html>`;
-        let blob = new Blob([html], { type: 'application/vnd.ms-excel' }); let url = window.URL.createObjectURL(blob); let a = document.createElement('a'); a.href = url; a.download = 'Setoran_Warung.xls'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        state.routes.forEach(r => r.warungs.forEach(w => { 
+            if (w.setorPoints && w.setorPoints > 0) { 
+                let rp = w.setorPoints * state.setorConversion; 
+                let sisa = maxPcs - w.setorPoints; 
+                gt += rp; tt += w.setorPoints; ts += sisa; 
+                html += `<tr><td>${count++}</td><td>${r.name} ${w.name}</td><td>${w.setorPoints}</td><td>${rp}</td><td>${sisa}</td></tr>`; 
+            }
+        }));
+        
+        const terpalQty = parseInt(document.getElementById('input-laporan-terpal').value) || 0;
+        if (terpalQty > 0) {
+            const terpalPcs = terpalQty * maxPcs;
+            const terpalRp = terpalPcs * state.setorConversion;
+            gt += terpalRp;
+            tt += terpalPcs;
+            html += `<tr><td colspan="2"><b>Terpal (${terpalQty}x)</b></td><td>${terpalPcs} Pcs</td><td>${terpalRp}</td><td>-</td></tr>`;
+        }
+        
+        html += `<tr><td colspan="3"><b>Total Setor</b></td><td colspan="2"><b>Rp${gt}</b></td></tr></tbody></table></body></html>`;
+        
+        let blob = new Blob([html], { type: 'application/vnd.ms-excel' }); 
+        let url = window.URL.createObjectURL(blob); let a = document.createElement('a'); a.href = url; 
+        
+        let today = new Date(); 
+        let sName = state.salesName && state.salesName.trim() !== '' ? state.salesName.replace(/\s+/g, '_') : 'Laporan';
+        a.download = `Setoran_${sName}_${today.getDate()}-${today.getMonth()+1}-${today.getFullYear()}.xls`; 
+        
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
     }
     
-    function saveSettings() { const m = parseInt(document.getElementById('input-conv-main').value); const s = parseInt(document.getElementById('input-conv-setor').value); if(m>0) state.mainConversion = m; if(s>0) state.setorConversion = s; saveData(); closeModal('modal-settings'); alert("Tersimpan!"); }
-    function backupData() { const a = document.createElement('a'); a.href = window.URL.createObjectURL(new Blob([JSON.stringify(state)], { type: "application/json" })); a.download = "Backup_Warung.json"; document.body.appendChild(a); a.click(); document.body.removeChild(a); }
+    function saveSettings() { 
+        const m = parseInt(document.getElementById('input-conv-main').value); 
+        const s = parseInt(document.getElementById('input-conv-setor').value); 
+        const t = parseInt(document.getElementById('input-conv-terpal').value); 
+        const sales = document.getElementById('input-setting-sales').value;
+        
+        if(m > 0) state.mainConversion = m; 
+        if(s > 0) state.setorConversion = s; 
+        if(!isNaN(t) && t > 0) state.terpalConversion = t; 
+        state.salesName = sales;
+        
+        saveData(); 
+        closeModal('modal-settings'); 
+        alert("Pengaturan Berhasil Disimpan!"); 
+    }
+    
+    // --- CEK HAK AKSES ADMIN UNTUK PENGATURAN KONVERSI ---
+    function checkAdminAccess(salesNameValue) {
+        const adminSection = document.getElementById('admin-settings-section');
+        // Pengecekan case-insensitive (bisa "admin", "Admin", "ADMIN")
+        if (salesNameValue.trim().toLowerCase() === 'admin') {
+            adminSection.style.display = 'block';
+        } else {
+            adminSection.style.display = 'none';
+        }
+    }
+    
+    function backupData() { 
+        const a = document.createElement('a'); 
+        a.href = window.URL.createObjectURL(new Blob([JSON.stringify(state)], { type: "application/json" })); 
+        
+        let date = new Date();
+        let dateStr = `${date.getDate()}-${date.getMonth()+1}-${date.getFullYear()}`;
+        let salesPart = state.salesName && state.salesName.trim() !== '' ? state.salesName.replace(/\s+/g, '_') : 'TanpaNama';
+        
+        a.download = `Backup_${salesPart}_${dateStr}.json`; 
+        document.body.appendChild(a); a.click(); document.body.removeChild(a); 
+    }
+    
     function restoreData(e) { const r = new FileReader(); r.onload = (ev) => { try { state = JSON.parse(ev.target.result); saveData(); alert("Berhasil dipulihkan!"); closeModal('modal-settings'); } catch(err) { alert("Format salah!"); }}; if(e.target.files[0]) r.readAsText(e.target.files[0]); }
-    function openModal(id) { if(id === 'modal-settings') { document.getElementById('input-conv-main').value = state.mainConversion; document.getElementById('input-conv-setor').value = state.setorConversion; } document.getElementById(id).classList.add('active'); }
+    
+    function openModal(id) { 
+        if(id === 'modal-settings') { 
+            const currentSales = state.salesName || '';
+            document.getElementById('input-conv-main').value = state.mainConversion; 
+            document.getElementById('input-conv-setor').value = state.setorConversion; 
+            document.getElementById('input-conv-terpal').value = state.terpalConversion || 50; 
+            document.getElementById('input-setting-sales').value = currentSales;
+            
+            // Evaluasi hak akses saat modal settings dibuka
+            checkAdminAccess(currentSales);
+        } 
+        document.getElementById(id).classList.add('active'); 
+    }
+    
     function closeModal(id) { document.getElementById(id).classList.remove('active'); }
     function closeModalOnBackdrop(e, id) { if(e.target.id === id) closeModal(id); }
 
@@ -498,7 +676,6 @@
 </script>
 
 <script>
-    // Registrasi Service Worker Diperbarui
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('./sw.js')
