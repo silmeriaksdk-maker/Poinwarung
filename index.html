@@ -100,9 +100,31 @@
         /* Manual Inputs for Laporan */
         .laporan-input { border: none; border-bottom: 1px dashed gray; background: transparent; text-align: center; font-weight: bold; outline: none; margin: 0; padding: 2px; }
         .laporan-input:focus { border-bottom: 1px solid var(--primary); }
+
+        /* Network Status UI */
+        .network-status {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            padding: 8px 15px;
+            color: white;
+            font-size: 0.85rem;
+            font-weight: 600;
+            z-index: 9999;
+            transform: translateY(-100%);
+            transition: transform 0.3s ease-in-out;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .network-status.offline { background-color: var(--danger); transform: translateY(0); }
+        .network-status.online { background-color: var(--success); transform: translateY(0); }
     </style>
 </head>
 <body>
+
+<!-- Offline/Online Indicator -->
+<div id="network-status" class="network-status"></div>
 
 <div id="app">
     <div id="swipe-container"></div>
@@ -116,7 +138,7 @@
     </div>
 </div>
 
-<!-- Modals -->
+<!-- (Sisa kode Modals Anda tetap persis sama dan aman, tidak ada yang diubah dari struktur sebelumnya...) -->
 <div class="modal" id="modal-add-route" onclick="closeModalOnBackdrop(event, 'modal-add-route')">
     <div class="modal-content">
         <div class="modal-header">
@@ -231,7 +253,6 @@
     </div>
 </div>
 
-<!-- Menu Keuangan Modal -->
 <div class="modal" id="modal-keuangan" onclick="closeModalOnBackdrop(event, 'modal-keuangan')">
     <div class="modal-content" style="max-width: 550px;">
         <div class="modal-header">
@@ -328,7 +349,6 @@
         <label>Nama Sales</label>
         <input type="text" id="input-setting-sales" placeholder="Masukkan Nama Sales" oninput="checkAdminAccess(this.value)">
         
-        <!-- Bagian Pengaturan Konversi & Backup yang di-hide jika bukan Admin -->
         <div id="admin-settings-section" style="display: none;">
             <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
             
@@ -607,7 +627,6 @@
 
     // --- LOGIKA LAPORAN SETOR ---
     function populateSetorData() {
-        // Fungsi ini bertugas memuat/merender elemen data terbaru di tabel Setor
         const tbody = document.getElementById('setor-tbody'); tbody.innerHTML = ''; let count = 1;
         const maxPcs = state.terpalConversion || 50; 
 
@@ -667,7 +686,6 @@
     function deleteSetorRow(rId, wId) { state.routes.find(r => r.id === rId).warungs.find(w => w.id === wId).setorPoints = 0; saveData(); populateSetorData(); }
     function deleteAllSetor() { if(confirm("Hapus semua data setor?")) { state.routes.forEach(r => r.warungs.forEach(w => w.setorPoints = 0)); saveData(); populateSetorData(); } }
     
-    // Fungsi ini diubah menjadi Promise (Asynchronous) agar bisa ditunggu (await) saat mode Auto-Save
     function selesaikanSetor(isAuto = false) {
         return new Promise((resolve, reject) => {
             const clone = document.getElementById('setor-capture-area').cloneNode(true);
@@ -689,11 +707,11 @@
                 link.href = canvas.toDataURL('image/jpeg', 0.9); link.click(); 
                 
                 if(!isAuto) alert("Gambar JPG berhasil disimpan!");
-                resolve(); // Memberi sinyal bahwa proses image selesai
+                resolve(); 
             }).catch(err => {
                 console.error("Gagal generate JPG:", err);
                 if(!isAuto) alert("Gagal menyimpan gambar!");
-                resolve(); // Tetap di-resolve agar proses keuangan tidak mandek (macet)
+                resolve(); 
             }).finally(() => {
                 document.body.removeChild(clone);
             });
@@ -828,17 +846,12 @@
         renderKeuanganData();
     }
 
-    // Diubah menjadi fungsi async untuk menunggu unduhan JPG otomatis
     async function finishDailyActivity() {
         if (!confirm("Selesaikan aktivitas penjualan hari ini?\n\nLaporan Setor (JPG) akan otomatis diunduh sebelum saldo akhir dicatat dan angka setor di-reset.")) return;
 
-        // 1. Refresh Data UI Setor agar akurat (meskipun menu Setor tidak pernah dibuka hari itu)
         populateSetorData();
-
-        // 2. Jalankan Auto-Save JPG dan tunggu (await) sampai prosesnya benar-benar tuntas
         await selesaikanSetor(true);
 
-        // 3. Setelah gambar aman terunduh, lanjutkan proses kalkulasi keuangan
         const totalPcs = getTotalTerjualPcs();
         const profitRate = state.profitConversion || 300;
         const profit = totalPcs * profitRate;
@@ -859,11 +872,9 @@
             expenses: [...state.expenses]
         });
 
-        // 4. Update saldo tersimpan dan bersihkan pengeluaran
         state.saldo = finalSaldo;
         state.expenses = [];
 
-        // 5. Reset data setor menjadi 0 dengan aman!
         state.routes.forEach(r => {
             r.warungs.forEach(w => {
                 w.setorPoints = 0;
@@ -902,7 +913,6 @@
         alert("Pengaturan Berhasil Disimpan!"); 
     }
     
-    // --- CEK HAK AKSES ADMIN UNTUK PENGATURAN KONVERSI ---
     function checkAdminAccess(salesNameValue) {
         const adminSection = document.getElementById('admin-settings-section');
         if (salesNameValue.trim().toLowerCase() === 'admin') {
@@ -948,6 +958,30 @@
 </script>
 
 <script>
+    // --- LOGIKA DETEKSI KONEKSI INTERNET ---
+    function updateOnlineStatus() {
+        const statusEl = document.getElementById('network-status');
+        if (navigator.onLine) {
+            statusEl.textContent = 'Terhubung kembali! Anda sedang online.';
+            statusEl.className = 'network-status online';
+            setTimeout(() => { 
+                if(navigator.onLine) statusEl.classList.remove('online'); 
+            }, 3000);
+        } else {
+            statusEl.textContent = 'Koneksi terputus! Mode Offline aktif, data tetap tersimpan.';
+            statusEl.className = 'network-status offline';
+        }
+    }
+    
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+    
+    // Cek status saat aplikasi pertama kali dimuat
+    if (!navigator.onLine) {
+        updateOnlineStatus();
+    }
+
+    // --- SERVICE WORKER REGISTRATION ---
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('./sw.js')
