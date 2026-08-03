@@ -46,9 +46,31 @@
         .stat-item { text-align: center; }
         .stat-item span { display: block; font-weight: 700; font-size: 1rem; }
 
-        /* Bottom Nav */
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--white); display: flex; justify-around: space-around; padding: 10px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 20; }
-        .nav-item { background: none; border: none; color: var(--text); font-size: 1.5rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; }
+        /* Bottom Nav - Diperbaiki agar tidak berdempetan */
+        .bottom-nav { 
+            position: fixed; 
+            bottom: 0; 
+            width: 100%; 
+            background: var(--white); 
+            display: flex; 
+            justify-content: space-around; 
+            align-items: center; 
+            padding: 8px 10px; 
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.08); 
+            z-index: 20; 
+        }
+        .nav-item { 
+            background: none; 
+            border: none; 
+            color: var(--text); 
+            font-size: 1.3rem; 
+            cursor: pointer; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            flex: 1; 
+            padding: 4px 0; 
+        }
         .nav-item span { font-size: 0.7rem; margin-top: 4px; font-weight: 500; }
         .nav-item.active { color: var(--primary); }
 
@@ -402,7 +424,7 @@
         profitConversion: 300,
         saldo: 0,
         expenses: [],
-        setorExpenses: [], // Array Pengeluaran Khusus Menu Setor
+        setorExpenses: [],
         history: [],
         routes: [], 
         salesName: "" 
