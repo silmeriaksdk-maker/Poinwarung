@@ -182,7 +182,10 @@
             <option value="">-- Pilih Jalur Dulu --</option>
         </select>
         <input type="text" id="input-warung-name" placeholder="Nama Warung">
-        <input type="text" id="input-warung-maps" placeholder="Link Google Maps (Opsional)">
+        <div style="display: flex; gap: 8px; align-items: center; margin: 8px 0;">
+            <input type="text" id="input-warung-maps" placeholder="Klik GPS untuk ambil koordinat maps" style="margin: 0; flex: 1;" readonly>
+            <button type="button" class="btn btn-outline" style="width: auto; margin: 0; padding: 10px 14px; white-space: nowrap;" onclick="getWarungGpsLocation()"><i class="fas fa-location-arrow"></i> GPS</button>
+        </div>
         <button class="btn btn-primary" onclick="addWarung()">Simpan Warung</button>
     </div>
 </div>
@@ -633,7 +636,53 @@
         }
     }
     
-    function editMaps(rId, wId) { const w = state.routes.find(r => r.id === rId).warungs.find(w => w.id === wId); const newLink = prompt("Edit Maps:", w.maps || ""); if (newLink !== null) { w.maps = newLink.trim(); saveData(); } }
+    // --- FUNGSI GPS OTOMATIS MAPS (BARU) ---
+    function getWarungGpsLocation() {
+        if (!navigator.geolocation) {
+            alert("Browser Anda tidak mendukung Geolocation.");
+            return;
+        }
+        const btn = event.currentTarget;
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        btn.disabled = true;
+
+        navigator.geolocation.getCurrentPosition((position) => {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            const mapsLink = `https://www.google.com/maps?q=${lat},${lng}`;
+            document.getElementById('input-warung-maps').value = mapsLink;
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+            alert("Lokasi GPS berhasil didapatkan!");
+        }, (error) => {
+            alert("Gagal mendapatkan lokasi GPS: " + error.message);
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+        }, { enableHighAccuracy: true, timeout: 10000 });
+    }
+
+    function editMaps(rId, wId) { 
+        if (!navigator.geolocation) {
+            alert("Browser Anda tidak mendukung Geolocation.");
+            return;
+        }
+        if (!confirm("Perbarui titik koordinat maps warung ini dengan posisi GPS Anda saat ini?")) return;
+
+        navigator.geolocation.getCurrentPosition((position) => {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            const newLink = `https://www.google.com/maps?q=${lat},${lng}`;
+            const w = state.routes.find(r => r.id === rId).warungs.find(w => w.id === wId);
+            if (w) {
+                w.maps = newLink;
+                saveData();
+                alert("Lokasi Maps berhasil diperbarui melalui GPS!");
+            }
+        }, (error) => {
+            alert("Gagal mendapatkan lokasi GPS: " + error.message);
+        }, { enableHighAccuracy: true, timeout: 10000 });
+    }
     
     function updateRouteDropdowns() { const select = document.getElementById('select-route-add'); if(select) select.innerHTML = '<option value="">-- Pilih Jalur --</option>' + state.routes.map(r => `<option value="${r.id}">${r.name}</option>`).join(''); }
     
@@ -1079,7 +1128,11 @@
             document.getElementById('input-setting-sales').value = currentSales;
             
             checkAdminAccess(currentSales);
-        } 
+        } else if(id === 'modal-add-warung') {
+            document.getElementById('input-warung-name').value = '';
+            document.getElementById('input-warung-maps').value = '';
+            updateRouteDropdowns();
+        }
         document.getElementById(id).classList.add('active'); 
     }
     
