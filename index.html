@@ -533,12 +533,32 @@
         const div = document.createElement('div'); div.className = 'page';
         div.innerHTML = `
             <div class="header" style="background: var(--secondary);">
-                <div class="header-title"><span><i class="fas fa-route"></i> Jalur: ${route.name}</span><button class="btn-icon" onclick="editRouteName('${route.id}')" style="color:white;"><i class="fas fa-edit"></i></button></div>
+                <div class="header-title">
+                    <span><i class="fas fa-route"></i> Jalur: ${route.name}</span>
+                    <div style="display: flex; gap: 4px; align-items: center;">
+                        <button class="btn-icon" onclick="toggleSelectAllRoute('${route.id}')" title="Pilih Semua Warung" style="color:white; font-size:0.95rem;"><i class="fas fa-check-double"></i></button>
+                        <button class="btn-icon" onclick="editRouteName('${route.id}')" style="color:white;"><i class="fas fa-edit"></i></button>
+                    </div>
+                </div>
                 <div class="header-stats"><div class="stat-item">Warung<span>${rWarung}</span></div><div class="stat-item">Poin<span>${rPoin}</span></div><div class="stat-item">Total Rp<span>${formatRp(rRp)}</span></div></div>
             </div>
-            <div class="container">
+            <div class="container" style="padding-bottom: 120px;">
                 <div class="search-box"><i class="fas fa-search" style="color: #94a3b8;"></i><input type="text" placeholder="Cari nama warung..." onkeyup="filterRouteWarung('${route.id}', this.value)"></div>
                 <div id="list-warung-${route.id}">${route.warungs.map((w, index) => generateWarungCard(route.id, w, index)).join('')}</div>
+            </div>
+            <!-- Floating Action Bar untuk Pindah Jalur Massal -->
+            <div id="bulk-action-bar-${route.id}" style="display: none; position: fixed; bottom: 65px; left: 10px; right: 10px; background: white; padding: 12px 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 25; border: 1px solid var(--primary);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span id="selected-count-${route.id}" style="font-weight: 600; font-size: 0.85rem; color: var(--primary);">0 warung dipilih</span>
+                    <button class="btn-icon" onclick="clearRouteSelection('${route.id}')" style="font-size: 0.9rem; color: var(--danger);"><i class="fas fa-times"></i> Batal</button>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <select id="target-route-${route.id}" style="margin: 0; font-size: 0.85rem; flex: 1;">
+                        <option value="">-- Pindah ke Jalur --</option>
+                        ${state.routes.map(r => `<option value="${r.id}">${r.name}</option>`).join('')}
+                    </select>
+                    <button class="btn btn-primary" onclick="executeBulkMove('${route.id}')" style="margin: 0; width: auto; padding: 10px 14px; font-size: 0.85rem; white-space: nowrap;"><i class="fas fa-exchange-alt"></i> Pindahkan</button>
+                </div>
             </div>`;
         container.appendChild(div);
     }
@@ -555,7 +575,14 @@
         return `
             <div class="card warung-item" data-name="${w.name.toLowerCase()}" onclick="openWarungActionModal('${routeId}', '${w.id}')" style="cursor: pointer;">
                 <div class="card-header" style="border-bottom:none; margin-bottom:0; padding-bottom:0;">
-                    <div class="card-title" style="flex: 1;"><span class="badge">${index + 1}</span> <span style="word-break: break-word;">${w.name}</span> ${renameBtn} ${mapsButton} <span style="font-size: 0.75rem; color: var(--text); font-weight: 500;">(${formatRp(totalRpUtama)})</span></div>
+                    <div class="card-title" style="flex: 1;">
+                        <input type="checkbox" class="warung-checkbox-${routeId}" data-route-id="${routeId}" data-warung-id="${w.id}" onclick="event.stopPropagation()" onchange="handleWarungSelection('${routeId}')" style="width: auto; margin-right: 6px; transform: scale(1.2); cursor: pointer; accent-color: var(--primary);">
+                        <span class="badge">${index + 1}</span> 
+                        <span style="word-break: break-word;">${w.name}</span> 
+                        ${renameBtn} 
+                        ${mapsButton} 
+                        <span style="font-size: 0.75rem; color: var(--text); font-weight: 500;">(${formatRp(totalRpUtama)})</span>
+                    </div>
                     <i class="fas fa-chevron-right" style="color: #cbd5e1; font-size: 0.85rem; margin-left: 10px;"></i>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; background: #f8fafc; padding: 6px 12px; border-radius: 8px;">
@@ -563,6 +590,74 @@
                     <div><span style="font-size: 0.7rem; color: gray; display:block;">Angka Setor</span><strong style="font-size: 1rem; color: var(--success);">${w.setorPoints} Pcs</strong></div>
                 </div>
             </div>`;
+    }
+
+    // --- FUNGSI TANDAI & PINDAH JALUR (BARU) ---
+    function handleWarungSelection(routeId) {
+        const checkboxes = document.querySelectorAll(`.warung-checkbox-${routeId}:checked`);
+        const actionBar = document.getElementById(`bulk-action-bar-${routeId}`);
+        const countSpan = document.getElementById(`selected-count-${routeId}`);
+        
+        if (checkboxes.length > 0) {
+            actionBar.style.display = 'block';
+            countSpan.innerText = `${checkboxes.length} warung dipilih`;
+        } else {
+            actionBar.style.display = 'none';
+        }
+    }
+
+    function toggleSelectAllRoute(routeId) {
+        const checkboxes = document.querySelectorAll(`.warung-checkbox-${routeId}`);
+        const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+        checkboxes.forEach(cb => cb.checked = !allChecked);
+        handleWarungSelection(routeId);
+    }
+
+    function clearRouteSelection(routeId) {
+        const checkboxes = document.querySelectorAll(`.warung-checkbox-${routeId}`);
+        checkboxes.forEach(cb => cb.checked = false);
+        handleWarungSelection(routeId);
+    }
+
+    function executeBulkMove(sourceRouteId) {
+        const targetRouteId = document.getElementById(`target-route-${sourceRouteId}`).value;
+        if (!targetRouteId) {
+            alert("Pilih jalur tujuan terlebih dahulu!");
+            return;
+        }
+        if (sourceRouteId === targetRouteId) {
+            alert("Jalur tujuan sama dengan jalur asal!");
+            return;
+        }
+
+        const checkboxes = document.querySelectorAll(`.warung-checkbox-${sourceRouteId}:checked`);
+        if (checkboxes.length === 0) {
+            alert("Tidak ada warung yang dipilih!");
+            return;
+        }
+
+        const sourceRoute = state.routes.find(r => r.id === sourceRouteId);
+        const targetRoute = state.routes.find(r => r.id === targetRouteId);
+
+        if (!sourceRoute || !targetRoute) return;
+
+        const warungIdsToMove = Array.from(checkboxes).map(cb => cb.getAttribute('data-warung-id'));
+
+        // Ambil warung yang dipindahkan
+        const movedWarungs = sourceRoute.warungs.filter(w => warungIdsToMove.includes(w.id));
+        
+        // Hapus dari jalur asal dan rapikan urutannya
+        sourceRoute.warungs = sourceRoute.warungs.filter(w => !warungIdsToMove.includes(w.id));
+        sourceRoute.warungs.sort((a, b) => a.order - b.order).forEach((w, i) => w.order = i + 1);
+
+        // Masukkan ke jalur tujuan di urutan terakhir
+        movedWarungs.forEach(w => {
+            w.order = targetRoute.warungs.length + 1;
+            targetRoute.warungs.push(w);
+        });
+
+        saveData();
+        alert(`Berhasil memindahkan ${movedWarungs.length} warung dari ${sourceRoute.name} ke ${targetRoute.name}!`);
     }
 
     // --- INTERAKSI MENGAMBANG ---
@@ -636,7 +731,7 @@
         }
     }
     
-    // --- FUNGSI GPS OTOMATIS MAPS (BARU) ---
+    // --- FUNGSI GPS OTOMATIS MAPS ---
     function getWarungGpsLocation() {
         if (!navigator.geolocation) {
             alert("Browser Anda tidak mendukung Geolocation.");
@@ -746,7 +841,6 @@
         openModal('modal-setor');
     }
 
-    // LOGIKA KHUSUS PENGELUARAN DI MENU SETOR
     function checkKeteranganBeforeAmount() {
         const note = document.getElementById('input-setor-expense-note').value.trim();
         if (!note) {
@@ -819,7 +913,6 @@
 
         let totalKotor = grossTotal + terpalRp;
 
-        // Hitung & Tampilkan Pengeluaran Setor di Kanan Bawah
         let totalPengeluaran = 0;
         const expSection = document.getElementById('setor-expense-section');
         const expList = document.getElementById('setor-expense-list');
@@ -837,7 +930,6 @@
             expList.innerHTML = '';
         }
 
-        // Total Setor Otomatis Terpotong Oleh Pengeluaran
         let grandTotalBersih = totalKotor - totalPengeluaran;
 
         document.getElementById('setor-grand-total').innerText = formatRp(grandTotalBersih); 
@@ -972,7 +1064,6 @@
         document.getElementById('keq-total-expense').innerText = formatRp(totalExpense);
         document.getElementById('keq-sisa-saldo').innerText = formatRp(sisaSaldo);
 
-        // Render Expense Table
         const expTbody = document.getElementById('expense-tbody');
         expTbody.innerHTML = '';
         if (state.expenses.length === 0) {
@@ -988,7 +1079,6 @@
             });
         }
 
-        // Render History Table
         const histTbody = document.getElementById('history-tbody');
         histTbody.innerHTML = '';
         if (!state.history || state.history.length === 0) {
@@ -1139,7 +1229,6 @@
     function closeModal(id) { document.getElementById(id).classList.remove('active'); }
     function closeModalOnBackdrop(e, id) { if(e.target.id === id) closeModal(id); }
 
-    // Init Application
     renderApp();
 </script>
 
@@ -1162,12 +1251,10 @@
     window.addEventListener('online', updateOnlineStatus);
     window.addEventListener('offline', updateOnlineStatus);
     
-    // Cek status saat aplikasi pertama kali dimuat
     if (!navigator.onLine) {
         updateOnlineStatus();
     }
 
-    // --- SERVICE WORKER REGISTRATION ---
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('./sw.js')
