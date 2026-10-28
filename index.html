@@ -250,10 +250,6 @@
                     <label>Nama Sales:</label>
                     <input type="text" id="laporan-sales-name" class="laporan-input" placeholder="Ketik disini..." style="width: 150px;" onchange="updateSalesName(this.value)">
                 </div>
-                <div style="display: flex; justify-content: center; align-items: center; gap: 15px; font-size: 0.9rem;">
-                    <div><label>Terpal:</label> <input type="number" id="input-laporan-terpal" class="laporan-input" placeholder="0" style="width: 50px;" oninput="calculateSetorTotals()"></div>
-                    <div><label>Sisa:</label> <input type="number" class="laporan-input" placeholder="0" style="width: 50px;"></div>
-                </div>
             </div>
 
             <div class="table-responsive">
@@ -834,7 +830,6 @@
     }
 
     function openSetorModal() {
-        document.getElementById('input-laporan-terpal').value = '';
         document.getElementById('input-setor-expense-note').value = '';
         document.getElementById('input-setor-expense-amount').value = '';
         populateSetorData();
@@ -899,7 +894,7 @@
             });
         });
         
-        const terpalQty = parseInt(document.getElementById('input-laporan-terpal').value) || 0;
+        const terpalQty = 0; 
         const terpalPcs = terpalQty * maxPcs; 
         const terpalRp = terpalPcs * state.setorConversion;
         
@@ -995,14 +990,7 @@
             }
         }));
         
-        const terpalQty = parseInt(document.getElementById('input-laporan-terpal').value) || 0;
-        if (terpalQty > 0) {
-            const terpalPcs = terpalQty * maxPcs;
-            const terpalRp = terpalPcs * state.setorConversion;
-            gt += terpalRp;
-            tt += terpalPcs;
-            html += `<tr><td colspan="2"><b>Terpal (${terpalQty}x)</b></td><td>${terpalPcs} Pcs</td><td>${terpalRp}</td><td>-</td></tr>`;
-        }
+        const terpalQty = 0;
         
         let totalPengeluaranExp = 0;
         if (state.setorExpenses && state.setorExpenses.length > 0) {
