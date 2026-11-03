@@ -401,6 +401,13 @@
             <label>Nilai Konversi Keuntungan Sales (1 Pcs = Rp)</label>
             <input type="number" id="input-conv-profit" placeholder="Contoh: 300">
             
+            <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
+            <h4 style="margin-bottom: 5px; font-size: 0.95rem;"><i class="fas fa-edit"></i> Fitur Menu Setor</h4>
+            <label style="display: flex; align-items: center; gap: 8px; margin: 10px 0; cursor: pointer; font-size: 0.9rem; font-weight: normal;">
+                <input type="checkbox" id="input-allow-manual-setor" style="width: auto; margin: 0; transform: scale(1.2);">
+                <span>Aktifkan Edit Nominal Manual di Kolom Terjual Setor</span>
+            </label>
+
             <button class="btn btn-primary" style="margin-top: 15px;" onclick="saveSettings()">Simpan Pengaturan</button>
             
             <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
@@ -421,6 +428,7 @@
         setorConversion: 1200, 
         terpalConversion: 50, 
         profitConversion: 300,
+        allowManualSetorEdit: false,
         saldo: 0,
         expenses: [],
         setorExpenses: [],
@@ -432,6 +440,7 @@
     if(state.salesName === undefined) state.salesName = ""; 
     if(state.terpalConversion === undefined) state.terpalConversion = 50; 
     if(state.profitConversion === undefined) state.profitConversion = 300;
+    if(state.allowManualSetorEdit === undefined) state.allowManualSetorEdit = false;
     if(state.saldo === undefined) state.saldo = 0;
     if(state.expenses === undefined) state.expenses = [];
     if(state.setorExpenses === undefined) state.setorExpenses = [];
@@ -588,7 +597,7 @@
             </div>`;
     }
 
-    // --- FUNGSI TANDAI & PINDAH JALUR (BARU) ---
+    // --- FUNGSI TANDAI & PINDAH JALUR ---
     function handleWarungSelection(routeId) {
         const checkboxes = document.querySelectorAll(`.warung-checkbox-${routeId}:checked`);
         const actionBar = document.getElementById(`bulk-action-bar-${routeId}`);
@@ -639,14 +648,11 @@
 
         const warungIdsToMove = Array.from(checkboxes).map(cb => cb.getAttribute('data-warung-id'));
 
-        // Ambil warung yang dipindahkan
         const movedWarungs = sourceRoute.warungs.filter(w => warungIdsToMove.includes(w.id));
         
-        // Hapus dari jalur asal dan rapikan urutannya
         sourceRoute.warungs = sourceRoute.warungs.filter(w => !warungIdsToMove.includes(w.id));
         sourceRoute.warungs.sort((a, b) => a.order - b.order).forEach((w, i) => w.order = i + 1);
 
-        // Masukkan ke jalur tujuan di urutan terakhir
         movedWarungs.forEach(w => {
             w.order = targetRoute.warungs.length + 1;
             targetRoute.warungs.push(w);
@@ -817,7 +823,13 @@
             if (w.setorPoints && w.setorPoints > 0) {
                 let rp = w.setorPoints * state.setorConversion; 
                 let sisa = maxPcs - w.setorPoints; 
-                tbody.innerHTML += `<tr><td>${count++}</td><td><b>${route.name} ${w.name}</b></td><td style="text-align:center; color: var(--primary);"><b>${w.setorPoints}</b></td><td>${formatRp(rp)}</td><td style="text-align:center; font-weight:600; color: var(--danger);">${sisa}</td><td style="text-align:center;" class="no-print"><button class="btn-icon red" onclick="deleteSetorRow('${route.id}', '${w.id}')"><i class="fas fa-times-circle"></i></button></td></tr>`;
+                
+                // Jika fitur edit manual aktif di pengaturan, render input di kolom Terjual
+                let terjualCell = state.allowManualSetorEdit 
+                    ? `<input type="number" class="laporan-input" value="${w.setorPoints}" style="width: 60px;" min="0" onchange="updateSetorManualPoint('${route.id}', '${w.id}', this.value)">`
+                    : `<b>${w.setorPoints}</b>`;
+
+                tbody.innerHTML += `<tr><td>${count++}</td><td><b>${route.name} ${w.name}</b></td><td style="text-align:center;">${terjualCell}</td><td>${formatRp(rp)}</td><td style="text-align:center; font-weight:600; color: var(--danger);">${sisa}</td><td style="text-align:center;" class="no-print"><button class="btn-icon red" onclick="deleteSetorRow('${route.id}', '${w.id}')"><i class="fas fa-times-circle"></i></button></td></tr>`;
             }
         });});
         
@@ -827,6 +839,20 @@
         let today = new Date(); document.getElementById('setor-date').innerText = `Laporan Setoran (${today.getDate()}/${today.getMonth()+1}/${today.getFullYear()})`;
         
         calculateSetorTotals();
+    }
+
+    // Fungsi update nilai setor secara manual dari kolom tabel setor
+    function updateSetorManualPoint(rId, wId, val) {
+        let pts = parseInt(val);
+        if (isNaN(pts) || pts < 0) pts = 0;
+        const route = state.routes.find(r => r.id === rId);
+        if (!route) return;
+        const w = route.warungs.find(w => w.id === wId);
+        if (w) {
+            w.setorPoints = pts;
+            saveData();
+            populateSetorData();
+        }
     }
 
     function openSetorModal() {
@@ -952,8 +978,10 @@
             const originalInputs = document.getElementById('setor-capture-area').querySelectorAll('input');
             const cloneInputs = clone.querySelectorAll('input');
             originalInputs.forEach((input, index) => {
-                cloneInputs[index].setAttribute('value', input.value);
-                cloneInputs[index].style.border = 'none'; 
+                if(cloneInputs[index]) {
+                    cloneInputs[index].setAttribute('value', input.value);
+                    cloneInputs[index].style.border = 'none'; 
+                }
             });
 
             document.body.appendChild(clone);
@@ -989,8 +1017,6 @@
                 html += `<tr><td>${count++}</td><td>${r.name} ${w.name}</td><td>${w.setorPoints}</td><td>${rp}</td><td>${sisa}</td></tr>`; 
             }
         }));
-        
-        const terpalQty = 0;
         
         let totalPengeluaranExp = 0;
         if (state.setorExpenses && state.setorExpenses.length > 0) {
@@ -1160,12 +1186,14 @@
         const s = parseInt(document.getElementById('input-conv-setor').value); 
         const t = parseInt(document.getElementById('input-conv-terpal').value); 
         const p = parseInt(document.getElementById('input-conv-profit').value);
+        const manualSetor = document.getElementById('input-allow-manual-setor').checked;
         const sales = document.getElementById('input-setting-sales').value;
         
         if(m > 0) state.mainConversion = m; 
         if(s > 0) state.setorConversion = s; 
         if(!isNaN(t) && t > 0) state.terpalConversion = t; 
         if(!isNaN(p) && p >= 0) state.profitConversion = p;
+        state.allowManualSetorEdit = manualSetor;
         state.salesName = sales;
         
         saveData(); 
@@ -1203,6 +1231,7 @@
             document.getElementById('input-conv-setor').value = state.setorConversion; 
             document.getElementById('input-conv-terpal').value = state.terpalConversion || 50; 
             document.getElementById('input-conv-profit').value = state.profitConversion || 300;
+            document.getElementById('input-allow-manual-setor').checked = state.allowManualSetorEdit || false;
             document.getElementById('input-setting-sales').value = currentSales;
             
             checkAdminAccess(currentSales);
