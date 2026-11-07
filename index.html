@@ -12,6 +12,11 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="MABIRH POIN">
     
+    <!-- Favicon & PWA Icons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
+    <link rel="apple-touch-icon" href="./icon-192.png">
+    
     <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -2009,48 +2014,3 @@
         deferredPrompt = null;
         const banner = document.getElementById('pwa-install-banner');
         if (banner) banner.style.display = 'none';
-    });
-
-    // PWA Service Worker Registration
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('./sw.js')
-                .then(reg => {
-                    console.log('SW terdaftar dengan sukses:', reg.scope);
-                    reg.update(); // Selalu periksa pembaharuan SW saat dibuka
-                })
-                .catch(err => console.warn('SW Registrasi ditunda:', err));
-        });
-    }
-
-    // Fungsi Darurat: Bersihkan Seluruh Cache Browser & Reset Service Worker
-    async function resetServiceWorkerAndCache() {
-        if (!confirm("Fitur ini akan membersihkan cache browser dan me-refresh aplikasi agar bisa diinstal ulang tanpa macet. Data warung & omset Anda tetap aman.\n\nLanjutkan?")) return;
-        
-        try {
-            if ('serviceWorker' in navigator) {
-                const registrations = await navigator.serviceWorker.getRegistrations();
-                for (let registration of registrations) {
-                    await registration.unregister();
-                }
-            }
-            if ('caches' in window) {
-                const keys = await caches.keys();
-                for (let key of keys) {
-                    await caches.delete(key);
-                }
-            }
-            showToast("Cache dibersihkan! Memuat ulang...");
-            setTimeout(() => {
-                window.location.reload(true);
-            }, 1000);
-        } catch (err) {
-            alert("Gagal reset cache: " + err.message);
-        }
-    }
-
-    // Inisialisasi Render Awal
-    renderApp();
-</script>
-</body>
-</html>
