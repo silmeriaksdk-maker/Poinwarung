@@ -58,23 +58,23 @@
         body {
             background-color: var(--bg);
             color: var(--text-main);
-            overflow-x: hidden;
+            overflow: hidden;
             font-size: 14px;
-            width: 100%;
+            width: 100vw;
+            height: 100vh;
         }
 
-        /* App Container & Presisi Sizing */
+        /* App Container */
         #app {
             width: 100%;
-            max-width: 100%;
-            height: 100vh;
+            height: 100%;
             display: flex;
             flex-direction: column;
             overflow: hidden;
             position: relative;
         }
 
-        /* Route Tabs Pill Bar (Quick Navigation) */
+        /* Horizontal Route Tabs (Pill Bar) */
         .route-tabs-wrapper {
             background: var(--primary-dark);
             padding: 8px 12px;
@@ -109,22 +109,23 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
 
-        /* Anti-Leak Slider Container */
+        /* 60 FPS Virtual Viewport Container */
         #swipe-container {
-            display: flex;
+            position: relative;
             width: 100%;
             flex: 1;
             height: calc(100vh - 128px);
-            transition: transform 0.28s cubic-bezier(0.25, 1, 0.5, 1);
-            will-change: transform;
+            overflow: hidden; /* Hard clip agar tidak ada piksel bocor */
+            perspective: 1000px;
+            background: var(--bg);
         }
 
-        /* Perbaikan Inti: Bebas dari bocoran pixel */
+        /* Independent Virtual Coordinate Page */
         .page {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            min-width: 100%;
-            max-width: 100%;
-            flex: 0 0 100%;
             height: 100%;
             overflow-y: auto;
             overflow-x: hidden;
@@ -132,9 +133,13 @@
             padding-bottom: 90px;
             -webkit-overflow-scrolling: touch;
             box-sizing: border-box;
+            will-change: transform;
+            contain: content; /* Isolasi rendering untuk lock 60 FPS */
+            backface-visibility: hidden;
+            touch-action: pan-y; /* Prioritaskan scroll vertikal */
         }
 
-        /* Outdoor Optimized Headers */
+        /* Header Modern High Contrast */
         .header {
             background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
             color: #ffffff;
@@ -210,7 +215,7 @@
             box-shadow: var(--shadow-sm);
             border: 1px solid rgba(226, 232, 240, 0.8);
             position: relative;
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            transition: transform 0.12s ease;
         }
         .card:active { transform: scale(0.985); }
         .card-header {
@@ -237,7 +242,7 @@
             border: 1px solid rgba(0,0,0,0.05);
         }
 
-        /* Inputs & Buttons */
+        /* Inputs & Controls */
         input, select {
             width: 100%;
             padding: 12px 14px;
@@ -380,7 +385,7 @@
         }
         .chip-btn:active { background: var(--primary); color: #fff; transform: scale(0.92); }
 
-        /* Tables & Settling Sheet */
+        /* Tables & Setor */
         .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: var(--radius-md); border: 1px solid var(--border); }
         .setor-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 440px; background: #ffffff; }
         .setor-table th, .setor-table td { border-bottom: 1px solid var(--border); padding: 10px 12px; text-align: left; }
@@ -457,7 +462,7 @@
     <!-- Horizontal Route Pill Nav -->
     <div class="route-tabs-wrapper" id="route-tabs"></div>
 
-    <!-- Swipe View Container -->
+    <!-- 60 FPS Virtual Screen Container -->
     <div id="swipe-container"></div>
     <div class="page-indicator" id="page-indicator"></div>
 
@@ -512,7 +517,7 @@
     </div>
 </div>
 
-<!-- Modal Warung Quick Action -->
+<!-- Modal Warung Action -->
 <div class="modal" id="modal-warung-action" onclick="closeModalOnBackdrop(event, 'modal-warung-action')">
     <div class="modal-content">
         <div class="modal-handle"></div>
@@ -800,7 +805,7 @@
             localStorage.setItem('warungApp', JSON.stringify(state));
             renderApp();
         } catch (err) {
-            showToast("Memori lokal penuh atau gagal disimpan!", "danger");
+            showToast("Memori lokal penuh atau gagal disimpan!");
         }
     }
 
@@ -913,6 +918,7 @@
 
         const div = document.createElement('div');
         div.className = 'page';
+        div.setAttribute('data-page-index', '0');
         div.innerHTML = `
             <div class="header">
                 <div class="header-title">
@@ -963,6 +969,7 @@
 
         const div = document.createElement('div');
         div.className = 'page';
+        div.setAttribute('data-page-index', pageIndex);
         div.innerHTML = `
             <div class="header" style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);">
                 <div class="header-title">
@@ -1149,57 +1156,115 @@
         showToast(`+${pt} poin berhasil ditambahkan!`);
     }
 
-    // --- ACCURATE ANTI-LEAK NAVIGATION LOGIC ---
-    let startX = 0, isDragging = false;
+    // --- 60 FPS INDEPENDENT VIRTUAL TRANSITION ENGINE ---
     const swipeContainer = document.getElementById('swipe-container');
 
-    // Mendapatkan lebar piksel presisi tanpa distorsi subpixel atau scrollbar
-    function getPageWidth() {
-        return swipeContainer.offsetWidth || document.documentElement.clientWidth || window.innerWidth;
-    }
-
-    swipeContainer.addEventListener('touchstart', (e) => {
-        if (['INPUT', 'BUTTON', 'SELECT', 'A', 'I', 'LABEL'].includes(e.target.tagName)) return;
-        startX = e.touches[0].clientX;
-        isDragging = true;
-    }, { passive: true });
-
-    swipeContainer.addEventListener('touchend', (e) => {
-        if (!isDragging) return;
-        isDragging = false;
-        const diff = e.changedTouches[0].clientX - startX;
-        if (diff > 55 && currentPage > 0) currentPage--;
-        else if (diff < -55 && currentPage < state.routes.length) currentPage++;
-        goToPage(currentPage);
-    }, { passive: true });
-
-    function goToPage(index) {
-        currentPage = index;
+    function goToPage(index, animate = true) {
         const totalPages = state.routes.length + 1;
-        if (currentPage >= totalPages) currentPage = totalPages - 1;
-        if (currentPage < 0) currentPage = 0;
+        if (index >= totalPages) index = totalPages - 1;
+        if (index < 0) index = 0;
+        currentPage = index;
 
-        // Menggunakan kalkulasi piksel akurat (Bebas bocor/geser)
-        const pageWidth = getPageWidth();
-        swipeContainer.style.transform = `translateX(-${currentPage * pageWidth}px)`;
+        const pages = swipeContainer.querySelectorAll('.page');
+        pages.forEach((page, i) => {
+            const offset = i - currentPage;
+            
+            // Set transisi mulus 60 FPS
+            page.style.transition = animate ? 'transform 0.28s cubic-bezier(0.25, 1, 0.5, 1), visibility 0.28s' : 'none';
+            // Koordinat independen persentase murni tanpa akumulasi eror
+            page.style.transform = `translate3d(${offset * 100}%, 0, 0)`;
+
+            // Culling: Matikan halaman di luar rentang visual agar GPU ringan & 0% bocor
+            if (Math.abs(offset) > 1) {
+                page.style.visibility = 'hidden';
+                page.style.pointerEvents = 'none';
+            } else {
+                page.style.visibility = 'visible';
+                page.style.pointerEvents = offset === 0 ? 'auto' : 'none';
+            }
+        });
 
         updateIndicators();
         renderRouteTabs();
         document.querySelectorAll('.bottom-nav .nav-item').forEach((el, i) => el.classList.toggle('active', i === 0 && currentPage === 0));
     }
 
-    // Koreksi otomatis jika pengguna merotasi layar smartphone
-    window.addEventListener('resize', () => {
-        swipeContainer.style.transition = 'none';
-        goToPage(currentPage);
-        setTimeout(() => {
-            swipeContainer.style.transition = 'transform 0.28s cubic-bezier(0.25, 1, 0.5, 1)';
-        }, 50);
-    });
+    // Gesture Swipe dengan Pemisahan Sumbu Horizontal vs Vertikal (Anti-Jank)
+    let startX = 0, startY = 0, currentX = 0;
+    let isSwiping = false, isHorizontal = null;
 
-    window.addEventListener('orientationchange', () => {
-        setTimeout(() => goToPage(currentPage), 100);
-    });
+    swipeContainer.addEventListener('touchstart', (e) => {
+        if (['INPUT', 'BUTTON', 'SELECT', 'A', 'I', 'LABEL'].includes(e.target.tagName)) return;
+        if (e.target.closest('.modal')) return;
+
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        currentX = startX;
+        isSwiping = true;
+        isHorizontal = null;
+
+        // Hilangkan delay animasi saat jari sedang menempel di layar
+        const pages = swipeContainer.querySelectorAll('.page');
+        pages.forEach(p => p.style.transition = 'none');
+    }, { passive: true });
+
+    swipeContainer.addEventListener('touchmove', (e) => {
+        if (!isSwiping) return;
+        currentX = e.touches[0].clientX;
+        const diffX = currentX - startX;
+        const diffY = e.touches[0].clientY - startY;
+
+        // Kunci arah gerakan: Jangan geser jalur jika sales sedang scroll daftar warung ke atas/bawah
+        if (isHorizontal === null) {
+            if (Math.abs(diffX) > 7 || Math.abs(diffY) > 7) {
+                isHorizontal = Math.abs(diffX) > Math.abs(diffY);
+            }
+        }
+
+        if (!isHorizontal) return;
+
+        // Efek karet elastis pada ujung awal & akhir halaman
+        const totalPages = state.routes.length + 1;
+        let dragOffset = diffX;
+        if ((currentPage === 0 && diffX > 0) || (currentPage === totalPages - 1 && diffX < 0)) {
+            dragOffset = diffX * 0.28;
+        }
+
+        const width = swipeContainer.clientWidth || window.innerWidth;
+        const pages = swipeContainer.querySelectorAll('.page');
+        pages.forEach((page, i) => {
+            const offset = i - currentPage;
+            if (Math.abs(offset) <= 1) {
+                page.style.visibility = 'visible';
+                page.style.transform = `translate3d(calc(${offset * 100}% + ${dragOffset}px), 0, 0)`;
+            }
+        });
+    }, { passive: true });
+
+    swipeContainer.addEventListener('touchend', (e) => {
+        if (!isSwiping) return;
+        isSwiping = false;
+
+        if (!isHorizontal) {
+            goToPage(currentPage, false);
+            return;
+        }
+
+        const diffX = currentX - startX;
+        const threshold = 48; // Ambang batas jarak usap jari
+        const totalPages = state.routes.length + 1;
+
+        if (diffX < -threshold && currentPage < totalPages - 1) {
+            goToPage(currentPage + 1, true);
+        } else if (diffX > threshold && currentPage > 0) {
+            goToPage(currentPage - 1, true);
+        } else {
+            goToPage(currentPage, true);
+        }
+    }, { passive: true });
+
+    window.addEventListener('resize', () => goToPage(currentPage, false));
+    window.addEventListener('orientationchange', () => setTimeout(() => goToPage(currentPage, false), 100));
 
     function updateIndicators() {
         let html = '';
