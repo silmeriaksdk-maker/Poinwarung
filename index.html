@@ -115,7 +115,7 @@
             width: 100%;
             flex: 1;
             height: calc(100vh - 128px);
-            overflow: hidden; /* Hard clip agar tidak ada piksel bocor */
+            overflow: hidden;
             perspective: 1000px;
             background: var(--bg);
         }
@@ -130,13 +130,13 @@
             overflow-y: auto;
             overflow-x: hidden;
             background: var(--bg);
-            padding-bottom: 90px;
+            padding-bottom: 120px;
             -webkit-overflow-scrolling: touch;
             box-sizing: border-box;
             will-change: transform;
-            contain: content; /* Isolasi rendering untuk lock 60 FPS */
+            contain: content;
             backface-visibility: hidden;
-            touch-action: pan-y; /* Prioritaskan scroll vertikal */
+            touch-action: pan-y;
         }
 
         /* Header Modern High Contrast */
@@ -172,6 +172,31 @@
         .stat-item { text-align: center; }
         .stat-label { font-size: 0.72rem; color: #cbd5e1; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; }
         .stat-value { display: block; font-weight: 800; font-size: 1.05rem; color: #ffffff; margin-top: 2px; }
+
+        /* Global Floating Bulk Action Bar (Always In Thumb-Zone) */
+        .global-bulk-bar {
+            position: fixed;
+            bottom: 68px; /* Mengambang tepat di atas bottom-nav */
+            left: 12px;
+            right: 12px;
+            max-width: 500px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 12px 14px;
+            border-radius: var(--radius-lg);
+            box-shadow: 0 12px 35px rgba(15, 23, 42, 0.22), 0 2px 8px rgba(30, 64, 175, 0.15);
+            z-index: 45;
+            border: 1.5px solid var(--primary);
+            transform: translateY(160%);
+            transition: transform 0.26s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .global-bulk-bar.active {
+            transform: translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
 
         /* Bottom Nav - Thumb Zone */
         .bottom-nav {
@@ -465,6 +490,26 @@
     <!-- 60 FPS Virtual Screen Container -->
     <div id="swipe-container"></div>
     <div class="page-indicator" id="page-indicator"></div>
+
+    <!-- Global Floating Bulk Action Bar (Always in Thumb-Zone, No Scrolling Needed) -->
+    <div id="global-bulk-bar" class="global-bulk-bar">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span id="global-bulk-count" style="font-weight: 800; font-size: 0.85rem; color: var(--primary); display: flex; align-items: center; gap: 6px;">
+                <i class="fas fa-check-circle" style="color: var(--primary);"></i> 0 warung dipilih
+            </span>
+            <button class="btn-icon" onclick="clearRouteSelection()" style="font-size: 0.82rem; color: var(--danger); font-weight: 700; padding: 2px 6px;">
+                <i class="fas fa-times"></i> Batal
+            </button>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+            <select id="global-bulk-target-route" style="margin: 0; font-size: 0.85rem; flex: 1; padding: 10px 12px;">
+                <option value="">-- Pindah ke Jalur --</option>
+            </select>
+            <button class="btn btn-primary" onclick="executeBulkMove()" style="margin: 0; width: auto; padding: 10px 16px; font-size: 0.85rem; white-space: nowrap;">
+                <i class="fas fa-truck-moving"></i> Pindahkan
+            </button>
+        </div>
+    </div>
 
     <!-- Bottom Navigation Bar -->
     <div class="bottom-nav">
@@ -985,28 +1030,13 @@
                     <div class="stat-item"><span class="stat-label">Nilai</span><span class="stat-value">${formatRp(rRp)}</span></div>
                 </div>
             </div>
-            <div class="container" style="padding-bottom: 120px;">
+            <div class="container">
                 <div class="search-box">
                     <i class="fas fa-search" style="color: #94a3b8;"></i>
                     <input type="text" placeholder="Ketik nama warung..." onkeyup="filterRouteWarung('${route.id}', this.value)">
                 </div>
                 <div id="list-warung-${route.id}">
                     ${route.warungs.map((w, index) => generateWarungCard(route.id, w, index)).join('')}
-                </div>
-            </div>
-            
-            <!-- Bulk Action Bar -->
-            <div id="bulk-action-bar-${route.id}" style="display: none; position: fixed; bottom: 70px; left: 12px; right: 12px; background: white; padding: 12px 14px; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); z-index: 25; border: 1.5px solid var(--primary);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <span id="selected-count-${route.id}" style="font-weight: 700; font-size: 0.85rem; color: var(--primary);">0 warung ditandai</span>
-                    <button class="btn-icon" onclick="clearRouteSelection('${route.id}')" style="font-size: 0.85rem; color: var(--danger); font-weight:700;"><i class="fas fa-times"></i> Batal</button>
-                </div>
-                <div style="display: flex; gap: 8px; align-items: center;">
-                    <select id="target-route-${route.id}" style="margin: 0; font-size: 0.85rem; flex: 1;">
-                        <option value="">-- Pindah ke Jalur --</option>
-                        ${state.routes.map(r => `<option value="${r.id}">${r.name}</option>`).join('')}
-                    </select>
-                    <button class="btn btn-primary" onclick="executeBulkMove('${route.id}')" style="margin: 0; width: auto; padding: 10px 14px; font-size: 0.85rem; white-space: nowrap;"><i class="fas fa-truck-moving"></i> Pindahkan</button>
                 </div>
             </div>`;
         container.appendChild(div);
@@ -1047,17 +1077,27 @@
             </div>`;
     }
 
-    // --- BULK OPERATIONS ---
+    // --- BULK OPERATIONS (ALWAYS IN THUMB ZONE) ---
     function handleWarungSelection(routeId) {
         const checkboxes = document.querySelectorAll(`.warung-checkbox-${routeId}:checked`);
-        const actionBar = document.getElementById(`bulk-action-bar-${routeId}`);
-        const countSpan = document.getElementById(`selected-count-${routeId}`);
+        const globalBar = document.getElementById('global-bulk-bar');
+        const countSpan = document.getElementById('global-bulk-count');
+        const targetSelect = document.getElementById('global-bulk-target-route');
         
         if (checkboxes.length > 0) {
-            actionBar.style.display = 'block';
-            countSpan.innerText = `${checkboxes.length} warung ditandai`;
+            triggerHaptic(15);
+            globalBar.classList.add('active');
+            globalBar.setAttribute('data-source-route', routeId);
+            countSpan.innerHTML = `<i class="fas fa-check-circle" style="color: var(--primary);"></i> ${checkboxes.length} warung dipilih`;
+
+            // Hanya tampilkan jalur tujuan lain (jalur aktif disembunyikan agar tidak keliru)
+            targetSelect.innerHTML = '<option value="">-- Pindah ke Jalur --</option>' +
+                state.routes
+                    .filter(r => r.id !== routeId)
+                    .map(r => `<option value="${r.id}">${r.name}</option>`)
+                    .join('');
         } else {
-            actionBar.style.display = 'none';
+            globalBar.classList.remove('active');
         }
     }
 
@@ -1070,14 +1110,22 @@
     }
 
     function clearRouteSelection(routeId) {
-        const checkboxes = document.querySelectorAll(`.warung-checkbox-${routeId}`);
-        checkboxes.forEach(cb => cb.checked = false);
-        handleWarungSelection(routeId);
+        triggerHaptic();
+        const globalBar = document.getElementById('global-bulk-bar');
+        const rId = routeId || globalBar.getAttribute('data-source-route');
+        if (rId) {
+            const checkboxes = document.querySelectorAll(`.warung-checkbox-${rId}`);
+            checkboxes.forEach(cb => cb.checked = false);
+        }
+        globalBar.classList.remove('active');
     }
 
-    function executeBulkMove(sourceRouteId) {
-        triggerHaptic();
-        const targetRouteId = document.getElementById(`target-route-${sourceRouteId}`).value;
+    function executeBulkMove() {
+        triggerHaptic(20);
+        const globalBar = document.getElementById('global-bulk-bar');
+        const sourceRouteId = globalBar.getAttribute('data-source-route');
+        const targetRouteId = document.getElementById('global-bulk-target-route').value;
+
         if (!targetRouteId) return showToast("Pilih jalur tujuan!");
         if (sourceRouteId === targetRouteId) return showToast("Jalur asal dan tujuan sama!");
 
@@ -1099,8 +1147,9 @@
             targetRoute.warungs.push(w);
         });
 
+        globalBar.classList.remove('active');
         saveData();
-        showToast(`${movedWarungs.length} warung dipindahkan ke ${targetRoute.name}`);
+        showToast(`${movedWarungs.length} warung dipindahkan ke ${targetRoute.name}!`);
     }
 
     // --- QUICK ACTION MODAL ---
@@ -1165,16 +1214,22 @@
         if (index < 0) index = 0;
         currentPage = index;
 
+        // Tutup bar pilihan jika berpindah halaman jalur
+        const globalBar = document.getElementById('global-bulk-bar');
+        const activeBulkSource = globalBar?.getAttribute('data-source-route');
+        if (activeBulkSource) {
+            const activeRouteObj = state.routes[currentPage - 1];
+            if (!activeRouteObj || activeRouteObj.id !== activeBulkSource) {
+                clearRouteSelection(activeBulkSource);
+            }
+        }
+
         const pages = swipeContainer.querySelectorAll('.page');
         pages.forEach((page, i) => {
             const offset = i - currentPage;
-            
-            // Set transisi mulus 60 FPS
             page.style.transition = animate ? 'transform 0.28s cubic-bezier(0.25, 1, 0.5, 1), visibility 0.28s' : 'none';
-            // Koordinat independen persentase murni tanpa akumulasi eror
             page.style.transform = `translate3d(${offset * 100}%, 0, 0)`;
 
-            // Culling: Matikan halaman di luar rentang visual agar GPU ringan & 0% bocor
             if (Math.abs(offset) > 1) {
                 page.style.visibility = 'hidden';
                 page.style.pointerEvents = 'none';
@@ -1189,7 +1244,7 @@
         document.querySelectorAll('.bottom-nav .nav-item').forEach((el, i) => el.classList.toggle('active', i === 0 && currentPage === 0));
     }
 
-    // Gesture Swipe dengan Pemisahan Sumbu Horizontal vs Vertikal (Anti-Jank)
+    // Gesture Swipe dengan Pemisahan Sumbu Horizontal vs Vertikal
     let startX = 0, startY = 0, currentX = 0;
     let isSwiping = false, isHorizontal = null;
 
@@ -1203,7 +1258,6 @@
         isSwiping = true;
         isHorizontal = null;
 
-        // Hilangkan delay animasi saat jari sedang menempel di layar
         const pages = swipeContainer.querySelectorAll('.page');
         pages.forEach(p => p.style.transition = 'none');
     }, { passive: true });
@@ -1214,7 +1268,6 @@
         const diffX = currentX - startX;
         const diffY = e.touches[0].clientY - startY;
 
-        // Kunci arah gerakan: Jangan geser jalur jika sales sedang scroll daftar warung ke atas/bawah
         if (isHorizontal === null) {
             if (Math.abs(diffX) > 7 || Math.abs(diffY) > 7) {
                 isHorizontal = Math.abs(diffX) > Math.abs(diffY);
@@ -1223,14 +1276,12 @@
 
         if (!isHorizontal) return;
 
-        // Efek karet elastis pada ujung awal & akhir halaman
         const totalPages = state.routes.length + 1;
         let dragOffset = diffX;
         if ((currentPage === 0 && diffX > 0) || (currentPage === totalPages - 1 && diffX < 0)) {
             dragOffset = diffX * 0.28;
         }
 
-        const width = swipeContainer.clientWidth || window.innerWidth;
         const pages = swipeContainer.querySelectorAll('.page');
         pages.forEach((page, i) => {
             const offset = i - currentPage;
@@ -1251,7 +1302,7 @@
         }
 
         const diffX = currentX - startX;
-        const threshold = 48; // Ambang batas jarak usap jari
+        const threshold = 48;
         const totalPages = state.routes.length + 1;
 
         if (diffX < -threshold && currentPage < totalPages - 1) {
@@ -1879,53 +1930,4 @@
             document.getElementById('input-conv-setor').value = state.setorConversion;
             document.getElementById('input-conv-terpal').value = state.terpalConversion || 50;
             document.getElementById('input-conv-profit').value = state.profitConversion || 300;
-            document.getElementById('input-allow-manual-setor').checked = state.allowManualSetorEdit || false;
-            document.getElementById('input-setting-sales').value = state.salesName || '';
-            checkAdminAccess(state.salesName || '');
-        } else if (id === 'modal-add-warung') {
-            document.getElementById('input-warung-name').value = '';
-            document.getElementById('input-warung-maps').value = '';
-            updateRouteDropdowns();
-        }
-        document.getElementById(id).classList.add('active');
-    }
-
-    function closeModal(id) {
-        document.getElementById(id).classList.remove('active');
-    }
-
-    function closeModalOnBackdrop(e, id) {
-        if (e.target.id === id) closeModal(id);
-    }
-
-    // --- DETEKSI KONEKSI ---
-    function updateOnlineStatus() {
-        const statusEl = document.getElementById('network-status');
-        if (navigator.onLine) {
-            statusEl.textContent = 'Online — Tersambung kembali ke internet.';
-            statusEl.className = 'network-status online';
-            setTimeout(() => { if (navigator.onLine) statusEl.classList.remove('online'); }, 2500);
-        } else {
-            statusEl.textContent = 'Mode Luar Jaringan (Offline) — Data tetap aman di HP.';
-            statusEl.className = 'network-status offline';
-        }
-    }
-
-    window.addEventListener('online', updateOnlineStatus);
-    window.addEventListener('offline', updateOnlineStatus);
-    if (!navigator.onLine) updateOnlineStatus();
-
-    // PWA Service Worker
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('./sw.js')
-                .then(reg => console.log('SW siap:', reg.scope))
-                .catch(err => console.warn('SW Registrasi ditunda:', err));
-        });
-    }
-
-    // Render Awal
-    renderApp();
-</script>
-</body>
-</html>
+            document.getElementById('
