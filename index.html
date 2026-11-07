@@ -7,6 +7,7 @@
     <title>MABIRH POIN PRO</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1e3a8a">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="MABIRH POIN">
@@ -173,10 +174,10 @@
         .stat-label { font-size: 0.72rem; color: #cbd5e1; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; }
         .stat-value { display: block; font-weight: 800; font-size: 1.05rem; color: #ffffff; margin-top: 2px; }
 
-        /* Global Floating Bulk Action Bar (Always In Thumb-Zone) */
+        /* Global Floating Bulk Action Bar */
         .global-bulk-bar {
             position: fixed;
-            bottom: 68px; /* Mengambang tepat di atas bottom-nav */
+            bottom: 68px;
             left: 12px;
             right: 12px;
             max-width: 500px;
@@ -198,7 +199,7 @@
             pointer-events: auto;
         }
 
-        /* Bottom Nav - Thumb Zone */
+        /* Bottom Nav */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -230,7 +231,7 @@
         .nav-item span { font-size: 0.7rem; margin-top: 4px; font-weight: 600; }
         .nav-item.active { color: var(--primary); }
 
-        /* Container & Cards */
+        /* Cards */
         .container { padding: 14px 16px; }
         .card {
             background: var(--card-bg);
@@ -325,7 +326,7 @@
 
         .flex-row { display: flex; gap: 10px; align-items: center; }
 
-        /* Ergonomic Bottom Sheet Modals */
+        /* Modals */
         .modal {
             display: none;
             position: fixed;
@@ -375,7 +376,6 @@
             gap: 8px;
         }
 
-        /* Search Box */
         .search-box {
             background: #ffffff;
             display: flex;
@@ -389,7 +389,6 @@
         .search-box input { border: none; margin: 0; padding: 10px 8px; background: transparent; font-weight: 500; }
         .search-box input:focus { box-shadow: none; }
 
-        /* Quick Increment Chip Buttons */
         .quick-chips {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -410,7 +409,6 @@
         }
         .chip-btn:active { background: var(--primary); color: #fff; transform: scale(0.92); }
 
-        /* Tables & Setor */
         .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: var(--radius-md); border: 1px solid var(--border); }
         .setor-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 440px; background: #ffffff; }
         .setor-table th, .setor-table td { border-bottom: 1px solid var(--border); padding: 10px 12px; text-align: left; }
@@ -429,7 +427,6 @@
             color: var(--primary);
         }
 
-        /* Floating Toast */
         .toast {
             position: fixed;
             bottom: 75px;
@@ -452,7 +449,6 @@
         }
         .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
-        /* Network Status */
         .network-status {
             position: fixed;
             top: 0;
@@ -491,7 +487,7 @@
     <div id="swipe-container"></div>
     <div class="page-indicator" id="page-indicator"></div>
 
-    <!-- Global Floating Bulk Action Bar (Always in Thumb-Zone, No Scrolling Needed) -->
+    <!-- Global Floating Bulk Action Bar -->
     <div id="global-bulk-bar" class="global-bulk-bar">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
             <span id="global-bulk-count" style="font-weight: 800; font-size: 0.85rem; color: var(--primary); display: flex; align-items: center; gap: 6px;">
@@ -588,7 +584,6 @@
         <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-sub);">Input Nominal Poin / Pcs :</label>
         <input type="number" inputmode="numeric" id="input-action-pt" placeholder="0" style="font-size: 1.3rem; text-align: center; font-weight: 800; letter-spacing: 0.05em; padding: 8px; margin: 6px 0 2px 0;">
         
-        <!-- Quick Chips -->
         <div class="quick-chips">
             <button class="chip-btn" onclick="appendInputVal(5)">+5</button>
             <button class="chip-btn" onclick="appendInputVal(10)">+10</button>
@@ -621,7 +616,6 @@
             <button class="btn-icon" onclick="closeModal('modal-setor')"><i class="fas fa-times"></i></button>
         </div>
         
-        <!-- Input Pengeluaran Setor -->
         <div class="no-print" style="background: #f8fafc; padding: 12px; border-radius: var(--radius-md); margin-bottom: 14px; border: 1.5px solid var(--border);">
             <div style="font-weight: 700; font-size: 0.8rem; margin-bottom: 6px; color: var(--text-main); display:flex; align-items:center; gap:6px;">
                 <i class="fas fa-minus-circle" style="color: var(--danger);"></i> Potongan / Pengeluaran Setoran
@@ -773,6 +767,13 @@
             <h3><i class="fas fa-cog" style="color:var(--text-sub);"></i> Setelan Aplikasi</h3>
             <button class="btn-icon" onclick="closeModal('modal-settings')"><i class="fas fa-times"></i></button>
         </div>
+
+        <!-- Tombol Instal Aplikasi PWA Manual -->
+        <div id="pwa-install-banner" style="display:none; margin-bottom: 14px;">
+            <button class="btn btn-success" onclick="triggerPWAInstall()" style="height: 48px;">
+                <i class="fas fa-download"></i> Pasang / Instal Aplikasi Ini
+            </button>
+        </div>
         
         <label style="font-size:0.8rem; font-weight:600; color:var(--text-sub);">Nama Profil Sales</label>
         <input type="text" id="input-setting-sales" placeholder="Ketik nama Anda (Ketik 'admin' untuk akses penuh)" oninput="checkAdminAccess(this.value)">
@@ -802,13 +803,18 @@
         
         <hr style="margin: 18px 0; border: 0; border-top: 1px solid var(--border);">
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
             <button class="btn btn-outline" onclick="backupData()"><i class="fas fa-file-download"></i> Backup Data</button>
             <label for="restore-file" class="btn btn-outline" style="text-align: center; cursor: pointer; margin:0;">
                 <i class="fas fa-file-upload"></i> Restore
             </label>
             <input type="file" id="restore-file" style="display: none;" accept=".json" onchange="restoreData(event)">
         </div>
+
+        <!-- Tombol Darurat Bersihkan Cache PWA -->
+        <button class="btn btn-outline" style="color: var(--danger); border-color: #fca5a5; font-size: 0.8rem;" onclick="resetServiceWorkerAndCache()">
+            <i class="fas fa-broom"></i> Bersihkan Cache & Refresh PWA
+        </button>
     </div>
 </div>
 
@@ -1077,7 +1083,7 @@
             </div>`;
     }
 
-    // --- BULK OPERATIONS (ALWAYS IN THUMB ZONE) ---
+    // --- BULK OPERATIONS ---
     function handleWarungSelection(routeId) {
         const checkboxes = document.querySelectorAll(`.warung-checkbox-${routeId}:checked`);
         const globalBar = document.getElementById('global-bulk-bar');
@@ -1090,7 +1096,6 @@
             globalBar.setAttribute('data-source-route', routeId);
             countSpan.innerHTML = `<i class="fas fa-check-circle" style="color: var(--primary);"></i> ${checkboxes.length} warung dipilih`;
 
-            // Hanya tampilkan jalur tujuan lain (jalur aktif disembunyikan agar tidak keliru)
             targetSelect.innerHTML = '<option value="">-- Pindah ke Jalur --</option>' +
                 state.routes
                     .filter(r => r.id !== routeId)
@@ -1205,7 +1210,7 @@
         showToast(`+${pt} poin berhasil ditambahkan!`);
     }
 
-    // --- 60 FPS INDEPENDENT VIRTUAL TRANSITION ENGINE ---
+    // --- TRANSITION ENGINE ---
     const swipeContainer = document.getElementById('swipe-container');
 
     function goToPage(index, animate = true) {
@@ -1214,7 +1219,6 @@
         if (index < 0) index = 0;
         currentPage = index;
 
-        // Tutup bar pilihan jika berpindah halaman jalur
         const globalBar = document.getElementById('global-bulk-bar');
         const activeBulkSource = globalBar?.getAttribute('data-source-route');
         if (activeBulkSource) {
@@ -1244,7 +1248,6 @@
         document.querySelectorAll('.bottom-nav .nav-item').forEach((el, i) => el.classList.toggle('active', i === 0 && currentPage === 0));
     }
 
-    // Gesture Swipe dengan Pemisahan Sumbu Horizontal vs Vertikal
     let startX = 0, startY = 0, currentX = 0;
     let isSwiping = false, isHorizontal = null;
 
@@ -1325,7 +1328,7 @@
         document.getElementById('page-indicator').innerHTML = html;
     }
 
-    // --- CRUD JALUR & WARUNG ---
+    // --- CRUD ---
     function addRoute() {
         const input = document.getElementById('input-route-name');
         const name = input.value.trim();
@@ -1457,7 +1460,6 @@
         }
     }
 
-    // --- SEARCH HELPERS ---
     function updateMainWarungSearch() {
         const rId = document.getElementById('main-search-route').value;
         const wSelect = document.getElementById('main-search-warung');
@@ -1922,7 +1924,6 @@
         reader.readAsText(file);
     }
 
-    // --- MODAL CONTROLS ---
     function openModal(id) {
         triggerHaptic();
         if (id === 'modal-settings') {
@@ -1933,6 +1934,14 @@
             document.getElementById('input-allow-manual-setor').checked = state.allowManualSetorEdit || false;
             document.getElementById('input-setting-sales').value = state.salesName || '';
             checkAdminAccess(state.salesName || '');
+            
+            // Cek tombol instal PWA
+            const installBanner = document.getElementById('pwa-install-banner');
+            if (deferredPrompt) {
+                installBanner.style.display = 'block';
+            } else {
+                installBanner.style.display = 'none';
+            }
         } else if (id === 'modal-add-warung') {
             document.getElementById('input-warung-name').value = '';
             document.getElementById('input-warung-maps').value = '';
@@ -1949,7 +1958,6 @@
         if (e.target.id === id) closeModal(id);
     }
 
-    // --- DETEKSI KONEKSI ---
     function updateOnlineStatus() {
         const statusEl = document.getElementById('network-status');
         if (navigator.onLine) {
@@ -1966,16 +1974,82 @@
     window.addEventListener('offline', updateOnlineStatus);
     if (!navigator.onLine) updateOnlineStatus();
 
-    // PWA Service Worker
+    // ==========================================
+    // PWA INSTALLATION & SERVICE WORKER HANDLER
+    // ==========================================
+    let deferredPrompt = null;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        // Cegah Chrome mini-infobar default
+        e.preventDefault();
+        deferredPrompt = e;
+        console.log('PWA siap dipasang, prompt ditangkap.');
+        const banner = document.getElementById('pwa-install-banner');
+        if (banner) banner.style.display = 'block';
+    });
+
+    function triggerPWAInstall() {
+        if (!deferredPrompt) {
+            showToast("Buka menu titik 3 Chrome -> Tambahkan ke Layar Utama");
+            return;
+        }
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+                showToast("Aplikasi sedang dipasang...");
+                deferredPrompt = null;
+                const banner = document.getElementById('pwa-install-banner');
+                if (banner) banner.style.display = 'none';
+            }
+        });
+    }
+
+    window.addEventListener('appinstalled', () => {
+        showToast("MABIRH POIN PRO sukses terpasang!");
+        deferredPrompt = null;
+        const banner = document.getElementById('pwa-install-banner');
+        if (banner) banner.style.display = 'none';
+    });
+
+    // PWA Service Worker Registration
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('./sw.js')
-                .then(reg => console.log('SW siap:', reg.scope))
+                .then(reg => {
+                    console.log('SW terdaftar dengan sukses:', reg.scope);
+                    reg.update(); // Selalu periksa pembaharuan SW saat dibuka
+                })
                 .catch(err => console.warn('SW Registrasi ditunda:', err));
         });
     }
 
-    // Render Awal
+    // Fungsi Darurat: Bersihkan Seluruh Cache Browser & Reset Service Worker
+    async function resetServiceWorkerAndCache() {
+        if (!confirm("Fitur ini akan membersihkan cache browser dan me-refresh aplikasi agar bisa diinstal ulang tanpa macet. Data warung & omset Anda tetap aman.\n\nLanjutkan?")) return;
+        
+        try {
+            if ('serviceWorker' in navigator) {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                for (let registration of registrations) {
+                    await registration.unregister();
+                }
+            }
+            if ('caches' in window) {
+                const keys = await caches.keys();
+                for (let key of keys) {
+                    await caches.delete(key);
+                }
+            }
+            showToast("Cache dibersihkan! Memuat ulang...");
+            setTimeout(() => {
+                window.location.reload(true);
+            }, 1000);
+        } catch (err) {
+            alert("Gagal reset cache: " + err.message);
+        }
+    }
+
+    // Inisialisasi Render Awal
     renderApp();
 </script>
 </body>
