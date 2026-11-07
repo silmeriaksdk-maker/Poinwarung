@@ -2,253 +2,586 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
-    <title>MABIRH POIN</title>
+    <title>MABIRH POIN PRO</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#2563eb">
+    <meta name="theme-color" content="#1e3a8a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="MABIRH POIN">
     
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <style>
         :root {
-            --primary: #2563eb;
-            --secondary: #3b82f6;
-            --success: #10b981;
-            --danger: #ef4444;
-            --dark: #1e293b;
-            --light: #f1f5f9;
-            --white: #ffffff;
-            --text: #334155;
-            --gold: #eab308;
-            --silver: #94a3b8;
+            --primary: #1e40af;
+            --primary-dark: #1e3a8a;
+            --primary-light: #3b82f6;
+            --accent: #0284c7;
+            --success: #059669;
+            --success-dark: #047857;
+            --danger: #dc2626;
+            --warning: #d97706;
+            --dark: #0f172a;
+            --card-bg: #ffffff;
+            --bg: #f8fafc;
+            --text-main: #0f172a;
+            --text-sub: #475569;
+            --border: #e2e8f0;
+            --gold: #f59e0b;
+            --silver: #64748b;
             --bronze: #b45309;
-            --purple: #8b5cf6;
+            --purple: #7c3aed;
+            --radius-md: 12px;
+            --radius-lg: 18px;
+            --radius-xl: 24px;
+            --shadow-sm: 0 2px 4px rgba(15, 23, 42, 0.04);
+            --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06);
+            --shadow-lg: 0 10px 25px -5px rgba(15, 23, 42, 0.1);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body { background-color: var(--light); color: var(--text); overflow-x: hidden; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            overflow-x: hidden;
+            font-size: 14px;
+        }
 
         /* App Container & Swipe Logic */
-        #app { width: 100vw; height: 100vh; display: flex; flex-direction: column; overflow: hidden; position: relative; }
-        #swipe-container { display: flex; height: calc(100vh - 60px); transition: transform 0.3s ease-out; will-change: transform; }
-        .page { min-width: 100vw; height: 100%; overflow-y: auto; background: var(--light); padding-bottom: 80px; }
+        #app {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
 
-        /* Headers */
-        .header { background: var(--primary); color: var(--white); padding: 15px 20px; position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .header-title { font-size: 1.2rem; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
-        .header-stats { display: flex; justify-content: space-between; margin-top: 10px; font-size: 0.85rem; background: rgba(255,255,255,0.1); padding: 8px; border-radius: 8px; }
+        /* Route Tabs Pill Bar (Quick Navigation) */
+        .route-tabs-wrapper {
+            background: var(--primary-dark);
+            padding: 8px 12px;
+            overflow-x: auto;
+            white-space: nowrap;
+            display: flex;
+            gap: 8px;
+            z-index: 15;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        .route-tabs-wrapper::-webkit-scrollbar { display: none; }
+        .route-tab-pill {
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .route-tab-pill.active {
+            background: #ffffff;
+            color: var(--primary-dark);
+            border-color: #ffffff;
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        #swipe-container {
+            display: flex;
+            height: calc(100vh - 128px);
+            transition: transform 0.28s cubic-bezier(0.25, 1, 0.5, 1);
+            will-change: transform;
+        }
+
+        .page {
+            min-width: 100vw;
+            height: 100%;
+            overflow-y: auto;
+            background: var(--bg);
+            padding-bottom: 90px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Outdoor Optimized Headers */
+        .header {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+            color: #ffffff;
+            padding: 16px 18px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            box-shadow: var(--shadow-md);
+        }
+        .header-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            letter-spacing: -0.01em;
+        }
+        .header-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 14px;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 10px;
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
         .stat-item { text-align: center; }
-        .stat-item span { display: block; font-weight: 700; font-size: 1rem; }
+        .stat-label { font-size: 0.72rem; color: #cbd5e1; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; }
+        .stat-value { display: block; font-weight: 800; font-size: 1.05rem; color: #ffffff; margin-top: 2px; }
 
-        /* Bottom Nav - Diperbaiki agar tidak berdempetan */
-        .bottom-nav { 
-            position: fixed; 
-            bottom: 0; 
-            width: 100%; 
-            background: var(--white); 
-            display: flex; 
-            justify-content: space-around; 
-            align-items: center; 
-            padding: 8px 10px; 
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.08); 
-            z-index: 20; 
+        /* Bottom Nav - Thumb Zone Optimized */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: #ffffff;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06);
+            z-index: 30;
+            border-top: 1px solid var(--border);
         }
-        .nav-item { 
-            background: none; 
-            border: none; 
-            color: var(--text); 
-            font-size: 1.3rem; 
-            cursor: pointer; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            flex: 1; 
-            padding: 4px 0; 
+        .nav-item {
+            background: none;
+            border: none;
+            color: var(--text-sub);
+            font-size: 1.25rem;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            padding: 6px 0;
+            border-radius: var(--radius-md);
+            transition: all 0.2s ease;
         }
-        .nav-item span { font-size: 0.7rem; margin-top: 4px; font-weight: 500; }
+        .nav-item:active { transform: scale(0.92); }
+        .nav-item span { font-size: 0.7rem; margin-top: 4px; font-weight: 600; }
         .nav-item.active { color: var(--primary); }
+        .nav-item.active i { transform: translateY(-1px); }
 
-        /* Cards & Lists */
-        .container { padding: 15px; }
-        .card { background: var(--white); border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: relative; }
-        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
-        .card-title { font-weight: 600; font-size: 1rem; color: var(--dark); display: flex; align-items: center; gap: 8px; flex-wrap: wrap;}
-        .badge { background: var(--light); padding: 3px 8px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; color: var(--primary); }
+        /* Container & Cards */
+        .container { padding: 14px 16px; }
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            position: relative;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .card:active { transform: scale(0.985); }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .badge {
+            background: #f1f5f9;
+            padding: 4px 9px;
+            border-radius: 30px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--primary);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        /* Inputs & Modern Form Elements */
+        input, select {
+            width: 100%;
+            padding: 12px 14px;
+            margin: 8px 0;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-md);
+            outline: none;
+            font-size: 0.92rem;
+            background: #ffffff;
+            color: var(--text-main);
+            font-weight: 500;
+            transition: border-color 0.2s;
+        }
+        input:focus, select:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+
+        /* Buttons & Tap States */
+        .btn {
+            padding: 12px 16px;
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 0.92rem;
+            width: 100%;
+            transition: all 0.15s ease;
+        }
+        .btn:active { transform: scale(0.96); opacity: 0.9; }
+        .btn-primary { background: var(--primary); color: #ffffff; box-shadow: 0 4px 10px rgba(30, 64, 175, 0.25); }
+        .btn-success { background: var(--success); color: #ffffff; box-shadow: 0 4px 10px rgba(5, 150, 105, 0.25); }
+        .btn-danger { background: var(--danger); color: #ffffff; }
+        .btn-warning { background: var(--gold); color: #000000; }
+        .btn-outline { background: #ffffff; border: 1.5px solid var(--border); color: var(--text-main); }
         
-        /* Inputs & Buttons */
-        input, select { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; font-size: 0.9rem; }
-        input:focus, select:focus { border-color: var(--primary); }
-        .btn { padding: 10px 15px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; font-size: 0.9rem; width: 100%; margin-top: 5px; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-success { background: var(--success); color: white; }
-        .btn-danger { background: var(--danger); color: white; }
-        .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); }
-        .btn-icon { background: none; border: none; color: var(--text); font-size: 1.2rem; cursor: pointer; padding: 5px; }
+        .btn-icon {
+            background: none;
+            border: none;
+            color: var(--text-sub);
+            font-size: 1.15rem;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-icon:active { transform: scale(0.85); background: rgba(0,0,0,0.05); }
         .btn-icon.red { color: var(--danger); }
-        .btn-icon.blue { color: var(--primary); }
+        .btn-icon.blue { color: var(--primary-light); }
         .btn-icon.green { color: var(--success); }
 
-        /* Flex Utilities */
         .flex-row { display: flex; gap: 10px; align-items: center; }
-        
-        /* Modals */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; }
+
+        /* Ergonomic Bottom Sheet Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            z-index: 100;
+            align-items: flex-end;
+            justify-content: center;
+        }
         .modal.active { display: flex; }
-        .modal-content { background: var(--white); width: 95%; max-width: 550px; border-radius: 12px; padding: 20px; max-height: 90vh; overflow-y: auto; transition: all 0.3s; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        
-        /* Search Bar */
-        .search-box { background: var(--white); display: flex; align-items: center; padding: 0 15px; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 15px; }
-        .search-box input { border: none; margin: 0; padding: 10px; background: transparent; }
-        
-        /* Setor Table */
-        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        .setor-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; min-width: 450px; }
-        .setor-table th, .setor-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        .setor-table th { background: var(--primary); color: white; white-space: nowrap; }
-        .setor-table td { white-space: nowrap; }
-        
-        /* Indicators */
-        .page-indicator { display: flex; justify-content: center; gap: 5px; padding: 10px; background: var(--light); }
-        .dot { width: 8px; height: 8px; background: #cbd5e1; border-radius: 50%; transition: 0.3s; }
-        .dot.active { background: var(--primary); width: 16px; border-radius: 4px; }
+        .modal-content {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 500px;
+            border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+            padding: 22px 20px calc(24px + env(safe-area-inset-bottom));
+            max-height: 88vh;
+            overflow-y: auto;
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.2);
+            animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        .modal-handle {
+            width: 44px;
+            height: 5px;
+            background: #cbd5e1;
+            border-radius: 10px;
+            margin: -8px auto 16px auto;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .modal-header h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-        /* Manual Inputs for Laporan */
-        .laporan-input { border: none; border-bottom: 1px dashed gray; background: transparent; text-align: center; font-weight: bold; outline: none; margin: 0; padding: 2px; }
-        .laporan-input:focus { border-bottom: 1px solid var(--primary); }
+        /* Search Box */
+        .search-box {
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            padding: 4px 14px;
+            border-radius: var(--radius-md);
+            border: 1.5px solid var(--border);
+            margin-bottom: 14px;
+            box-shadow: var(--shadow-sm);
+        }
+        .search-box input { border: none; margin: 0; padding: 10px 8px; background: transparent; font-weight: 500; }
+        .search-box input:focus { box-shadow: none; }
 
-        /* Network Status UI */
+        /* Quick Increment Chip Buttons (Thumb Zone) */
+        .quick-chips {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin: 10px 0 14px 0;
+        }
+        .chip-btn {
+            background: #f1f5f9;
+            border: 1px solid var(--border);
+            padding: 8px 4px;
+            border-radius: var(--radius-md);
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--primary);
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.15s ease;
+        }
+        .chip-btn:active { background: var(--primary); color: #fff; transform: scale(0.92); }
+
+        /* Tables & Settling Sheet */
+        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: var(--radius-md); border: 1px solid var(--border); }
+        .setor-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 440px; background: #ffffff; }
+        .setor-table th, .setor-table td { border-bottom: 1px solid var(--border); padding: 10px 12px; text-align: left; }
+        .setor-table th { background: #f8fafc; color: var(--text-sub); font-weight: 700; font-size: 0.75rem; text-transform: uppercase; white-space: nowrap; }
+        .setor-table td { white-space: nowrap; font-weight: 500; }
+        .setor-table tr:last-child td { border-bottom: none; }
+
+        .laporan-input {
+            border: none;
+            border-bottom: 1.5px dashed var(--primary-light);
+            background: transparent;
+            text-align: center;
+            font-weight: 700;
+            outline: none;
+            margin: 0;
+            padding: 2px 4px;
+            color: var(--primary);
+        }
+
+        /* Floating Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 75px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--dark);
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+        /* Network Status Banner */
         .network-status {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             text-align: center;
-            padding: 8px 15px;
+            padding: 6px 12px;
             color: white;
-            font-size: 0.85rem;
-            font-weight: 600;
+            font-size: 0.78rem;
+            font-weight: 700;
             z-index: 9999;
             transform: translateY(-100%);
             transition: transform 0.3s ease-in-out;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         .network-status.offline { background-color: var(--danger); transform: translateY(0); }
         .network-status.online { background-color: var(--success); transform: translateY(0); }
+
+        /* Page Dots */
+        .page-indicator { display: flex; justify-content: center; gap: 6px; padding: 6px; background: transparent; }
+        .dot { width: 6px; height: 6px; background: #cbd5e1; border-radius: 50%; transition: 0.25s; }
+        .dot.active { background: var(--primary); width: 18px; border-radius: 4px; }
     </style>
 </head>
 <body>
 
-<!-- Offline/Online Indicator -->
+<!-- Network Status Banner -->
 <div id="network-status" class="network-status"></div>
 
+<!-- Toast Box -->
+<div id="toast" class="toast"><i class="fas fa-info-circle"></i><span id="toast-msg">Notifikasi</span></div>
+
 <div id="app">
+    <!-- Horizontal Route Pill Nav -->
+    <div class="route-tabs-wrapper" id="route-tabs"></div>
+
+    <!-- Swipe View Container -->
     <div id="swipe-container"></div>
     <div class="page-indicator" id="page-indicator"></div>
 
+    <!-- Bottom Navigation Bar -->
     <div class="bottom-nav">
-        <button class="nav-item active" onclick="goToPage(0)"><i class="fas fa-home"></i><span>Utama</span></button>
-        <button class="nav-item" onclick="openModal('modal-add-route')"><i class="fas fa-route"></i><span>+ Jalur</span></button>
-        <button class="nav-item" onclick="openModal('modal-add-warung')"><i class="fas fa-store"></i><span>+ Warung</span></button>
-        <button class="nav-item" onclick="openModal('modal-settings')"><i class="fas fa-cog"></i><span>Pengaturan</span></button>
+        <button class="nav-item active" onclick="goToPage(0)"><i class="fas fa-compass"></i><span>Utama</span></button>
+        <button class="nav-item" onclick="openModal('modal-add-route')"><i class="fas fa-map-signs"></i><span>+ Jalur</span></button>
+        <button class="nav-item" onclick="openModal('modal-add-warung')"><i class="fas fa-store-alt"></i><span>+ Warung</span></button>
+        <button class="nav-item" onclick="openModal('modal-settings')"><i class="fas fa-sliders-h"></i><span>Setelan</span></button>
     </div>
 </div>
 
-<!-- Modals -->
+<!-- ==================== MODALS / BOTTOM SHEETS ==================== -->
+
+<!-- Modal Add Route -->
 <div class="modal" id="modal-add-route" onclick="closeModalOnBackdrop(event, 'modal-add-route')">
     <div class="modal-content">
+        <div class="modal-handle"></div>
         <div class="modal-header">
-            <h3><i class="fas fa-route"></i> Tambah Jalur</h3>
+            <h3><i class="fas fa-route" style="color:var(--primary);"></i> Tambah Jalur</h3>
             <button class="btn-icon" onclick="closeModal('modal-add-route')"><i class="fas fa-times"></i></button>
         </div>
-        <input type="text" id="input-route-name" placeholder="Nama Jalur (Misal: J1)">
-        <button class="btn btn-primary" onclick="addRoute()">Simpan Jalur</button>
+        <label style="font-size:0.8rem; font-weight:600; color:var(--text-sub);">Nama Jalur Distribusi</label>
+        <input type="text" id="input-route-name" placeholder="Misal: Jalur 1 (Pasar Wage)" autocomplete="off">
+        <button class="btn btn-primary" onclick="addRoute()" style="margin-top: 10px;"><i class="fas fa-plus-circle"></i> Simpan Jalur</button>
     </div>
 </div>
 
+<!-- Modal Add Warung -->
 <div class="modal" id="modal-add-warung" onclick="closeModalOnBackdrop(event, 'modal-add-warung')">
     <div class="modal-content">
+        <div class="modal-handle"></div>
         <div class="modal-header">
-            <h3><i class="fas fa-store"></i> Tambah Warung</h3>
+            <h3><i class="fas fa-store" style="color:var(--primary);"></i> Tambah Warung</h3>
             <button class="btn-icon" onclick="closeModal('modal-add-warung')"><i class="fas fa-times"></i></button>
         </div>
+        <label style="font-size:0.8rem; font-weight:600; color:var(--text-sub);">Pilih Jalur</label>
         <select id="select-route-add">
-            <option value="">-- Pilih Jalur Dulu --</option>
+            <option value="">-- Pilih Jalur --</option>
         </select>
-        <input type="text" id="input-warung-name" placeholder="Nama Warung">
-        <div style="display: flex; gap: 8px; align-items: center; margin: 8px 0;">
-            <input type="text" id="input-warung-maps" placeholder="Klik GPS untuk ambil koordinat maps" style="margin: 0; flex: 1;" readonly>
-            <button type="button" class="btn btn-outline" style="width: auto; margin: 0; padding: 10px 14px; white-space: nowrap;" onclick="getWarungGpsLocation()"><i class="fas fa-location-arrow"></i> GPS</button>
+        
+        <label style="font-size:0.8rem; font-weight:600; color:var(--text-sub);">Nama Toko / Warung</label>
+        <input type="text" id="input-warung-name" placeholder="Misal: Toko Berkah Barokah" autocomplete="off">
+        
+        <label style="font-size:0.8rem; font-weight:600; color:var(--text-sub);">Koordinat Lokasi GPS</label>
+        <div style="display: flex; gap: 8px; align-items: center; margin: 4px 0 14px 0;">
+            <input type="text" id="input-warung-maps" placeholder="Klik GPS saat berada di warung" style="margin: 0; flex: 1;" readonly>
+            <button type="button" class="btn btn-outline" style="width: auto; margin: 0; padding: 12px 14px; white-space: nowrap;" onclick="getWarungGpsLocation()"><i class="fas fa-crosshairs text-danger" style="color:var(--danger)"></i> GPS</button>
         </div>
-        <button class="btn btn-primary" onclick="addWarung()">Simpan Warung</button>
+        
+        <button class="btn btn-primary" onclick="addWarung()"><i class="fas fa-save"></i> Daftarkan Warung</button>
     </div>
 </div>
 
+<!-- Modal Warung Quick Action (Bottom Sheet) -->
 <div class="modal" id="modal-warung-action" onclick="closeModalOnBackdrop(event, 'modal-warung-action')">
-    <div class="modal-content" style="border-top: 5px solid var(--primary); max-width: 400px;">
-        <div class="modal-header">
-            <h3 id="action-warung-title" style="color: var(--dark);">Nama Warung</h3>
+    <div class="modal-content">
+        <div class="modal-handle"></div>
+        <div class="modal-header" style="margin-bottom: 8px;">
+            <div style="overflow: hidden;">
+                <h3 id="action-warung-title" style="white-space: nowrap; text-overflow: ellipsis; overflow: hidden; display: block;">Nama Warung</h3>
+                <span id="action-warung-route" style="font-size: 0.78rem; font-weight: 600; color: var(--primary);">Jalur</span>
+            </div>
             <button class="btn-icon" onclick="closeModal('modal-warung-action')"><i class="fas fa-times"></i></button>
         </div>
-        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-            <div style="flex: 1; text-align: center; background: var(--light); padding: 10px; border-radius: 8px;">
-                <small style="color:gray; font-size: 0.75rem;">Poin Utama</small><br>
-                <strong id="action-warung-points" style="font-size: 1.3rem; color: var(--primary);">0</strong>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0;">
+            <div style="text-align: center; background: #eff6ff; padding: 10px; border-radius: var(--radius-md); border: 1px solid #bfdbfe;">
+                <span style="color: var(--primary); font-size: 0.72rem; font-weight: 700; text-transform: uppercase;">Poin Utama</span><br>
+                <strong id="action-warung-points" style="font-size: 1.4rem; color: var(--primary); font-weight: 800;">0</strong>
             </div>
-            <div style="flex: 1; text-align: center; background: var(--light); padding: 10px; border-radius: 8px;">
-                <small style="color:gray; font-size: 0.75rem;">Angka (Setor)</small><br>
-                <strong id="action-warung-setor" style="font-size: 1.3rem; color: var(--success);">0 Pcs</strong>
+            <div style="text-align: center; background: #f0fdf4; padding: 10px; border-radius: var(--radius-md); border: 1px solid #bbf7d0;">
+                <span style="color: var(--success); font-size: 0.72rem; font-weight: 700; text-transform: uppercase;">Setor (Pcs)</span><br>
+                <strong id="action-warung-setor" style="font-size: 1.4rem; color: var(--success); font-weight: 800;">0 Pcs</strong>
             </div>
         </div>
         
-        <label style="font-size: 0.85rem; font-weight: 600;">Masukkan Angka Input Poin/Pcs :</label>
-        <input type="number" id="input-action-pt" placeholder="Contoh: 10" style="font-size: 1.1rem; text-align: center;">
+        <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-sub);">Input Nominal Poin / Pcs :</label>
+        <input type="number" inputmode="numeric" id="input-action-pt" placeholder="0" style="font-size: 1.3rem; text-align: center; font-weight: 800; letter-spacing: 0.05em; padding: 8px; margin: 6px 0 2px 0;">
         
-        <div class="flex-row" style="margin-top: 10px; gap: 10px;">
-            <button class="btn btn-primary" onclick="executeAddPoints(false)" style="flex: 1; height: 45px;"><i class="fas fa-plus"></i> Tambah Poin</button>
-            <button class="btn btn-success" onclick="executeAddPoints(true)" style="flex: 1; height: 45px; background: #eab308; color: black;"><i class="fas fa-dollar-sign"></i> Tombol $</button>
+        <!-- Ergonomic Quick Chips -->
+        <div class="quick-chips">
+            <button class="chip-btn" onclick="appendInputVal(5)">+5</button>
+            <button class="chip-btn" onclick="appendInputVal(10)">+10</button>
+            <button class="chip-btn" onclick="appendInputVal(25)">+25</button>
+            <button class="chip-btn" onclick="appendInputVal(50)">+50</button>
+        </div>
+
+        <div class="flex-row" style="gap: 10px;">
+            <button class="btn btn-primary" onclick="executeAddPoints(false)" style="flex: 1; height: 48px;"><i class="fas fa-plus"></i> Tambah Poin</button>
+            <button class="btn btn-warning" onclick="executeAddPoints(true)" style="flex: 1; height: 48px; font-weight: 800;"><i class="fas fa-dollar-sign"></i> Tombol ($)</button>
         </div>
         
-        <hr style="margin: 15px 0; border: 0; border-top: 1px solid #cbd5e1;">
+        <hr style="margin: 16px 0; border: 0; border-top: 1px solid var(--border);">
         
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-            <button class="btn btn-outline" id="btn-action-maps"><i class="fas fa-map-marker-alt"></i> Edit Maps</button>
-            <button class="btn btn-outline" id="btn-action-order"><i class="fas fa-sort-numeric-up"></i> Urutan</button>
-            <button class="btn btn-outline" style="color: var(--danger); border-color: var(--danger);" id="btn-action-reset"><i class="fas fa-undo"></i> Reset Poin</button>
-            <button class="btn btn-danger" id="btn-action-delete"><i class="fas fa-trash"></i> Hapus Warung</button>
+            <button class="btn btn-outline" id="btn-action-maps"><i class="fas fa-map-pin" style="color:var(--danger)"></i> Pin GPS</button>
+            <button class="btn btn-outline" id="btn-action-order"><i class="fas fa-sort-numeric-down"></i> Atur Nomor</button>
+            <button class="btn btn-outline" style="color: var(--danger);" id="btn-action-reset"><i class="fas fa-undo"></i> Reset Poin</button>
+            <button class="btn btn-danger" id="btn-action-delete"><i class="fas fa-trash"></i> Hapus Toko</button>
         </div>
     </div>
 </div>
 
+<!-- Modal Setor & Laporan (High Contrast Slip) -->
 <div class="modal" id="modal-setor" onclick="closeModalOnBackdrop(event, 'modal-setor')">
-    <div class="modal-content">
+    <div class="modal-content" style="max-width: 540px;">
+        <div class="modal-handle"></div>
         <div class="modal-header">
-            <h3><i class="fas fa-money-bill-wave"></i> Menu Setor</h3>
+            <h3><i class="fas fa-receipt" style="color:var(--success);"></i> Rekapitulasi Setoran</h3>
             <button class="btn-icon" onclick="closeModal('modal-setor')"><i class="fas fa-times"></i></button>
         </div>
         
-        <!-- Form Input Pengeluaran Setor (Tidak ikut tercetak saat download gambar) -->
-        <div class="no-print" style="background: #f8fafc; padding: 12px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #cbd5e1;">
-            <div style="font-weight: 600; font-size: 0.85rem; margin-bottom: 6px; color: var(--dark);"><i class="fas fa-minus-circle" style="color: var(--danger);"></i> Input Pengeluaran Setor</div>
+        <!-- Input Pengeluaran Setor -->
+        <div class="no-print" style="background: #f8fafc; padding: 12px; border-radius: var(--radius-md); margin-bottom: 14px; border: 1.5px solid var(--border);">
+            <div style="font-weight: 700; font-size: 0.8rem; margin-bottom: 6px; color: var(--text-main); display:flex; align-items:center; gap:6px;">
+                <i class="fas fa-minus-circle" style="color: var(--danger);"></i> Potongan / Pengeluaran Setoran
+            </div>
             <div style="display: flex; gap: 8px; align-items: center;">
-                <input type="text" id="input-setor-expense-note" placeholder="Keterangan (Contoh: Makan)" style="margin:0; flex: 1.2; font-size: 0.85rem;">
-                <input type="number" id="input-setor-expense-amount" placeholder="Nominal (Rp)" style="margin:0; flex: 1; font-size: 0.85rem;" onfocus="checkKeteranganBeforeAmount()">
-                <button class="btn btn-danger" onclick="addSetorExpense()" style="margin:0; width: auto; padding: 10px 14px; font-size: 0.85rem; white-space: nowrap;"><i class="fas fa-plus"></i></button>
+                <input type="text" id="input-setor-expense-note" placeholder="Keterangan (misal: Bensin)" style="margin:0; flex: 1.2; font-size: 0.82rem;">
+                <input type="number" inputmode="numeric" id="input-setor-expense-amount" placeholder="Nominal (Rp)" style="margin:0; flex: 1; font-size: 0.82rem;">
+                <button class="btn btn-danger" onclick="addSetorExpense()" style="margin:0; width: auto; padding: 10px 14px; font-size: 0.85rem;"><i class="fas fa-plus"></i></button>
             </div>
         </div>
 
-        <div id="setor-capture-area" style="background: white; padding: 10px; width: 100%;">
-            <div style="text-align: center; margin-bottom: 15px;">
-                <h4 id="setor-date" style="margin-bottom: 8px; font-size: 1.1rem;">Laporan Setoran</h4>
-                <div style="display: flex; justify-content: center; align-items: center; gap: 5px; font-size: 0.9rem; margin-bottom: 5px;">
-                    <label>Nama Sales:</label>
-                    <input type="text" id="laporan-sales-name" class="laporan-input" placeholder="Ketik disini..." style="width: 150px;" onchange="updateSalesName(this.value)">
+        <div id="setor-capture-area" style="background: white; padding: 12px; width: 100%;">
+            <div style="text-align: center; margin-bottom: 12px; border-bottom: 2px solid var(--border); padding-bottom: 10px;">
+                <h4 id="setor-date" style="font-size: 1.05rem; font-weight: 800; color: var(--dark);">LAPORAN SETORAN SALES</h4>
+                <div style="display: flex; justify-content: center; align-items: center; gap: 6px; font-size: 0.85rem; margin-top: 4px;">
+                    <span style="color: var(--text-sub); font-weight: 600;">Petugas:</span>
+                    <input type="text" id="laporan-sales-name" class="laporan-input" placeholder="Isi nama..." style="width: 140px;" onchange="updateSalesName(this.value)">
                 </div>
             </div>
 
@@ -256,13 +589,13 @@
                 <table class="setor-table" id="table-setor">
                     <thead>
                         <tr>
-                            <th style="width: 5%;">No</th>
-                            <th>Warung</th>
-                            <th style="text-align:center;">Terjual</th>
-                            <th>Rp</th>
+                            <th style="width: 6%;">No</th>
+                            <th>Warung / Toko</th>
+                            <th style="text-align:center;">Laku</th>
+                            <th>Rupiah</th>
                             <th style="text-align:center;">Sisa</th>
-                            <th style="text-align:center; width: 5%;" class="no-print">
-                                <button class="btn-icon" style="color: white; padding: 0;" onclick="deleteAllSetor()" title="Hapus Semua Data Setor"><i class="fas fa-trash-alt"></i></button>
+                            <th style="text-align:center; width: 6%;" class="no-print">
+                                <button class="btn-icon" style="color: var(--danger); padding: 0;" onclick="deleteAllSetor()" title="Reset Semua Data"><i class="fas fa-trash-alt"></i></button>
                             </th>
                         </tr>
                     </thead>
@@ -270,105 +603,103 @@
                 </table>
             </div>
             
-            <div style="margin-top: 15px; border-top: 2px dashed #cbd5e1; padding-top: 10px; text-align: right; font-size: 0.95rem; line-height: 1.6;">
-                <div id="setor-terpal-info" style="display:none;">Total Terpal : <span id="setor-total-terpal" style="font-weight: 600; color: var(--bronze);">Rp0</span></div>
+            <div style="margin-top: 14px; border-top: 2px dashed #cbd5e1; padding-top: 10px; text-align: right; font-size: 0.92rem; line-height: 1.6;">
+                <div id="setor-terpal-info" style="display:none; color: var(--bronze); font-weight: 600;">Total Terpal : <span id="setor-total-terpal">Rp0</span></div>
                 
-                <!-- Tampilan Hasil Pengeluaran di Sebelah Kanan Bawah -->
-                <div id="setor-expense-section" style="display:none; margin: 8px 0; border-top: 1px dashed #cbd5e1; padding-top: 5px;">
-                    <div style="font-weight: 700; color: var(--danger); font-size: 0.9rem; text-transform: uppercase;">PENGELUARAN</div>
-                    <div id="setor-expense-list" style="font-weight: 500; font-size: 0.9rem;"></div>
+                <div id="setor-expense-section" style="display:none; margin: 6px 0; border-top: 1px dashed var(--border); padding-top: 6px;">
+                    <div style="font-weight: 700; color: var(--danger); font-size: 0.82rem; text-transform: uppercase;">Daftar Pengeluaran:</div>
+                    <div id="setor-expense-list" style="font-weight: 600; font-size: 0.85rem;"></div>
                 </div>
 
-                <div>Total Setor : <span id="setor-grand-total" style="font-weight: 700; font-size: 1.1rem; color: var(--dark);">Rp0</span></div>
-                <div>Total Terjual : <span id="setor-total-terjual" style="font-weight: 700; color: var(--primary);">0 Pcs</span></div>
-                <div>Total Sisa : <span id="setor-total-sisa" style="font-weight: 700; color: var(--danger);">0 Pcs</span></div>
+                <div style="margin-top: 6px; font-size: 1.12rem;">Total Setor Bersih: <span id="setor-grand-total" style="font-weight: 800; color: var(--success-dark);">Rp0</span></div>
+                <div>Total Barang Terjual: <span id="setor-total-terjual" style="font-weight: 800; color: var(--primary);">0 Pcs</span></div>
+                <div>Estimasi Total Sisa: <span id="setor-total-sisa" style="font-weight: 700; color: var(--danger);">0 Pcs</span></div>
             </div>
         </div>
         
-        <div class="flex-row" style="margin-top: 15px; gap: 8px;">
-            <button class="btn btn-success" style="margin:0; flex: 1;" onclick="selesaikanSetor()"><i class="fas fa-image"></i> Simpan JPG</button>
-            <button class="btn" style="margin:0; flex: 1; background: #16a34a; color: white;" onclick="exportToExcel()"><i class="fas fa-file-excel"></i> Simpan Excel</button>
+        <div class="flex-row" style="margin-top: 16px; gap: 8px;">
+            <button class="btn btn-success" style="margin:0; flex: 1;" onclick="selesaikanSetor()"><i class="fas fa-camera"></i> Simpan JPG</button>
+            <button class="btn" style="margin:0; flex: 1; background: #15803d; color: white;" onclick="exportToExcel()"><i class="fas fa-file-excel"></i> Excel</button>
         </div>
     </div>
 </div>
 
+<!-- Modal Keuangan Harian -->
 <div class="modal" id="modal-keuangan" onclick="closeModalOnBackdrop(event, 'modal-keuangan')">
-    <div class="modal-content" style="max-width: 550px;">
+    <div class="modal-content" style="max-width: 520px;">
+        <div class="modal-handle"></div>
         <div class="modal-header">
-            <h3><i class="fas fa-wallet"></i> Menu Keuangan</h3>
+            <h3><i class="fas fa-wallet" style="color:var(--purple);"></i> Kas & Komisi Sales</h3>
             <button class="btn-icon" onclick="closeModal('modal-keuangan')"><i class="fas fa-times"></i></button>
         </div>
         
-        <div style="background: var(--light); padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9rem;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                <span>Total Barang Terjual:</span>
+        <div style="background: #faf5ff; border: 1.5px solid #e9d5ff; padding: 14px; border-radius: var(--radius-md); margin-bottom: 14px; font-size: 0.88rem;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                <span style="color:var(--text-sub);">Terjual Hari Ini:</span>
                 <strong id="keq-total-terjual">0 Pcs</strong>
             </div>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                <span>Keuntungan Sales (<span id="keq-conv-label">300</span>/Pcs):</span>
-                <strong id="keq-total-profit" style="color: var(--success);">Rp0</strong>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                <span style="color:var(--text-sub);">Komisi (<span id="keq-conv-label">300</span>/Pcs):</span>
+                <strong id="keq-total-profit" style="color: var(--success); font-weight: 700;">Rp0</strong>
             </div>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                <span>Saldo / Sisa Sebelumnya:</span>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                <span style="color:var(--text-sub);">Saldo Kas Sebelumnya:</span>
                 <strong id="keq-saldo-awal">Rp0</strong>
             </div>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                <span>Total Pengeluaran:</span>
-                <strong id="keq-total-expense" style="color: var(--danger);">Rp0</strong>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                <span style="color:var(--text-sub);">Pengeluaran Kas:</span>
+                <strong id="keq-total-expense" style="color: var(--danger); font-weight: 700;">Rp0</strong>
             </div>
-            <hr style="margin: 8px 0; border: 0; border-top: 1px solid #cbd5e1;">
+            <hr style="margin: 8px 0; border: 0; border-top: 1.5px dashed #d8b4fe;">
             <div style="display: flex; justify-content: space-between; font-size: 1.05rem;">
-                <span><strong>Sisa Saldo / Pendapatan Bersih:</strong></span>
-                <strong id="keq-sisa-saldo" style="color: var(--primary);">Rp0</strong>
+                <span style="font-weight: 700;">Sisa Saldo Kas Bersih:</span>
+                <strong id="keq-sisa-saldo" style="color: var(--purple); font-weight: 800;">Rp0</strong>
             </div>
         </div>
 
-        <h4 style="font-size: 0.95rem; margin-bottom: 8px;"><i class="fas fa-minus-circle"></i> Tambah Pengeluaran</h4>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
-            <select id="input-expense-category">
+        <h4 style="font-size: 0.9rem; font-weight:700; margin-bottom: 6px;"><i class="fas fa-cart-arrow-down" style="color:var(--danger)"></i> Tambah Biaya Lapangan</h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 6px;">
+            <select id="input-expense-category" style="margin:0;">
+                <option value="Bensin">Bensin</option>
                 <option value="Makan">Makan</option>
                 <option value="Minum">Minum</option>
                 <option value="Rokok">Rokok</option>
-                <option value="Bensin">Bensin</option>
-                <option value="Pokok">Pokok</option>
-                <option value="Obat">Obat</option>
+                <option value="Parkir">Parkir / Tol</option>
+                <option value="Obat">Kesehatan / Obat</option>
                 <option value="Takterduga">Takterduga</option>
-                <option value="Serba-serbi">Serba-serbi</option>
             </select>
-            <input type="number" id="input-expense-amount" placeholder="Nominal (Rp)" style="margin:0;">
+            <input type="number" inputmode="numeric" id="input-expense-amount" placeholder="Nominal Rp" style="margin:0;">
         </div>
-        <input type="text" id="input-expense-note" placeholder="Keterangan tambahan (Opsional)" style="margin-top:0; margin-bottom: 8px;">
-        <button class="btn btn-danger" onclick="addExpense()" style="margin-top:0; margin-bottom: 15px;"><i class="fas fa-plus"></i> Tambah Pengeluaran</button>
+        <input type="text" id="input-expense-note" placeholder="Catatan tambahan (Opsional)" style="margin: 6px 0 10px 0;">
+        <button class="btn btn-outline" onclick="addExpense()" style="margin-bottom: 14px; border-color: var(--danger); color: var(--danger);"><i class="fas fa-plus"></i> Catat Pengeluaran</button>
 
-        <h4 style="font-size: 0.95rem; margin-bottom: 8px;"><i class="fas fa-list"></i> Daftar Pengeluaran Hari Ini</h4>
-        <div class="table-responsive" style="max-height: 150px; overflow-y: auto; margin-bottom: 15px;">
+        <h4 style="font-size: 0.85rem; font-weight: 700; margin-bottom: 6px;"><i class="fas fa-list-ul"></i> Catatan Biaya Hari Ini</h4>
+        <div class="table-responsive" style="max-height: 140px; overflow-y: auto; margin-bottom: 14px;">
             <table class="setor-table">
                 <thead>
                     <tr>
-                        <th>Kategori</th>
+                        <th>Pos</th>
                         <th>Keterangan</th>
                         <th>Nominal</th>
-                        <th style="width: 40px; text-align:center;">Aksi</th>
+                        <th style="width: 35px; text-align:center;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody id="expense-tbody"></tbody>
             </table>
         </div>
 
-        <div class="flex-row" style="gap: 10px; margin-bottom: 15px;">
-            <button class="btn btn-success" onclick="finishDailyActivity()" style="flex: 1; background: var(--success);"><i class="fas fa-check-circle"></i> Selesai (Simpan Aktivitas Hari Ini)</button>
-        </div>
+        <button class="btn btn-success" onclick="finishDailyActivity()" style="margin-bottom: 14px;"><i class="fas fa-calendar-check"></i> Selesai & Tutup Kas Harian</button>
 
-        <h4 style="font-size: 0.95rem; margin-bottom: 8px; border-top: 1px solid #eee; padding-top: 15px;"><i class="fas fa-history"></i> Riwayat Keuangan Selesai</h4>
-        <div class="table-responsive" style="max-height: 180px; overflow-y: auto;">
+        <h4 style="font-size: 0.85rem; font-weight: 700; margin-bottom: 6px; border-top: 1px solid var(--border); padding-top: 12px;"><i class="fas fa-history"></i> Rekam Jejak Kas</h4>
+        <div class="table-responsive" style="max-height: 150px; overflow-y: auto;">
             <table class="setor-table">
                 <thead>
                     <tr>
                         <th>Tanggal</th>
-                        <th>Keuntungan</th>
-                        <th>Pengeluaran</th>
+                        <th>Komisi</th>
+                        <th>Biaya</th>
                         <th>Saldo Akhir</th>
-                        <th style="width: 40px; text-align:center;">Aksi</th>
+                        <th style="width: 35px; text-align:center;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody id="history-tbody"></tbody>
@@ -377,44 +708,47 @@
     </div>
 </div>
 
+<!-- Modal Settings -->
 <div class="modal" id="modal-settings" onclick="closeModalOnBackdrop(event, 'modal-settings')">
-    <div class="modal-content" style="max-width: 400px;">
+    <div class="modal-content" style="max-width: 420px;">
+        <div class="modal-handle"></div>
         <div class="modal-header">
-            <h3><i class="fas fa-cog"></i> Pengaturan</h3>
+            <h3><i class="fas fa-cog" style="color:var(--text-sub);"></i> Setelan Aplikasi</h3>
             <button class="btn-icon" onclick="closeModal('modal-settings')"><i class="fas fa-times"></i></button>
         </div>
         
-        <h4 style="margin-bottom: 5px; font-size: 0.95rem;"><i class="fas fa-user-tie"></i> Profil</h4>
-        <label>Nama Sales</label>
-        <input type="text" id="input-setting-sales" placeholder="Masukkan Nama Sales" oninput="checkAdminAccess(this.value)">
+        <label style="font-size:0.8rem; font-weight:600; color:var(--text-sub);">Nama Profil Sales</label>
+        <input type="text" id="input-setting-sales" placeholder="Ketik nama Anda (Ketik 'admin' untuk akses penuh)" oninput="checkAdminAccess(this.value)">
         
-        <div id="admin-settings-section" style="display: none;">
-            <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
+        <div id="admin-settings-section" style="display: none; background: #f8fafc; padding: 12px; border-radius: var(--radius-md); border: 1.5px solid #cbd5e1; margin-top: 10px;">
+            <div style="font-size: 0.82rem; font-weight: 800; color: var(--danger); margin-bottom: 8px;"><i class="fas fa-shield-alt"></i> MODE PENGATURAN ADMIN</div>
             
-            <h4 style="margin-bottom: 5px; font-size: 0.95rem;"><i class="fas fa-calculator"></i> Konversi</h4>
-            <label>Nilai Konversi Utama (1 Poin = Rp)</label>
+            <label style="font-size:0.75rem; font-weight:600;">Nilai Poin Utama (1 Poin = Rp)</label>
             <input type="number" id="input-conv-main" placeholder="30">
-            <label>Nilai Konversi Setor (1 Pcs = Rp)</label>
+            
+            <label style="font-size:0.75rem; font-weight:600;">Nilai Setor (1 Pcs = Rp)</label>
             <input type="number" id="input-conv-setor" placeholder="1200">
-            <label>Nilai Konversi Terpal (1 Terpal = Pcs)</label>
-            <input type="number" id="input-conv-terpal" placeholder="Contoh: 50">
-            <label>Nilai Konversi Keuntungan Sales (1 Pcs = Rp)</label>
-            <input type="number" id="input-conv-profit" placeholder="Contoh: 300">
             
-            <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
-            <h4 style="margin-bottom: 5px; font-size: 0.95rem;"><i class="fas fa-edit"></i> Fitur Menu Setor</h4>
-            <label style="display: flex; align-items: center; gap: 8px; margin: 10px 0; cursor: pointer; font-size: 0.9rem; font-weight: normal;">
-                <input type="checkbox" id="input-allow-manual-setor" style="width: auto; margin: 0; transform: scale(1.2);">
-                <span>Aktifkan Edit Nominal Manual di Kolom Terjual Setor</span>
+            <label style="font-size:0.75rem; font-weight:600;">Kapasitas Terpal (1 Terpal = Pcs)</label>
+            <input type="number" id="input-conv-terpal" placeholder="50">
+            
+            <label style="font-size:0.75rem; font-weight:600;">Komisi Sales (1 Pcs = Rp)</label>
+            <input type="number" id="input-conv-profit" placeholder="300">
+            
+            <label style="display: flex; align-items: center; gap: 8px; margin: 10px 0; cursor: pointer; font-size: 0.82rem; font-weight: 600;">
+                <input type="checkbox" id="input-allow-manual-setor" style="width: auto; margin: 0; transform: scale(1.15);">
+                <span>Izinkan Edit Nilai Laku Langsung di Tabel Setor</span>
             </label>
+        </div>
 
-            <button class="btn btn-primary" style="margin-top: 15px;" onclick="saveSettings()">Simpan Pengaturan</button>
-            
-            <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
-            <h4 style="margin-bottom: 10px; font-size: 0.95rem;"><i class="fas fa-database"></i> Data Aplikasi</h4>
-            <button class="btn btn-success" onclick="backupData()"><i class="fas fa-download"></i> Pencadangan (Backup)</button>
-            <label for="restore-file" class="btn btn-outline" style="text-align: center; display: block; margin-top: 10px; cursor: pointer;">
-                <i class="fas fa-upload"></i> Pemulihan (Restore)
+        <button class="btn btn-primary" style="margin-top: 14px;" onclick="saveSettings()"><i class="fas fa-check-circle"></i> Terapkan Pengaturan</button>
+        
+        <hr style="margin: 18px 0; border: 0; border-top: 1px solid var(--border);">
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <button class="btn btn-outline" onclick="backupData()"><i class="fas fa-file-download"></i> Backup Data</button>
+            <label for="restore-file" class="btn btn-outline" style="text-align: center; cursor: pointer; margin:0;">
+                <i class="fas fa-file-upload"></i> Restore
             </label>
             <input type="file" id="restore-file" style="display: none;" accept=".json" onchange="restoreData(event)">
         </div>
@@ -423,53 +757,112 @@
 
 <script>
     // --- STATE MANAGEMENT ---
-    let state = JSON.parse(localStorage.getItem('warungApp')) || { 
-        mainConversion: 30, 
-        setorConversion: 1200, 
-        terpalConversion: 50, 
+    const DEFAULT_STATE = {
+        mainConversion: 30,
+        setorConversion: 1200,
+        terpalConversion: 50,
         profitConversion: 300,
         allowManualSetorEdit: false,
         saldo: 0,
         expenses: [],
         setorExpenses: [],
         history: [],
-        routes: [], 
-        salesName: "" 
+        routes: [],
+        salesName: ""
     };
-    
-    if(state.salesName === undefined) state.salesName = ""; 
-    if(state.terpalConversion === undefined) state.terpalConversion = 50; 
-    if(state.profitConversion === undefined) state.profitConversion = 300;
-    if(state.allowManualSetorEdit === undefined) state.allowManualSetorEdit = false;
-    if(state.saldo === undefined) state.saldo = 0;
-    if(state.expenses === undefined) state.expenses = [];
-    if(state.setorExpenses === undefined) state.setorExpenses = [];
-    if(state.history === undefined) state.history = [];
 
-    let currentPage = 0; let activeRouteId = null; let activeWarungId = null;
-    
-    state.routes.forEach(r => {
-        if(!r.warungs) r.warungs = [];
-        r.warungs.forEach(w => { if(w.setorPoints === undefined) w.setorPoints = 0; });
-    });
-    
-    function saveData() { localStorage.setItem('warungApp', JSON.stringify(state)); renderApp(); }
-    function formatRp(angka) { return "Rp" + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
-    function formatNumberOnly(angka) { return angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
-    function openMapsLink(event, url) { event.stopPropagation(); if (url && url.trim() !== "") window.open(url.trim(), '_blank'); }
-    
+    let state = loadInitialState();
+    let currentPage = 0;
+    let activeRouteId = null;
+    let activeWarungId = null;
+
+    function loadInitialState() {
+        try {
+            const raw = localStorage.getItem('warungApp');
+            if (!raw) return DEFAULT_STATE;
+            const parsed = JSON.parse(raw);
+            return { ...DEFAULT_STATE, ...parsed };
+        } catch (e) {
+            console.error("Gagal membaca LocalStorage, memuat default state:", e);
+            return DEFAULT_STATE;
+        }
+    }
+
+    function saveData() {
+        try {
+            localStorage.setItem('warungApp', JSON.stringify(state));
+            renderApp();
+        } catch (err) {
+            showToast("Memori lokal penuh atau gagal disimpan!", "danger");
+        }
+    }
+
+    // --- UTILITIES & ERGONOMICS ---
+    function formatRp(angka) {
+        return "Rp" + (angka || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    function formatNumberOnly(angka) {
+        return (angka || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    function triggerHaptic(ms = 15) {
+        if ('vibrate' in navigator) navigator.vibrate(ms);
+    }
+
+    function showToast(message, type = 'info') {
+        const toast = document.getElementById('toast');
+        const toastMsg = document.getElementById('toast-msg');
+        toastMsg.innerText = message;
+        toast.className = 'toast show';
+        setTimeout(() => { toast.classList.remove('show'); }, 2500);
+    }
+
+    function openMapsLink(event, url) {
+        event.stopPropagation();
+        triggerHaptic();
+        if (url && url.trim() !== "") {
+            window.open(url.trim(), '_blank');
+        } else {
+            showToast("Titik koordinat belum ditandai!");
+        }
+    }
+
     function updateSalesName(val) {
-        state.salesName = val;
+        state.salesName = val.trim();
         saveData();
     }
 
-    // --- RENDER LOGIC ---
+    function appendInputVal(val) {
+        triggerHaptic(20);
+        const input = document.getElementById('input-action-pt');
+        const cur = parseInt(input.value) || 0;
+        input.value = cur + val;
+    }
+
+    // --- RENDER APP & ROUTE TABS ---
     function renderApp() {
+        renderRouteTabs();
         const container = document.getElementById('swipe-container');
-        container.innerHTML = ''; 
+        container.innerHTML = '';
         renderMainPage(container);
         state.routes.forEach((route, index) => renderRoutePage(container, route, index + 1));
-        updateRouteDropdowns(); updateIndicators(); goToPage(currentPage);
+        updateRouteDropdowns();
+        updateIndicators();
+        goToPage(currentPage);
+    }
+
+    function renderRouteTabs() {
+        const wrapper = document.getElementById('route-tabs');
+        let html = `<button class="route-tab-pill ${currentPage === 0 ? 'active' : ''}" onclick="goToPage(0)"><i class="fas fa-home"></i> Beranda</button>`;
+        state.routes.forEach((r, idx) => {
+            html += `<button class="route-tab-pill ${currentPage === (idx + 1) ? 'active' : ''}" onclick="goToPage(${idx + 1})">${r.name}</button>`;
+        });
+        wrapper.innerHTML = html;
+        
+        // Auto-scroll pill into view
+        const activePill = wrapper.querySelector('.route-tab-pill.active');
+        if (activePill) activePill.scrollIntoView({ behavior: 'smooth', inline: 'center' });
     }
 
     function renderMainPage(container) {
@@ -477,56 +870,80 @@
         let allWarungs = [];
         state.routes.forEach(r => {
             totalWarung += r.warungs.length;
-            r.warungs.forEach(w => { totalPoin += w.points; allWarungs.push({ routeName: r.name, ...w }); });
+            r.warungs.forEach(w => {
+                totalPoin += (w.points || 0);
+                allWarungs.push({ routeName: r.name, routeId: r.id, ...w });
+            });
         });
         let totalRp = totalPoin * state.mainConversion;
 
         allWarungs.sort((a, b) => b.points - a.points);
         let top5 = allWarungs.slice(0, 5);
         let top5Html = top5.map((w, i) => {
-            let badgeColor = '#e2e8f0'; let textColor = 'var(--text)';
-            if(i === 0) { badgeColor = 'var(--gold)'; textColor = 'white'; }
-            else if(i === 1) { badgeColor = 'var(--silver)'; textColor = 'white'; }
-            else if(i === 2) { badgeColor = 'var(--bronze)'; textColor = 'white'; }
-            
+            let badgeBg = '#f1f5f9';
+            let badgeColor = 'var(--text-sub)';
+            if (i === 0) { badgeBg = 'var(--gold)'; badgeColor = '#ffffff'; }
+            else if (i === 1) { badgeBg = 'var(--silver)'; badgeColor = '#ffffff'; }
+            else if (i === 2) { badgeBg = 'var(--bronze)'; badgeColor = '#ffffff'; }
+
             return `
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9;">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9;" onclick="openWarungActionModal('${w.routeId}', '${w.id}')">
                     <div style="display: flex; align-items: center; gap: 10px;">
-                        <span class="badge" style="background: ${badgeColor}; color: ${textColor}; min-width: 25px; text-align: center; border-radius: 5px;">#${i+1}</span>
-                        <div><span style="font-weight: 600; display: block; line-height: 1.2;">${w.name}</span><small style="color: gray; font-size: 0.75rem;">Jalur: ${w.routeName}</small></div>
+                        <span class="badge" style="background: ${badgeBg}; color: ${badgeColor}; min-width: 26px; height: 26px; display:flex; align-items:center; justify-content:center; border-radius: 8px;">#${i+1}</span>
+                        <div>
+                            <span style="font-weight: 700; color: var(--text-main); line-height: 1.2;">${w.name}</span>
+                            <small style="color: var(--text-sub); font-size: 0.72rem; display:block;">Jalur: ${w.routeName}</small>
+                        </div>
                     </div>
-                    <div style="font-weight: 700; color: var(--primary); font-size: 1rem;">${w.points} <span style="font-size: 0.7rem; font-weight: normal; color: gray;">Pts</span></div>
+                    <div style="font-weight: 800; color: var(--primary); font-size: 1.05rem;">
+                        ${w.points} <span style="font-size: 0.7rem; font-weight: 500; color: var(--text-sub);">Pts</span>
+                    </div>
                 </div>`;
         }).join('');
-        if(top5.length === 0) top5Html = '<p style="font-size:0.8rem; color:gray; text-align:center; padding: 10px;">Belum ada data warung.</p>';
 
-        const div = document.createElement('div'); div.className = 'page';
+        if (top5.length === 0) {
+            top5Html = '<p style="font-size:0.82rem; color:var(--text-sub); text-align:center; padding: 14px;">Belum ada warung terdata.</p>';
+        }
+
+        const div = document.createElement('div');
+        div.className = 'page';
         div.innerHTML = `
             <div class="header">
-                <div class="header-title" style="align-items: flex-start;">
+                <div class="header-title">
                     <div>
-                        <span style="display: block;"><i class="fas fa-chart-pie"></i> MABIRH POIN</span>
-                        <span style="font-size: 0.75rem; font-weight: normal; color: #e2e8f0;"><i class="fas fa-user-tie"></i> Sales: ${state.salesName ? state.salesName : '-'}</span>
+                        <span style="display: flex; align-items: center; gap: 6px;"><i class="fas fa-layer-group"></i> MABIRH POIN</span>
+                        <span style="font-size: 0.75rem; font-weight: 500; opacity: 0.85;"><i class="fas fa-user-circle"></i> Sales: ${state.salesName || '-'}</span>
                     </div>
-                    <div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-end;">
-                        <button class="btn btn-success" style="width: auto; padding: 5px 10px; font-size: 0.8rem; margin:0;" onclick="openSetorModal()"><i class="fas fa-cash-register"></i> Menu Setor</button>
-                        <button class="btn" style="width: auto; padding: 5px 10px; font-size: 0.8rem; margin:0; background: var(--purple); color: white;" onclick="openKeuanganModal()"><i class="fas fa-wallet"></i> Menu Keuangan</button>
+                    <div style="display: flex; gap: 6px;">
+                        <button class="btn btn-success" style="width: auto; padding: 7px 12px; font-size: 0.8rem; margin:0;" onclick="openSetorModal()"><i class="fas fa-cash-register"></i> Setor</button>
+                        <button class="btn" style="width: auto; padding: 7px 12px; font-size: 0.8rem; margin:0; background: var(--purple); color: white;" onclick="openKeuanganModal()"><i class="fas fa-wallet"></i> Kas</button>
                     </div>
                 </div>
-                <div class="header-stats" style="margin-top: 15px;">
-                    <div class="stat-item">Warung<span>${totalWarung}</span></div><div class="stat-item">Poin<span>${totalPoin}</span></div><div class="stat-item">Total Rp<span>${formatRp(totalRp)}</span></div>
+                <div class="header-stats">
+                    <div class="stat-item"><span class="stat-label">Warung</span><span class="stat-value">${totalWarung}</span></div>
+                    <div class="stat-item"><span class="stat-label">Poin</span><span class="stat-value">${formatNumberOnly(totalPoin)}</span></div>
+                    <div class="stat-item"><span class="stat-label">Omset</span><span class="stat-value">${formatRp(totalRp)}</span></div>
                 </div>
             </div>
             <div class="container">
                 <div class="search-box">
-                    <i class="fas fa-search" style="color: #94a3b8;"></i>
-                    <select id="main-search-route" style="border:none; width:40%; background:transparent; font-size:0.8rem;" onchange="updateMainWarungSearch()"><option value="">Pilih Jalur</option>${state.routes.map(r => `<option value="${r.id}">${r.name}</option>`).join('')}</select>
-                    <select id="main-search-warung" style="border:none; width:50%; background:transparent; font-size:0.8rem;" onchange="executeMainSearch()"><option value="">Pilih Warung</option></select>
+                    <i class="fas fa-search" style="color: #94a3b8; font-size: 0.9rem;"></i>
+                    <select id="main-search-route" style="border:none; width:40%; background:transparent; font-size:0.82rem; font-weight:600;" onchange="updateMainWarungSearch()">
+                        <option value="">Semua Jalur</option>
+                        ${state.routes.map(r => `<option value="${r.id}">${r.name}</option>`).join('')}
+                    </select>
+                    <select id="main-search-warung" style="border:none; width:55%; background:transparent; font-size:0.82rem; font-weight:600;" onchange="executeMainSearch()">
+                        <option value="">Pilih Warung Cepat</option>
+                    </select>
                 </div>
                 <div id="main-search-result"></div>
-                <div class="card" style="margin-top: 15px;">
-                    <div class="card-header" style="margin-bottom: 5px;"><h3 style="font-size: 1rem; color: var(--dark); display: flex; align-items: center; gap: 8px;"><i class="fas fa-trophy" style="color: var(--gold);"></i> Top 5 Poin Terbanyak</h3></div>
-                    <div id="top-5-warung">${top5Html}</div>
+                <div class="card" style="margin-top: 10px;">
+                    <div class="card-header" style="margin-bottom: 6px;">
+                        <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-trophy" style="color: var(--gold);"></i> 5 Poin Tertinggi
+                        </h3>
+                    </div>
+                    <div>${top5Html}</div>
                 </div>
             </div>`;
         container.appendChild(div);
@@ -534,35 +951,49 @@
 
     function renderRoutePage(container, route, pageIndex) {
         route.warungs.sort((a, b) => a.order - b.order);
-        let rWarung = route.warungs.length; let rPoin = route.warungs.reduce((sum, w) => sum + w.points, 0); let rRp = rPoin * state.mainConversion;
-        const div = document.createElement('div'); div.className = 'page';
+        let rWarung = route.warungs.length;
+        let rPoin = route.warungs.reduce((sum, w) => sum + (w.points || 0), 0);
+        let rRp = rPoin * state.mainConversion;
+
+        const div = document.createElement('div');
+        div.className = 'page';
         div.innerHTML = `
-            <div class="header" style="background: var(--secondary);">
+            <div class="header" style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);">
                 <div class="header-title">
-                    <span><i class="fas fa-route"></i> Jalur: ${route.name}</span>
+                    <span style="font-size: 1.05rem;"><i class="fas fa-route"></i> ${route.name}</span>
                     <div style="display: flex; gap: 4px; align-items: center;">
-                        <button class="btn-icon" onclick="toggleSelectAllRoute('${route.id}')" title="Pilih Semua Warung" style="color:white; font-size:0.95rem;"><i class="fas fa-check-double"></i></button>
-                        <button class="btn-icon" onclick="editRouteName('${route.id}')" style="color:white;"><i class="fas fa-edit"></i></button>
+                        <button class="btn-icon" onclick="toggleSelectAllRoute('${route.id}')" title="Centang Semua" style="color:white; font-size:1.05rem;"><i class="fas fa-check-double"></i></button>
+                        <button class="btn-icon" onclick="editRouteName('${route.id}')" style="color:white; font-size:1.05rem;"><i class="fas fa-pen"></i></button>
                     </div>
                 </div>
-                <div class="header-stats"><div class="stat-item">Warung<span>${rWarung}</span></div><div class="stat-item">Poin<span>${rPoin}</span></div><div class="stat-item">Total Rp<span>${formatRp(rRp)}</span></div></div>
+                <div class="header-stats">
+                    <div class="stat-item"><span class="stat-label">Warung</span><span class="stat-value">${rWarung}</span></div>
+                    <div class="stat-item"><span class="stat-label">Poin</span><span class="stat-value">${formatNumberOnly(rPoin)}</span></div>
+                    <div class="stat-item"><span class="stat-label">Nilai</span><span class="stat-value">${formatRp(rRp)}</span></div>
+                </div>
             </div>
             <div class="container" style="padding-bottom: 120px;">
-                <div class="search-box"><i class="fas fa-search" style="color: #94a3b8;"></i><input type="text" placeholder="Cari nama warung..." onkeyup="filterRouteWarung('${route.id}', this.value)"></div>
-                <div id="list-warung-${route.id}">${route.warungs.map((w, index) => generateWarungCard(route.id, w, index)).join('')}</div>
+                <div class="search-box">
+                    <i class="fas fa-search" style="color: #94a3b8;"></i>
+                    <input type="text" placeholder="Ketik nama warung..." onkeyup="filterRouteWarung('${route.id}', this.value)">
+                </div>
+                <div id="list-warung-${route.id}">
+                    ${route.warungs.map((w, index) => generateWarungCard(route.id, w, index)).join('')}
+                </div>
             </div>
-            <!-- Floating Action Bar untuk Pindah Jalur Massal -->
-            <div id="bulk-action-bar-${route.id}" style="display: none; position: fixed; bottom: 65px; left: 10px; right: 10px; background: white; padding: 12px 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 25; border: 1px solid var(--primary);">
+            
+            <!-- Bulk Action Bar -->
+            <div id="bulk-action-bar-${route.id}" style="display: none; position: fixed; bottom: 70px; left: 12px; right: 12px; background: white; padding: 12px 14px; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); z-index: 25; border: 1.5px solid var(--primary);">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <span id="selected-count-${route.id}" style="font-weight: 600; font-size: 0.85rem; color: var(--primary);">0 warung dipilih</span>
-                    <button class="btn-icon" onclick="clearRouteSelection('${route.id}')" style="font-size: 0.9rem; color: var(--danger);"><i class="fas fa-times"></i> Batal</button>
+                    <span id="selected-count-${route.id}" style="font-weight: 700; font-size: 0.85rem; color: var(--primary);">0 warung ditandai</span>
+                    <button class="btn-icon" onclick="clearRouteSelection('${route.id}')" style="font-size: 0.85rem; color: var(--danger); font-weight:700;"><i class="fas fa-times"></i> Batal</button>
                 </div>
                 <div style="display: flex; gap: 8px; align-items: center;">
                     <select id="target-route-${route.id}" style="margin: 0; font-size: 0.85rem; flex: 1;">
                         <option value="">-- Pindah ke Jalur --</option>
                         ${state.routes.map(r => `<option value="${r.id}">${r.name}</option>`).join('')}
                     </select>
-                    <button class="btn btn-primary" onclick="executeBulkMove('${route.id}')" style="margin: 0; width: auto; padding: 10px 14px; font-size: 0.85rem; white-space: nowrap;"><i class="fas fa-exchange-alt"></i> Pindahkan</button>
+                    <button class="btn btn-primary" onclick="executeBulkMove('${route.id}')" style="margin: 0; width: auto; padding: 10px 14px; font-size: 0.85rem; white-space: nowrap;"><i class="fas fa-truck-moving"></i> Pindahkan</button>
                 </div>
             </div>`;
         container.appendChild(div);
@@ -570,34 +1001,40 @@
 
     function generateWarungCard(routeId, w, index) {
         if (w.setorPoints === undefined) w.setorPoints = 0;
-        const totalRpUtama = w.points * state.mainConversion;
-        const mapsButton = w.maps && w.maps.trim() !== "" 
-            ? `<button class="btn-icon" onclick="openMapsLink(event, '${w.maps}')" style="color: #ef4444; padding: 0 4px; font-size: 1.1rem; display: inline-flex; align-items: center;" title="Buka Maps"><i class="fas fa-map-marker-alt"></i></button>`
-            : `<button class="btn-icon" style="color: #cbd5e1; padding: 0 4px; font-size: 1.1rem; cursor: not-allowed; display: inline-flex; align-items: center;" disabled><i class="fas fa-map-marker-alt"></i></button>`;
+        const totalRpUtama = (w.points || 0) * state.mainConversion;
         
-        const renameBtn = `<button class="btn-icon" onclick="event.stopPropagation(); renameWarung('${routeId}', '${w.id}')" style="color: #3b82f6; padding: 0 4px; font-size: 0.95rem; display: inline-flex; align-items: center;" title="Edit Nama Warung"><i class="fas fa-pencil-alt"></i></button>`;
+        const mapsButton = w.maps && w.maps.trim() !== "" 
+            ? `<button class="btn-icon red" onclick="openMapsLink(event, '${w.maps}')" title="Buka Google Maps"><i class="fas fa-map-marked-alt"></i></button>`
+            : `<button class="btn-icon" style="color: #cbd5e1; cursor: not-allowed;" disabled><i class="fas fa-map-marker-alt"></i></button>`;
+        
+        const renameBtn = `<button class="btn-icon blue" onclick="event.stopPropagation(); renameWarung('${routeId}', '${w.id}')" title="Ubah Nama"><i class="fas fa-pen-square"></i></button>`;
 
         return `
-            <div class="card warung-item" data-name="${w.name.toLowerCase()}" onclick="openWarungActionModal('${routeId}', '${w.id}')" style="cursor: pointer;">
-                <div class="card-header" style="border-bottom:none; margin-bottom:0; padding-bottom:0;">
+            <div class="card warung-item" data-name="${w.name.toLowerCase()}" onclick="openWarungActionModal('${routeId}', '${w.id}')">
+                <div class="card-header">
                     <div class="card-title" style="flex: 1;">
-                        <input type="checkbox" class="warung-checkbox-${routeId}" data-route-id="${routeId}" data-warung-id="${w.id}" onclick="event.stopPropagation()" onchange="handleWarungSelection('${routeId}')" style="width: auto; margin-right: 6px; transform: scale(1.2); cursor: pointer; accent-color: var(--primary);">
+                        <input type="checkbox" class="warung-checkbox-${routeId}" data-route-id="${routeId}" data-warung-id="${w.id}" onclick="event.stopPropagation()" onchange="handleWarungSelection('${routeId}')" style="width: 18px; height: 18px; margin-right: 6px; cursor: pointer; accent-color: var(--primary);">
                         <span class="badge">${index + 1}</span> 
-                        <span style="word-break: break-word;">${w.name}</span> 
+                        <span style="font-weight:700;">${w.name}</span> 
                         ${renameBtn} 
                         ${mapsButton} 
-                        <span style="font-size: 0.75rem; color: var(--text); font-weight: 500;">(${formatRp(totalRpUtama)})</span>
                     </div>
-                    <i class="fas fa-chevron-right" style="color: #cbd5e1; font-size: 0.85rem; margin-left: 10px;"></i>
+                    <span style="font-size: 0.8rem; color: var(--text-sub); font-weight: 700;">${formatRp(totalRpUtama)}</span>
                 </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; background: #f8fafc; padding: 6px 12px; border-radius: 8px;">
-                    <div><span style="font-size: 0.7rem; color: gray; display:block;">Poin Utama</span><strong style="font-size: 1rem; color: var(--primary);">${w.points}</strong></div>
-                    <div><span style="font-size: 0.7rem; color: gray; display:block;">Angka Setor</span><strong style="font-size: 1rem; color: var(--success);">${w.setorPoints} Pcs</strong></div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; background: #f8fafc; padding: 8px 12px; border-radius: var(--radius-md); border: 1px solid var(--border);">
+                    <div>
+                        <span style="font-size: 0.7rem; color: var(--text-sub); font-weight:600; text-transform:uppercase;">Poin Utama</span>
+                        <strong style="font-size: 1.05rem; color: var(--primary); display:block; font-weight:800;">${w.points}</strong>
+                    </div>
+                    <div style="text-align: right;">
+                        <span style="font-size: 0.7rem; color: var(--text-sub); font-weight:600; text-transform:uppercase;">Angka Setor</span>
+                        <strong style="font-size: 1.05rem; color: var(--success); display:block; font-weight:800;">${w.setorPoints} Pcs</strong>
+                    </div>
                 </div>
             </div>`;
     }
 
-    // --- FUNGSI TANDAI & PINDAH JALUR ---
+    // --- BULK OPERATIONS ---
     function handleWarungSelection(routeId) {
         const checkboxes = document.querySelectorAll(`.warung-checkbox-${routeId}:checked`);
         const actionBar = document.getElementById(`bulk-action-bar-${routeId}`);
@@ -605,13 +1042,14 @@
         
         if (checkboxes.length > 0) {
             actionBar.style.display = 'block';
-            countSpan.innerText = `${checkboxes.length} warung dipilih`;
+            countSpan.innerText = `${checkboxes.length} warung ditandai`;
         } else {
             actionBar.style.display = 'none';
         }
     }
 
     function toggleSelectAllRoute(routeId) {
+        triggerHaptic();
         const checkboxes = document.querySelectorAll(`.warung-checkbox-${routeId}`);
         const allChecked = Array.from(checkboxes).every(cb => cb.checked);
         checkboxes.forEach(cb => cb.checked = !allChecked);
@@ -625,29 +1063,19 @@
     }
 
     function executeBulkMove(sourceRouteId) {
+        triggerHaptic();
         const targetRouteId = document.getElementById(`target-route-${sourceRouteId}`).value;
-        if (!targetRouteId) {
-            alert("Pilih jalur tujuan terlebih dahulu!");
-            return;
-        }
-        if (sourceRouteId === targetRouteId) {
-            alert("Jalur tujuan sama dengan jalur asal!");
-            return;
-        }
+        if (!targetRouteId) return showToast("Pilih jalur tujuan!");
+        if (sourceRouteId === targetRouteId) return showToast("Jalur asal dan tujuan sama!");
 
         const checkboxes = document.querySelectorAll(`.warung-checkbox-${sourceRouteId}:checked`);
-        if (checkboxes.length === 0) {
-            alert("Tidak ada warung yang dipilih!");
-            return;
-        }
+        if (checkboxes.length === 0) return showToast("Pilih setidaknya 1 warung!");
 
         const sourceRoute = state.routes.find(r => r.id === sourceRouteId);
         const targetRoute = state.routes.find(r => r.id === targetRouteId);
-
         if (!sourceRoute || !targetRoute) return;
 
         const warungIdsToMove = Array.from(checkboxes).map(cb => cb.getAttribute('data-warung-id'));
-
         const movedWarungs = sourceRoute.warungs.filter(w => warungIdsToMove.includes(w.id));
         
         sourceRoute.warungs = sourceRoute.warungs.filter(w => !warungIdsToMove.includes(w.id));
@@ -659,15 +1087,20 @@
         });
 
         saveData();
-        alert(`Berhasil memindahkan ${movedWarungs.length} warung dari ${sourceRoute.name} ke ${targetRoute.name}!`);
+        showToast(`${movedWarungs.length} warung dipindahkan ke ${targetRoute.name}`);
     }
 
-    // --- INTERAKSI MENGAMBANG ---
+    // --- QUICK ACTION MODAL (BOTTOM SHEET) ---
     function openWarungActionModal(routeId, warungId) {
-        activeRouteId = routeId; activeWarungId = warungId;
-        const route = state.routes.find(r => r.id === routeId); const w = route.warungs.find(w => w.id === warungId);
+        triggerHaptic();
+        activeRouteId = routeId;
+        activeWarungId = warungId;
+        const route = state.routes.find(r => r.id === routeId);
+        const w = route.warungs.find(w => w.id === warungId);
         if (!w) return;
-        document.getElementById('action-warung-title').innerText = `${w.name} (${route.name})`;
+
+        document.getElementById('action-warung-title').innerText = w.name;
+        document.getElementById('action-warung-route').innerText = `Jalur: ${route.name}`;
         document.getElementById('action-warung-points').innerText = w.points;
         document.getElementById('action-warung-setor').innerText = (w.setorPoints || 0) + ' Pcs';
         document.getElementById('input-action-pt').value = '';
@@ -676,178 +1109,302 @@
         document.getElementById('btn-action-order').onclick = () => { changeOrder(routeId, warungId); refreshActionModal(routeId, warungId); };
         document.getElementById('btn-action-reset').onclick = () => { resetPoints(routeId, warungId); refreshActionModal(routeId, warungId); };
         document.getElementById('btn-action-delete').onclick = () => { deleteWarung(routeId, warungId); closeModal('modal-warung-action'); };
+        
         openModal('modal-warung-action');
     }
 
     function refreshActionModal(routeId, warungId) {
-        const w = state.routes.find(r => r.id === routeId).warungs.find(w => w.id === warungId);
-        if (w) { document.getElementById('action-warung-points').innerText = w.points; document.getElementById('action-warung-setor').innerText = (w.setorPoints || 0) + ' Pcs'; }
+        const w = state.routes.find(r => r.id === routeId)?.warungs.find(w => w.id === warungId);
+        if (w) {
+            document.getElementById('action-warung-points').innerText = w.points;
+            document.getElementById('action-warung-setor').innerText = (w.setorPoints || 0) + ' Pcs';
+        }
     }
 
     function executeAddPoints(isDollarButton) {
-        const ptInput = document.getElementById('input-action-pt'); const pt = parseInt(ptInput.value);
-        if (isNaN(pt) || pt <= 0) return alert("Masukkan jumlah angka yang valid!");
-        const w = state.routes.find(r => r.id === activeRouteId).warungs.find(w => w.id === activeWarungId);
+        triggerHaptic(25);
+        const ptInput = document.getElementById('input-action-pt');
+        const pt = parseInt(ptInput.value);
+        if (isNaN(pt) || pt <= 0) return showToast("Masukkan angka poin yang valid!");
+
+        const route = state.routes.find(r => r.id === activeRouteId);
+        const w = route?.warungs.find(w => w.id === activeWarungId);
+        if (!w) return;
+
         w.points += pt;
-        if (isDollarButton) { if (w.setorPoints === undefined) w.setorPoints = 0; w.setorPoints += pt; }
-        saveData(); refreshActionModal(activeRouteId, activeWarungId); ptInput.value = '';
-        if(document.getElementById('main-search-warung').value === activeWarungId) executeMainSearch();
+        if (isDollarButton) {
+            if (w.setorPoints === undefined) w.setorPoints = 0;
+            w.setorPoints += pt;
+        }
+
+        saveData();
+        refreshActionModal(activeRouteId, activeWarungId);
+        ptInput.value = '';
+        showToast(`+${pt} poin berhasil ditambahkan!`);
     }
 
-    let startX = 0, isDragging = false; const swipeContainer = document.getElementById('swipe-container');
-    swipeContainer.addEventListener('touchstart', (e) => { if(['INPUT', 'BUTTON', 'SELECT', 'A', 'I', 'LABEL'].includes(e.target.tagName)) return; startX = e.touches[0].clientX; isDragging = true; });
+    // --- TOUCH & SWIPE LOGIC ---
+    let startX = 0, isDragging = false;
+    const swipeContainer = document.getElementById('swipe-container');
+    
+    swipeContainer.addEventListener('touchstart', (e) => {
+        if (['INPUT', 'BUTTON', 'SELECT', 'A', 'I', 'LABEL'].includes(e.target.tagName)) return;
+        startX = e.touches[0].clientX;
+        isDragging = true;
+    }, { passive: true });
+
     swipeContainer.addEventListener('touchend', (e) => {
-        if (!isDragging) return; isDragging = false;
+        if (!isDragging) return;
+        isDragging = false;
         const diff = e.changedTouches[0].clientX - startX;
-        if (diff > 50 && currentPage > 0) currentPage--;
-        else if (diff < -50 && currentPage < state.routes.length) currentPage++;
+        if (diff > 55 && currentPage > 0) currentPage--;
+        else if (diff < -55 && currentPage < state.routes.length) currentPage++;
         goToPage(currentPage);
-    });
+    }, { passive: true });
 
     function goToPage(index) {
-        currentPage = index; const totalPages = state.routes.length + 1;
-        if(currentPage >= totalPages) currentPage = totalPages - 1;
+        currentPage = index;
+        const totalPages = state.routes.length + 1;
+        if (currentPage >= totalPages) currentPage = totalPages - 1;
         swipeContainer.style.transform = `translateX(-${currentPage * 100}vw)`;
-        updateIndicators(); document.querySelectorAll('.nav-item').forEach((el, i) => el.classList.toggle('active', currentPage === 0));
+        updateIndicators();
+        renderRouteTabs();
+        document.querySelectorAll('.bottom-nav .nav-item').forEach((el, i) => el.classList.toggle('active', i === 0 && currentPage === 0));
     }
 
     function updateIndicators() {
-        let html = ''; for(let i = 0; i < state.routes.length + 1; i++) html += `<div class="dot ${i === currentPage ? 'active' : ''}"></div>`;
+        let html = '';
+        for (let i = 0; i < state.routes.length + 1; i++) {
+            html += `<div class="dot ${i === currentPage ? 'active' : ''}"></div>`;
+        }
         document.getElementById('page-indicator').innerHTML = html;
     }
 
+    // --- CRUD JALUR & WARUNG ---
     function addRoute() {
-        const name = document.getElementById('input-route-name').value;
-        if (!name) return alert("Nama jalur tidak boleh kosong!");
-        state.routes.push({ id: 'r_' + Date.now(), name: name, warungs: [] }); document.getElementById('input-route-name').value = ''; closeModal('modal-add-route'); saveData(); goToPage(state.routes.length);
+        const input = document.getElementById('input-route-name');
+        const name = input.value.trim();
+        if (!name) return showToast("Nama jalur tidak boleh kosong!");
+        state.routes.push({ id: 'r_' + Date.now(), name: name, warungs: [] });
+        input.value = '';
+        closeModal('modal-add-route');
+        saveData();
+        goToPage(state.routes.length);
+        showToast("Jalur berhasil dibuat!");
     }
-    
-    function editRouteName(routeId) { const route = state.routes.find(r => r.id === routeId); const newName = prompt("Masukkan nama baru:", route.name); if (newName && newName.trim() !== '') { route.name = newName.trim(); saveData(); } }
-    
+
+    function editRouteName(routeId) {
+        const route = state.routes.find(r => r.id === routeId);
+        const newName = prompt("Ubah Nama Jalur:", route.name);
+        if (newName && newName.trim() !== '') {
+            route.name = newName.trim();
+            saveData();
+            showToast("Nama jalur diperbarui");
+        }
+    }
+
     function renameWarung(rId, wId) {
-        const w = state.routes.find(r => r.id === rId).warungs.find(w => w.id === wId);
+        const w = state.routes.find(r => r.id === rId)?.warungs.find(w => w.id === wId);
         const newName = prompt("Ubah Nama Warung:", w.name);
         if (newName && newName.trim() !== '') {
             w.name = newName.trim();
             saveData();
+            showToast("Nama warung diperbarui");
         }
     }
-    
-    // --- FUNGSI GPS OTOMATIS MAPS ---
-    function getWarungGpsLocation() {
-        if (!navigator.geolocation) {
-            alert("Browser Anda tidak mendukung Geolocation.");
-            return;
+
+    function addWarung() {
+        const routeId = document.getElementById('select-route-add').value;
+        const name = document.getElementById('input-warung-name').value.trim();
+        const maps = document.getElementById('input-warung-maps').value.trim();
+        if (!routeId || !name) return showToast("Pilih jalur dan masukkan nama warung!");
+
+        const route = state.routes.find(r => r.id === routeId);
+        route.warungs.push({
+            id: 'w_' + Date.now(),
+            name: name,
+            points: 0,
+            setorPoints: 0,
+            maps: maps,
+            order: route.warungs.length + 1
+        });
+
+        document.getElementById('input-warung-name').value = '';
+        document.getElementById('input-warung-maps').value = '';
+        closeModal('modal-add-warung');
+        saveData();
+        showToast("Warung berhasil ditambahkan!");
+    }
+
+    function resetPoints(rId, wId) {
+        if (confirm("Reset poin warung ini kembali ke 0?")) {
+            state.routes.find(r => r.id === rId).warungs.find(w => w.id === wId).points = 0;
+            saveData();
+            showToast("Poin direset!");
         }
+    }
+
+    function deleteWarung(rId, wId) {
+        if (confirm("Hapus warung ini dari daftar?")) {
+            const r = state.routes.find(r => r.id === rId);
+            r.warungs = r.warungs.filter(w => w.id !== wId);
+            r.warungs.sort((a,b) => a.order - b.order).forEach((w, i) => w.order = i + 1);
+            saveData();
+            showToast("Warung dihapus!");
+        }
+    }
+
+    function changeOrder(rId, wId) {
+        const route = state.routes.find(r => r.id === rId);
+        const cw = route.warungs.find(w => w.id === wId);
+        let newOrder = parseInt(prompt(`Pindah ke urutan nomor berapa? (1 - ${route.warungs.length})`));
+        if (isNaN(newOrder) || newOrder < 1 || newOrder > route.warungs.length || newOrder === cw.order) return;
+        const tw = route.warungs.find(w => w.order === newOrder);
+        if (tw) tw.order = cw.order;
+        cw.order = newOrder;
+        saveData();
+        showToast("Urutan berhasil diubah");
+    }
+
+    // --- ACCURATE GPS HANDLER ---
+    function getWarungGpsLocation() {
+        if (!navigator.geolocation) return showToast("Browser tidak mendukung GPS.");
         const btn = event.currentTarget;
         const originalHtml = btn.innerHTML;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
         btn.disabled = true;
 
-        navigator.geolocation.getCurrentPosition((position) => {
-            const lat = position.coords.latitude;
-            const lng = position.coords.longitude;
-            const mapsLink = `https://www.google.com/maps?q=${lat},${lng}`;
+        navigator.geolocation.getCurrentPosition((pos) => {
+            const mapsLink = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
             document.getElementById('input-warung-maps').value = mapsLink;
             btn.innerHTML = originalHtml;
             btn.disabled = false;
-            alert("Lokasi GPS berhasil didapatkan!");
-        }, (error) => {
-            alert("Gagal mendapatkan lokasi GPS: " + error.message);
+            showToast("Koordinat GPS berhasil dikunci!");
+        }, (err) => {
             btn.innerHTML = originalHtml;
             btn.disabled = false;
-        }, { enableHighAccuracy: true, timeout: 10000 });
+            showToast("Gagal GPS: " + err.message);
+        }, { enableHighAccuracy: true, timeout: 8000 });
     }
 
-    function editMaps(rId, wId) { 
-        if (!navigator.geolocation) {
-            alert("Browser Anda tidak mendukung Geolocation.");
-            return;
-        }
-        if (!confirm("Perbarui titik koordinat maps warung ini dengan posisi GPS Anda saat ini?")) return;
+    function editMaps(rId, wId) {
+        if (!navigator.geolocation) return showToast("Browser tidak mendukung GPS.");
+        if (!confirm("Perbarui titik koordinat Maps dengan posisi Anda sekarang?")) return;
 
-        navigator.geolocation.getCurrentPosition((position) => {
-            const lat = position.coords.latitude;
-            const lng = position.coords.longitude;
-            const newLink = `https://www.google.com/maps?q=${lat},${lng}`;
-            const w = state.routes.find(r => r.id === rId).warungs.find(w => w.id === wId);
+        navigator.geolocation.getCurrentPosition((pos) => {
+            const newLink = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
+            const w = state.routes.find(r => r.id === rId)?.warungs.find(w => w.id === wId);
             if (w) {
                 w.maps = newLink;
                 saveData();
-                alert("Lokasi Maps berhasil diperbarui melalui GPS!");
+                showToast("Lokasi Maps diperbarui!");
             }
-        }, (error) => {
-            alert("Gagal mendapatkan lokasi GPS: " + error.message);
-        }, { enableHighAccuracy: true, timeout: 10000 });
-    }
-    
-    function updateRouteDropdowns() { const select = document.getElementById('select-route-add'); if(select) select.innerHTML = '<option value="">-- Pilih Jalur --</option>' + state.routes.map(r => `<option value="${r.id}">${r.name}</option>`).join(''); }
-    
-    function addWarung() {
-        const routeId = document.getElementById('select-route-add').value; const name = document.getElementById('input-warung-name').value; const maps = document.getElementById('input-warung-maps').value;
-        if (!routeId || !name) return alert("Pilih jalur dan isi nama warung!");
-        const route = state.routes.find(r => r.id === routeId);
-        route.warungs.push({ id: 'w_' + Date.now(), name: name, points: 0, setorPoints: 0, maps: maps, order: route.warungs.length + 1 });
-        document.getElementById('input-warung-name').value = ''; document.getElementById('input-warung-maps').value = ''; closeModal('modal-add-warung'); saveData();
-    }
-    
-    function resetPoints(rId, wId) { if(confirm("Reset poin menjadi 0?")) { state.routes.find(r => r.id === rId).warungs.find(w => w.id === wId).points = 0; saveData(); } }
-    function deleteWarung(rId, wId) { if(confirm("Hapus warung?")) { const r = state.routes.find(r => r.id === rId); r.warungs = r.warungs.filter(w => w.id !== wId); r.warungs.sort((a,b) => a.order - b.order).forEach((w, i) => w.order = i + 1); saveData(); } }
-    function changeOrder(rId, wId) {
-        const route = state.routes.find(r => r.id === rId); const cw = route.warungs.find(w => w.id === wId);
-        let newOrder = parseInt(prompt(`Pindah ke urutan nomor berapa? (1 - ${route.warungs.length})`));
-        if (isNaN(newOrder) || newOrder < 1 || newOrder > route.warungs.length || newOrder === cw.order) return;
-        const tw = route.warungs.find(w => w.order === newOrder); if(tw) tw.order = cw.order;
-        cw.order = newOrder; saveData();
+        }, (err) => {
+            showToast("Gagal mengambil GPS: " + err.message);
+        }, { enableHighAccuracy: true, timeout: 8000 });
     }
 
+    function updateRouteDropdowns() {
+        const select = document.getElementById('select-route-add');
+        if (select) {
+            select.innerHTML = '<option value="">-- Pilih Jalur --</option>' + 
+                state.routes.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
+        }
+    }
+
+    // --- SEARCH HELPERS ---
     function updateMainWarungSearch() {
-        const rId = document.getElementById('main-search-route').value; const wSelect = document.getElementById('main-search-warung');
-        if (!rId) { wSelect.innerHTML = '<option value="">Pilih Warung</option>'; return; }
-        wSelect.innerHTML = '<option value="">Pilih Warung</option>' + state.routes.find(r => r.id === rId).warungs.map(w => `<option value="${w.id}">${w.name}</option>`).join('');
+        const rId = document.getElementById('main-search-route').value;
+        const wSelect = document.getElementById('main-search-warung');
+        if (!rId) {
+            let options = '<option value="">Pilih Warung Cepat</option>';
+            state.routes.forEach(r => {
+                r.warungs.forEach(w => {
+                    options += `<option value="${r.id}|${w.id}">${w.name} (${r.name})</option>`;
+                });
+            });
+            wSelect.innerHTML = options;
+            return;
+        }
+        wSelect.innerHTML = '<option value="">Pilih Warung Cepat</option>' + 
+            state.routes.find(r => r.id === rId).warungs.map(w => `<option value="${rId}|${w.id}">${w.name}</option>`).join('');
     }
+
     function executeMainSearch() {
-        const rId = document.getElementById('main-search-route').value; const wId = document.getElementById('main-search-warung').value; const resDiv = document.getElementById('main-search-result');
-        if (!rId || !wId) { resDiv.innerHTML = ''; return; }
-        const r = state.routes.find(r => r.id === rId); const w = r.warungs.find(w => w.id === wId);
-        resDiv.innerHTML = `<div class="card" style="border: 2px solid var(--primary); background: white; margin-bottom: 20px;" onclick="openWarungActionModal('${rId}', '${w.id}')"><div class="card-header"><div class="card-title"><span style="word-break: break-word;">${w.name}</span><span class="badge" style="background:var(--primary); color:white;">${r.name}</span></div><i class="fas fa-expand-alt" style="color: var(--primary);"></i></div></div>`;
+        const val = document.getElementById('main-search-warung').value;
+        const resDiv = document.getElementById('main-search-result');
+        if (!val) { resDiv.innerHTML = ''; return; }
+        const [rId, wId] = val.split('|');
+        const r = state.routes.find(r => r.id === rId);
+        const w = r?.warungs.find(w => w.id === wId);
+        if (!w) return;
+
+        resDiv.innerHTML = `
+            <div class="card" style="border: 2px solid var(--primary); margin-bottom: 12px; cursor: pointer;" onclick="openWarungActionModal('${rId}', '${w.id}')">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span>${w.name}</span>
+                        <span class="badge" style="background:var(--primary); color:white;">${r.name}</span>
+                    </div>
+                    <i class="fas fa-chevron-right text-primary"></i>
+                </div>
+            </div>`;
     }
-    function filterRouteWarung(rId, keyword) { const kw = keyword.toLowerCase(); document.querySelectorAll(`#list-warung-${rId} .warung-item`).forEach(item => { item.style.display = item.getAttribute('data-name').includes(kw) ? 'block' : 'none'; }); }
 
-    // --- LOGIKA LAPORAN SETOR ---
+    function filterRouteWarung(rId, keyword) {
+        const kw = keyword.toLowerCase();
+        document.querySelectorAll(`#list-warung-${rId} .warung-item`).forEach(item => {
+            item.style.display = item.getAttribute('data-name').includes(kw) ? 'block' : 'none';
+        });
+    }
+
+    // --- LAPORAN SETOR & EKSPOR ---
     function populateSetorData() {
-        const tbody = document.getElementById('setor-tbody'); tbody.innerHTML = ''; let count = 1;
-        const maxPcs = state.terpalConversion || 50; 
+        const tbody = document.getElementById('setor-tbody');
+        tbody.innerHTML = '';
+        let count = 1;
+        const maxPcs = state.terpalConversion || 50;
 
-        state.routes.forEach(route => { route.warungs.forEach(w => {
-            if (w.setorPoints && w.setorPoints > 0) {
-                let rp = w.setorPoints * state.setorConversion; 
-                let sisa = maxPcs - w.setorPoints; 
-                
-                // Jika fitur edit manual aktif di pengaturan, render input di kolom Terjual
-                let terjualCell = state.allowManualSetorEdit 
-                    ? `<input type="number" class="laporan-input" value="${w.setorPoints}" style="width: 60px;" min="0" onchange="updateSetorManualPoint('${route.id}', '${w.id}', this.value)">`
-                    : `<b>${w.setorPoints}</b>`;
+        state.routes.forEach(route => {
+            route.warungs.forEach(w => {
+                if (w.setorPoints && w.setorPoints > 0) {
+                    let rp = w.setorPoints * state.setorConversion;
+                    let sisa = maxPcs - w.setorPoints;
 
-                tbody.innerHTML += `<tr><td>${count++}</td><td><b>${route.name} ${w.name}</b></td><td style="text-align:center;">${terjualCell}</td><td>${formatRp(rp)}</td><td style="text-align:center; font-weight:600; color: var(--danger);">${sisa}</td><td style="text-align:center;" class="no-print"><button class="btn-icon red" onclick="deleteSetorRow('${route.id}', '${w.id}')"><i class="fas fa-times-circle"></i></button></td></tr>`;
-            }
-        });});
-        
-        if(count === 1) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:gray; padding:20px;">Belum ada data disetor.</td></tr>';
-        
+                    let terjualCell = state.allowManualSetorEdit 
+                        ? `<input type="number" class="laporan-input" value="${w.setorPoints}" style="width: 55px;" min="0" onchange="updateSetorManualPoint('${route.id}', '${w.id}', this.value)">`
+                        : `<b>${w.setorPoints}</b>`;
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${count++}</td>
+                            <td><b>${route.name} - ${w.name}</b></td>
+                            <td style="text-align:center;">${terjualCell}</td>
+                            <td style="font-weight:700;">${formatRp(rp)}</td>
+                            <td style="text-align:center; font-weight:700; color: var(--danger);">${sisa}</td>
+                            <td style="text-align:center;" class="no-print">
+                                <button class="btn-icon red" onclick="deleteSetorRow('${route.id}', '${w.id}')"><i class="fas fa-times-circle"></i></button>
+                            </td>
+                        </tr>`;
+                }
+            });
+        });
+
+        if (count === 1) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-sub); padding:18px;">Belum ada data barang disetor.</td></tr>';
+        }
+
         document.getElementById('laporan-sales-name').value = state.salesName || '';
-        let today = new Date(); document.getElementById('setor-date').innerText = `Laporan Setoran (${today.getDate()}/${today.getMonth()+1}/${today.getFullYear()})`;
-        
+        let today = new Date();
+        document.getElementById('setor-date').innerText = `LAPORAN SETORAN (${today.getDate()}/${today.getMonth()+1}/${today.getFullYear()})`;
         calculateSetorTotals();
     }
 
-    // Fungsi update nilai setor secara manual dari kolom tabel setor
     function updateSetorManualPoint(rId, wId, val) {
         let pts = parseInt(val);
         if (isNaN(pts) || pts < 0) pts = 0;
         const route = state.routes.find(r => r.id === rId);
-        if (!route) return;
-        const w = route.warungs.find(w => w.id === wId);
+        const w = route?.warungs.find(w => w.id === wId);
         if (w) {
             w.setorPoints = pts;
             saveData();
@@ -862,32 +1419,14 @@
         openModal('modal-setor');
     }
 
-    function checkKeteranganBeforeAmount() {
-        const note = document.getElementById('input-setor-expense-note').value.trim();
-        if (!note) {
-            alert("Harap isi KETERANGAN pengeluaran terlebih dahulu sebelum memasukkan nominal!");
-            document.getElementById('input-setor-expense-note').focus();
-        }
-    }
-
     function addSetorExpense() {
         const noteInput = document.getElementById('input-setor-expense-note');
         const amountInput = document.getElementById('input-setor-expense-amount');
-
         const note = noteInput.value.trim();
         const amount = parseInt(amountInput.value);
 
-        if (!note) {
-            alert("Harap masukan keterangan terlebih dahulu!");
-            noteInput.focus();
-            return;
-        }
-
-        if (isNaN(amount) || amount <= 0) {
-            alert("Harap masukan nominal pengeluaran yang valid!");
-            amountInput.focus();
-            return;
-        }
+        if (!note) return showToast("Isi keterangan potongan!");
+        if (isNaN(amount) || amount <= 0) return showToast("Masukkan nominal valid!");
 
         if (!state.setorExpenses) state.setorExpenses = [];
         state.setorExpenses.push({ note, amount });
@@ -896,6 +1435,7 @@
         noteInput.value = '';
         amountInput.value = '';
         calculateSetorTotals();
+        showToast("Biaya potongan ditambahkan");
     }
 
     function deleteSetorExpense(index) {
@@ -908,31 +1448,17 @@
 
     function calculateSetorTotals() {
         let grossTotal = 0, totalTerjual = 0, totalSisa = 0;
-        const maxPcs = state.terpalConversion || 50; 
+        const maxPcs = state.terpalConversion || 50;
 
-        state.routes.forEach(route => { 
+        state.routes.forEach(route => {
             route.warungs.forEach(w => {
                 if (w.setorPoints && w.setorPoints > 0) {
                     grossTotal += (w.setorPoints * state.setorConversion);
                     totalTerjual += w.setorPoints;
-                    totalSisa += (maxPcs - w.setorPoints); 
+                    totalSisa += (maxPcs - w.setorPoints);
                 }
             });
         });
-        
-        const terpalQty = 0; 
-        const terpalPcs = terpalQty * maxPcs; 
-        const terpalRp = terpalPcs * state.setorConversion;
-        
-        const terpalInfo = document.getElementById('setor-terpal-info');
-        if(terpalRp > 0 || terpalQty > 0) {
-            terpalInfo.style.display = 'block';
-            document.getElementById('setor-total-terpal').innerText = formatRp(terpalRp) + ` (${terpalQty} Terpal = ${terpalPcs} Pcs)`;
-        } else {
-            terpalInfo.style.display = 'none';
-        }
-
-        let totalKotor = grossTotal + terpalRp;
 
         let totalPengeluaran = 0;
         const expSection = document.getElementById('setor-expense-section');
@@ -943,7 +1469,10 @@
             let htmlList = '';
             state.setorExpenses.forEach((ex, idx) => {
                 totalPengeluaran += ex.amount;
-                htmlList += `<div>${ex.note} : ${formatNumberOnly(ex.amount)} <button class="btn-icon red no-print" style="font-size:0.75rem; padding:0 2px;" onclick="deleteSetorExpense(${idx})" title="Hapus"><i class="fas fa-times-circle"></i></button></div>`;
+                htmlList += `<div style="display:flex; justify-content:flex-end; gap:6px; align-items:center;">
+                    <span>${ex.note}: -${formatRp(ex.amount)}</span>
+                    <button class="btn-icon red no-print" onclick="deleteSetorExpense(${idx})"><i class="fas fa-times-circle"></i></button>
+                </div>`;
             });
             expList.innerHTML = htmlList;
         } else {
@@ -951,52 +1480,62 @@
             expList.innerHTML = '';
         }
 
-        let grandTotalBersih = totalKotor - totalPengeluaran;
-
-        document.getElementById('setor-grand-total').innerText = formatRp(grandTotalBersih); 
-        document.getElementById('setor-total-terjual').innerText = (totalTerjual + terpalPcs) + " Pcs"; 
+        let grandTotalBersih = grossTotal - totalPengeluaran;
+        document.getElementById('setor-grand-total').innerText = formatRp(grandTotalBersih);
+        document.getElementById('setor-total-terjual').innerText = totalTerjual + " Pcs";
         document.getElementById('setor-total-sisa').innerText = totalSisa + " Pcs";
     }
 
-    function deleteSetorRow(rId, wId) { state.routes.find(r => r.id === rId).warungs.find(w => w.id === wId).setorPoints = 0; saveData(); populateSetorData(); }
-    
-    function deleteAllSetor() { 
-        if(confirm("Hapus semua data setor dan daftar pengeluaran setor?")) { 
-            state.routes.forEach(r => r.warungs.forEach(w => w.setorPoints = 0)); 
-            state.setorExpenses = [];
-            saveData(); 
-            populateSetorData(); 
-        } 
+    function deleteSetorRow(rId, wId) {
+        state.routes.find(r => r.id === rId).warungs.find(w => w.id === wId).setorPoints = 0;
+        saveData();
+        populateSetorData();
     }
-    
+
+    function deleteAllSetor() {
+        if (confirm("Reset seluruh data setor dan pengeluaran hari ini?")) {
+            state.routes.forEach(r => r.warungs.forEach(w => w.setorPoints = 0));
+            state.setorExpenses = [];
+            saveData();
+            populateSetorData();
+            showToast("Seluruh setoran dibersihkan");
+        }
+    }
+
     function selesaikanSetor(isAuto = false) {
-        return new Promise((resolve, reject) => {
-            const clone = document.getElementById('setor-capture-area').cloneNode(true);
+        return new Promise((resolve) => {
+            const captureArea = document.getElementById('setor-capture-area');
+            const clone = captureArea.cloneNode(true);
             clone.querySelectorAll('.no-print').forEach(el => el.style.display = 'none');
-            clone.style.position = 'absolute'; clone.style.top = '-9999px'; clone.style.left = '0'; clone.style.width = 'max-content'; clone.style.background = '#ffffff'; clone.style.padding = '20px'; clone.style.boxSizing = 'border-box';
-            
-            const originalInputs = document.getElementById('setor-capture-area').querySelectorAll('input');
+            clone.style.position = 'absolute';
+            clone.style.top = '-9999px';
+            clone.style.left = '0';
+            clone.style.width = '550px';
+            clone.style.background = '#ffffff';
+            clone.style.padding = '24px';
+
+            const originalInputs = captureArea.querySelectorAll('input');
             const cloneInputs = clone.querySelectorAll('input');
             originalInputs.forEach((input, index) => {
-                if(cloneInputs[index]) {
+                if (cloneInputs[index]) {
                     cloneInputs[index].setAttribute('value', input.value);
-                    cloneInputs[index].style.border = 'none'; 
+                    cloneInputs[index].style.border = 'none';
                 }
             });
 
             document.body.appendChild(clone);
-            html2canvas(clone, { scale: 2, useCORS: true, backgroundColor: "#ffffff", windowWidth: clone.scrollWidth, windowHeight: clone.scrollHeight }).then(canvas => {
-                const link = document.createElement('a'); let today = new Date(); 
-                let sName = state.salesName && state.salesName.trim() !== '' ? state.salesName.replace(/\s+/g, '_') : 'Laporan';
-                link.download = `Setoran_${sName}_${today.getDate()}-${today.getMonth()+1}-${today.getFullYear()}.jpg`; 
-                link.href = canvas.toDataURL('image/jpeg', 0.9); link.click(); 
-                
-                if(!isAuto) alert("Gambar JPG berhasil disimpan!");
-                resolve(); 
+            html2canvas(clone, { scale: 2, backgroundColor: "#ffffff" }).then(canvas => {
+                const link = document.createElement('a');
+                let today = new Date();
+                let sName = state.salesName ? state.salesName.replace(/\s+/g, '_') : 'Sales';
+                link.download = `Setor_${sName}_${today.getDate()}-${today.getMonth()+1}-${today.getFullYear()}.jpg`;
+                link.href = canvas.toDataURL('image/jpeg', 0.95);
+                link.click();
+                if (!isAuto) showToast("Gambar JPG berhasil diunduh!");
+                resolve();
             }).catch(err => {
-                console.error("Gagal generate JPG:", err);
-                if(!isAuto) alert("Gagal menyimpan gambar!");
-                resolve(); 
+                console.error(err);
+                resolve();
             }).finally(() => {
                 document.body.removeChild(clone);
             });
@@ -1004,23 +1543,31 @@
     }
 
     function exportToExcel() {
-        if(document.getElementById('setor-tbody').innerHTML.includes('Belum ada data')) return;
-        const maxPcs = state.terpalConversion || 50; 
+        const maxPcs = state.terpalConversion || 50;
+        let html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+        <head><meta charset="UTF-8"></head><body>
+        <h2>LAPORAN SETORAN</h2><p>Sales: <b>${state.salesName || '-'}</b></p>
+        <table border="1">
+            <thead>
+                <tr style="background:#1e40af; color:#fff;">
+                    <th>No</th><th>Warung</th><th>Terjual</th><th>Nominal</th><th>Sisa</th>
+                </tr>
+            </thead>
+            <tbody>`;
 
-        let html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"></head><body><h2>Laporan Setoran</h2><p>Nama Sales: <b>${state.salesName || '-'}</b></p><table border="1"><thead><tr style="background-color: #2563eb; color: white;"><th>No</th><th>Warung</th><th>Terjual</th><th>Rp</th><th>Sisa</th></tr></thead><tbody>`;
         let count = 1, gt = 0, tt = 0, ts = 0;
-        state.routes.forEach(r => r.warungs.forEach(w => { 
-            if (w.setorPoints && w.setorPoints > 0) { 
-                let rp = w.setorPoints * state.setorConversion; 
-                let sisa = maxPcs - w.setorPoints; 
-                gt += rp; tt += w.setorPoints; ts += sisa; 
-                html += `<tr><td>${count++}</td><td>${r.name} ${w.name}</td><td>${w.setorPoints}</td><td>${rp}</td><td>${sisa}</td></tr>`; 
+        state.routes.forEach(r => r.warungs.forEach(w => {
+            if (w.setorPoints && w.setorPoints > 0) {
+                let rp = w.setorPoints * state.setorConversion;
+                let sisa = maxPcs - w.setorPoints;
+                gt += rp; tt += w.setorPoints; ts += sisa;
+                html += `<tr><td>${count++}</td><td>${r.name} - ${w.name}</td><td>${w.setorPoints}</td><td>${rp}</td><td>${sisa}</td></tr>`;
             }
         }));
-        
+
         let totalPengeluaranExp = 0;
         if (state.setorExpenses && state.setorExpenses.length > 0) {
-            html += `<tr><td colspan="5" style="background-color: #fee2e2; font-weight: bold;">PENGELUARAN</td></tr>`;
+            html += `<tr><td colspan="5" style="background:#fee2e2; font-weight:bold;">PENGELUARAN</td></tr>`;
             state.setorExpenses.forEach(ex => {
                 totalPengeluaranExp += ex.amount;
                 html += `<tr><td colspan="3">${ex.note}</td><td style="color:red;">-${ex.amount}</td><td>-</td></tr>`;
@@ -1028,36 +1575,34 @@
         }
 
         let gtBersih = gt - totalPengeluaranExp;
+        html += `<tr><td colspan="3"><b>Total Bersih</b></td><td colspan="2"><b>Rp${gtBersih}</b></td></tr></tbody></table></body></html>`;
 
-        html += `<tr><td colspan="3"><b>Total Setor Bersih</b></td><td colspan="2"><b>Rp${gtBersih}</b></td></tr></tbody></table></body></html>`;
-        
-        let blob = new Blob([html], { type: 'application/vnd.ms-excel' }); 
-        let url = window.URL.createObjectURL(blob); let a = document.createElement('a'); a.href = url; 
-        
-        let today = new Date(); 
-        let sName = state.salesName && state.salesName.trim() !== '' ? state.salesName.replace(/\s+/g, '_') : 'Laporan';
-        a.download = `Setoran_${sName}_${today.getDate()}-${today.getMonth()+1}-${today.getFullYear()}.xls`; 
-        
-        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        let blob = new Blob([html], { type: 'application/vnd.ms-excel' });
+        let url = window.URL.createObjectURL(blob);
+        let a = document.createElement('a');
+        let today = new Date();
+        let sName = state.salesName ? state.salesName.replace(/\s+/g, '_') : 'Sales';
+        a.download = `Setor_${sName}_${today.getDate()}-${today.getMonth()+1}.xls`;
+        a.href = url;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
     }
 
-    // --- LOGIKA MENU KEUANGAN ---
+    // --- KEUANGAN & SALDO HARIAN ---
     function openKeuanganModal() {
         document.getElementById('keq-conv-label').innerText = formatRp(state.profitConversion || 300);
         document.getElementById('input-expense-amount').value = '';
         document.getElementById('input-expense-note').value = '';
-        
         renderKeuanganData();
         openModal('modal-keuangan');
     }
 
     function getTotalTerjualPcs() {
         let total = 0;
-        state.routes.forEach(r => {
-            r.warungs.forEach(w => {
-                if (w.setorPoints && w.setorPoints > 0) total += w.setorPoints;
-            });
-        });
+        state.routes.forEach(r => r.warungs.forEach(w => {
+            if (w.setorPoints && w.setorPoints > 0) total += w.setorPoints;
+        }));
         return total;
     }
 
@@ -1068,8 +1613,7 @@
         const saldoAwal = state.saldo || 0;
 
         let totalExpense = 0;
-        state.expenses.forEach(e => { totalExpense += Number(e.amount); });
-
+        (state.expenses || []).forEach(e => totalExpense += Number(e.amount));
         const sisaSaldo = totalProfit + saldoAwal - totalExpense;
 
         document.getElementById('keq-total-terjual').innerText = totalPcs + " Pcs";
@@ -1081,13 +1625,13 @@
         const expTbody = document.getElementById('expense-tbody');
         expTbody.innerHTML = '';
         if (state.expenses.length === 0) {
-            expTbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:gray; padding:10px;">Belum ada pengeluaran.</td></tr>';
+            expTbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-sub); padding:10px;">Belum ada pengeluaran dicatat.</td></tr>';
         } else {
             state.expenses.forEach((ex, idx) => {
                 expTbody.innerHTML += `<tr>
                     <td><b>${ex.category}</b></td>
                     <td>${ex.note || '-'}</td>
-                    <td style="color:var(--danger);">${formatRp(ex.amount)}</td>
+                    <td style="color:var(--danger); font-weight:700;">${formatRp(ex.amount)}</td>
                     <td style="text-align:center;"><button class="btn-icon red" onclick="deleteExpense(${idx})"><i class="fas fa-times-circle"></i></button></td>
                 </tr>`;
             });
@@ -1096,16 +1640,16 @@
         const histTbody = document.getElementById('history-tbody');
         histTbody.innerHTML = '';
         if (!state.history || state.history.length === 0) {
-            histTbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:gray; padding:10px;">Belum ada riwayat aktivitas.</td></tr>';
+            histTbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-sub); padding:10px;">Belum ada riwayat tutup kas.</td></tr>';
         } else {
             state.history.slice().reverse().forEach((h, idx) => {
                 let actualIndex = state.history.length - 1 - idx;
                 histTbody.innerHTML += `<tr>
                     <td>${h.date}</td>
-                    <td>${formatRp(h.profit)}</td>
-                    <td>${formatRp(h.totalExpense)}</td>
-                    <td><b>${formatRp(h.finalSaldo)}</b></td>
-                    <td style="text-align:center;"><button class="btn-icon red" onclick="deleteHistory(${actualIndex})" title="Hapus Riwayat"><i class="fas fa-trash-alt"></i></button></td>
+                    <td style="color:var(--success); font-weight:700;">${formatRp(h.profit)}</td>
+                    <td style="color:var(--danger); font-weight:700;">${formatRp(h.totalExpense)}</td>
+                    <td style="font-weight:800;">${formatRp(h.finalSaldo)}</td>
+                    <td style="text-align:center;"><button class="btn-icon red" onclick="deleteHistory(${actualIndex})"><i class="fas fa-trash-alt"></i></button></td>
                 </tr>`;
             });
         }
@@ -1116,13 +1660,14 @@
         const amount = parseInt(document.getElementById('input-expense-amount').value);
         const note = document.getElementById('input-expense-note').value.trim();
 
-        if (isNaN(amount) || amount <= 0) return alert("Masukkan nominal pengeluaran yang valid!");
+        if (isNaN(amount) || amount <= 0) return showToast("Masukkan nominal pengeluaran!");
 
         state.expenses.push({ category, amount, note });
         saveData();
         renderKeuanganData();
         document.getElementById('input-expense-amount').value = '';
         document.getElementById('input-expense-note').value = '';
+        showToast("Pengeluaran disimpan");
     }
 
     function deleteExpense(index) {
@@ -1132,7 +1677,7 @@
     }
 
     async function finishDailyActivity() {
-        if (!confirm("Selesaikan aktivitas penjualan hari ini?\n\nLaporan Setor (JPG) akan otomatis diunduh sebelum saldo akhir dicatat dan angka setor di-reset.")) return;
+        if (!confirm("Selesaikan kegiatan hari ini?\n\nLaporan Setoran otomatis disimpan ke Galeri JPG dan saldo akan diarsipkan.")) return;
 
         populateSetorData();
         await selesaikanSetor(true);
@@ -1143,9 +1688,9 @@
         const saldoAwal = state.saldo || 0;
         
         let totalExpense = 0;
-        state.expenses.forEach(e => { totalExpense += Number(e.amount); });
-
+        state.expenses.forEach(e => totalExpense += Number(e.amount));
         const finalSaldo = profit + saldoAwal - totalExpense;
+
         let today = new Date();
         let dateStr = `${today.getDate()}/${today.getMonth()+1}/${today.getFullYear()}`;
 
@@ -1160,126 +1705,133 @@
         state.saldo = finalSaldo;
         state.expenses = [];
         state.setorExpenses = [];
-
-        state.routes.forEach(r => {
-            r.warungs.forEach(w => {
-                w.setorPoints = 0;
-            });
-        });
+        state.routes.forEach(r => r.warungs.forEach(w => w.setorPoints = 0));
 
         saveData();
         renderKeuanganData();
         renderApp();
-        alert("Gambar JPG berhasil diunduh otomatis!\n\nAktivitas hari ini selesai, dicatat ke riwayat, dan data setor telah direset.");
+        showToast("Kas harian selesai & laporan tersimpan!");
     }
 
     function deleteHistory(index) {
-        if(confirm("Hapus catatan riwayat ini?")) {
+        if (confirm("Hapus catatan riwayat kas ini?")) {
             state.history.splice(index, 1);
             saveData();
             renderKeuanganData();
         }
     }
-    
-    function saveSettings() { 
-        const m = parseInt(document.getElementById('input-conv-main').value); 
-        const s = parseInt(document.getElementById('input-conv-setor').value); 
-        const t = parseInt(document.getElementById('input-conv-terpal').value); 
-        const p = parseInt(document.getElementById('input-conv-profit').value);
-        const manualSetor = document.getElementById('input-allow-manual-setor').checked;
-        const sales = document.getElementById('input-setting-sales').value;
-        
-        if(m > 0) state.mainConversion = m; 
-        if(s > 0) state.setorConversion = s; 
-        if(!isNaN(t) && t > 0) state.terpalConversion = t; 
-        if(!isNaN(p) && p >= 0) state.profitConversion = p;
-        state.allowManualSetorEdit = manualSetor;
-        state.salesName = sales;
-        
-        saveData(); 
-        closeModal('modal-settings'); 
-        alert("Pengaturan Berhasil Disimpan!"); 
-    }
-    
+
+    // --- PENGATURAN & ADMIN ---
     function checkAdminAccess(salesNameValue) {
         const adminSection = document.getElementById('admin-settings-section');
-        if (salesNameValue.trim().toLowerCase() === 'admin') {
-            adminSection.style.display = 'block';
-        } else {
-            adminSection.style.display = 'none';
-        }
+        adminSection.style.display = (salesNameValue.trim().toLowerCase() === 'admin') ? 'block' : 'none';
     }
-    
-    function backupData() { 
-        const a = document.createElement('a'); 
-        a.href = window.URL.createObjectURL(new Blob([JSON.stringify(state)], { type: "application/json" })); 
-        
-        let date = new Date();
-        let dateStr = `${date.getDate()}-${date.getMonth()+1}-${date.getFullYear()}`;
-        let salesPart = state.salesName && state.salesName.trim() !== '' ? state.salesName.replace(/\s+/g, '_') : 'TanpaNama';
-        
-        a.download = `Backup_${salesPart}_${dateStr}.json`; 
-        document.body.appendChild(a); a.click(); document.body.removeChild(a); 
+
+    function saveSettings() {
+        const m = parseInt(document.getElementById('input-conv-main').value);
+        const s = parseInt(document.getElementById('input-conv-setor').value);
+        const t = parseInt(document.getElementById('input-conv-terpal').value);
+        const p = parseInt(document.getElementById('input-conv-profit').value);
+        const manualSetor = document.getElementById('input-allow-manual-setor').checked;
+        const sales = document.getElementById('input-setting-sales').value.trim();
+
+        if (m > 0) state.mainConversion = m;
+        if (s > 0) state.setorConversion = s;
+        if (!isNaN(t) && t > 0) state.terpalConversion = t;
+        if (!isNaN(p) && p >= 0) state.profitConversion = p;
+        state.allowManualSetorEdit = manualSetor;
+        if (sales.toLowerCase() !== 'admin') state.salesName = sales;
+
+        saveData();
+        closeModal('modal-settings');
+        showToast("Pengaturan berhasil disimpan!");
     }
-    
-    function restoreData(e) { const r = new FileReader(); r.onload = (ev) => { try { state = JSON.parse(ev.target.result); saveData(); alert("Berhasil dipulihkan!"); closeModal('modal-settings'); } catch(err) { alert("Format salah!"); }}; if(e.target.files[0]) r.readAsText(e.target.files[0]); }
-    
-    function openModal(id) { 
-        if(id === 'modal-settings') { 
-            const currentSales = state.salesName || '';
-            document.getElementById('input-conv-main').value = state.mainConversion; 
-            document.getElementById('input-conv-setor').value = state.setorConversion; 
-            document.getElementById('input-conv-terpal').value = state.terpalConversion || 50; 
+
+    function backupData() {
+        const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+        const a = document.createElement('a');
+        let today = new Date();
+        let name = state.salesName ? state.salesName.replace(/\s+/g, '_') : 'Data';
+        a.download = `MabirhBackup_${name}_${today.getDate()}-${today.getMonth()+1}.json`;
+        a.href = window.URL.createObjectURL(blob);
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+
+    function restoreData(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            try {
+                const parsed = JSON.parse(ev.target.result);
+                state = { ...DEFAULT_STATE, ...parsed };
+                saveData();
+                closeModal('modal-settings');
+                showToast("Data cadangan berhasil dipulihkan!");
+            } catch (err) {
+                showToast("Format berkas JSON tidak valid!", "danger");
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    // --- MODAL CONTROLS ---
+    function openModal(id) {
+        triggerHaptic();
+        if (id === 'modal-settings') {
+            document.getElementById('input-conv-main').value = state.mainConversion;
+            document.getElementById('input-conv-setor').value = state.setorConversion;
+            document.getElementById('input-conv-terpal').value = state.terpalConversion || 50;
             document.getElementById('input-conv-profit').value = state.profitConversion || 300;
             document.getElementById('input-allow-manual-setor').checked = state.allowManualSetorEdit || false;
-            document.getElementById('input-setting-sales').value = currentSales;
-            
-            checkAdminAccess(currentSales);
-        } else if(id === 'modal-add-warung') {
+            document.getElementById('input-setting-sales').value = state.salesName || '';
+            checkAdminAccess(state.salesName || '');
+        } else if (id === 'modal-add-warung') {
             document.getElementById('input-warung-name').value = '';
             document.getElementById('input-warung-maps').value = '';
             updateRouteDropdowns();
         }
-        document.getElementById(id).classList.add('active'); 
+        document.getElementById(id).classList.add('active');
     }
-    
-    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-    function closeModalOnBackdrop(e, id) { if(e.target.id === id) closeModal(id); }
 
-    renderApp();
-</script>
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('active');
+    }
 
-<script>
-    // --- LOGIKA DETEKSI KONEKSI INTERNET ---
+    function closeModalOnBackdrop(e, id) {
+        if (e.target.id === id) closeModal(id);
+    }
+
+    // --- DETEKSI KONEKSI INTERNET ---
     function updateOnlineStatus() {
         const statusEl = document.getElementById('network-status');
         if (navigator.onLine) {
-            statusEl.textContent = 'Terhubung kembali! Anda sedang online.';
+            statusEl.textContent = 'Online — Tersambung kembali ke internet.';
             statusEl.className = 'network-status online';
-            setTimeout(() => { 
-                if(navigator.onLine) statusEl.classList.remove('online'); 
-            }, 3000);
+            setTimeout(() => { if (navigator.onLine) statusEl.classList.remove('online'); }, 2500);
         } else {
-            statusEl.textContent = 'Koneksi terputus! Mode Offline aktif, data tetap tersimpan.';
+            statusEl.textContent = 'Mode Luar Jaringan (Offline) — Data tetap aman di HP.';
             statusEl.className = 'network-status offline';
         }
     }
-    
+
     window.addEventListener('online', updateOnlineStatus);
     window.addEventListener('offline', updateOnlineStatus);
-    
-    if (!navigator.onLine) {
-        updateOnlineStatus();
-    }
+    if (!navigator.onLine) updateOnlineStatus();
 
+    // Inisialisasi Service Worker PWA
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('./sw.js')
-                .then(reg => console.log('PWA Service Worker aktif:', reg.scope))
-                .catch(err => console.error('Gagal memuat Service Worker:', err));
+                .then(reg => console.log('PWA Service Worker siap:', reg.scope))
+                .catch(err => console.warn('SW Registrasi ditunda:', err));
         });
     }
-</script>
 
+    // Eksekusi Render Pertama
+    renderApp();
+</script>
 </body>
 </html>
