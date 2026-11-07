@@ -60,11 +60,13 @@
             color: var(--text-main);
             overflow-x: hidden;
             font-size: 14px;
+            width: 100%;
         }
 
-        /* App Container & Swipe Logic */
+        /* App Container & Presisi Sizing */
         #app {
-            width: 100vw;
+            width: 100%;
+            max-width: 100%;
             height: 100vh;
             display: flex;
             flex-direction: column;
@@ -82,6 +84,7 @@
             gap: 8px;
             z-index: 15;
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            flex-shrink: 0;
         }
         .route-tabs-wrapper::-webkit-scrollbar { display: none; }
         .route-tab-pill {
@@ -106,20 +109,29 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
 
+        /* Anti-Leak Slider Container */
         #swipe-container {
             display: flex;
+            width: 100%;
+            flex: 1;
             height: calc(100vh - 128px);
             transition: transform 0.28s cubic-bezier(0.25, 1, 0.5, 1);
             will-change: transform;
         }
 
+        /* Perbaikan Inti: Bebas dari bocoran pixel */
         .page {
-            min-width: 100vw;
+            width: 100%;
+            min-width: 100%;
+            max-width: 100%;
+            flex: 0 0 100%;
             height: 100%;
             overflow-y: auto;
+            overflow-x: hidden;
             background: var(--bg);
             padding-bottom: 90px;
             -webkit-overflow-scrolling: touch;
+            box-sizing: border-box;
         }
 
         /* Outdoor Optimized Headers */
@@ -156,7 +168,7 @@
         .stat-label { font-size: 0.72rem; color: #cbd5e1; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; }
         .stat-value { display: block; font-weight: 800; font-size: 1.05rem; color: #ffffff; margin-top: 2px; }
 
-        /* Bottom Nav - Thumb Zone Optimized */
+        /* Bottom Nav - Thumb Zone */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -187,7 +199,6 @@
         .nav-item:active { transform: scale(0.92); }
         .nav-item span { font-size: 0.7rem; margin-top: 4px; font-weight: 600; }
         .nav-item.active { color: var(--primary); }
-        .nav-item.active i { transform: translateY(-1px); }
 
         /* Container & Cards */
         .container { padding: 14px 16px; }
@@ -226,7 +237,7 @@
             border: 1px solid rgba(0,0,0,0.05);
         }
 
-        /* Inputs & Modern Form Elements */
+        /* Inputs & Buttons */
         input, select {
             width: 100%;
             padding: 12px 14px;
@@ -245,7 +256,6 @@
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
         }
 
-        /* Buttons & Tap States */
         .btn {
             padding: 12px 16px;
             border: none;
@@ -282,7 +292,6 @@
         .btn-icon:active { transform: scale(0.85); background: rgba(0,0,0,0.05); }
         .btn-icon.red { color: var(--danger); }
         .btn-icon.blue { color: var(--primary-light); }
-        .btn-icon.green { color: var(--success); }
 
         .flex-row { display: flex; gap: 10px; align-items: center; }
 
@@ -350,7 +359,7 @@
         .search-box input { border: none; margin: 0; padding: 10px 8px; background: transparent; font-weight: 500; }
         .search-box input:focus { box-shadow: none; }
 
-        /* Quick Increment Chip Buttons (Thumb Zone) */
+        /* Quick Increment Chip Buttons */
         .quick-chips {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -377,7 +386,6 @@
         .setor-table th, .setor-table td { border-bottom: 1px solid var(--border); padding: 10px 12px; text-align: left; }
         .setor-table th { background: #f8fafc; color: var(--text-sub); font-weight: 700; font-size: 0.75rem; text-transform: uppercase; white-space: nowrap; }
         .setor-table td { white-space: nowrap; font-weight: 500; }
-        .setor-table tr:last-child td { border-bottom: none; }
 
         .laporan-input {
             border: none;
@@ -391,7 +399,7 @@
             color: var(--primary);
         }
 
-        /* Floating Toast Notification */
+        /* Floating Toast */
         .toast {
             position: fixed;
             bottom: 75px;
@@ -414,7 +422,7 @@
         }
         .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
-        /* Network Status Banner */
+        /* Network Status */
         .network-status {
             position: fixed;
             top: 0;
@@ -432,7 +440,6 @@
         .network-status.offline { background-color: var(--danger); transform: translateY(0); }
         .network-status.online { background-color: var(--success); transform: translateY(0); }
 
-        /* Page Dots */
         .page-indicator { display: flex; justify-content: center; gap: 6px; padding: 6px; background: transparent; }
         .dot { width: 6px; height: 6px; background: #cbd5e1; border-radius: 50%; transition: 0.25s; }
         .dot.active { background: var(--primary); width: 18px; border-radius: 4px; }
@@ -463,7 +470,7 @@
     </div>
 </div>
 
-<!-- ==================== MODALS / BOTTOM SHEETS ==================== -->
+<!-- ==================== MODALS ==================== -->
 
 <!-- Modal Add Route -->
 <div class="modal" id="modal-add-route" onclick="closeModalOnBackdrop(event, 'modal-add-route')">
@@ -505,7 +512,7 @@
     </div>
 </div>
 
-<!-- Modal Warung Quick Action (Bottom Sheet) -->
+<!-- Modal Warung Quick Action -->
 <div class="modal" id="modal-warung-action" onclick="closeModalOnBackdrop(event, 'modal-warung-action')">
     <div class="modal-content">
         <div class="modal-handle"></div>
@@ -531,7 +538,7 @@
         <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-sub);">Input Nominal Poin / Pcs :</label>
         <input type="number" inputmode="numeric" id="input-action-pt" placeholder="0" style="font-size: 1.3rem; text-align: center; font-weight: 800; letter-spacing: 0.05em; padding: 8px; margin: 6px 0 2px 0;">
         
-        <!-- Ergonomic Quick Chips -->
+        <!-- Quick Chips -->
         <div class="quick-chips">
             <button class="chip-btn" onclick="appendInputVal(5)">+5</button>
             <button class="chip-btn" onclick="appendInputVal(10)">+10</button>
@@ -555,7 +562,7 @@
     </div>
 </div>
 
-<!-- Modal Setor & Laporan (High Contrast Slip) -->
+<!-- Modal Setor & Laporan -->
 <div class="modal" id="modal-setor" onclick="closeModalOnBackdrop(event, 'modal-setor')">
     <div class="modal-content" style="max-width: 540px;">
         <div class="modal-handle"></div>
@@ -783,7 +790,7 @@
             const parsed = JSON.parse(raw);
             return { ...DEFAULT_STATE, ...parsed };
         } catch (e) {
-            console.error("Gagal membaca LocalStorage, memuat default state:", e);
+            console.error("Gagal membaca LocalStorage:", e);
             return DEFAULT_STATE;
         }
     }
@@ -810,7 +817,7 @@
         if ('vibrate' in navigator) navigator.vibrate(ms);
     }
 
-    function showToast(message, type = 'info') {
+    function showToast(message) {
         const toast = document.getElementById('toast');
         const toastMsg = document.getElementById('toast-msg');
         toastMsg.innerText = message;
@@ -860,7 +867,6 @@
         });
         wrapper.innerHTML = html;
         
-        // Auto-scroll pill into view
         const activePill = wrapper.querySelector('.route-tab-pill.active');
         if (activePill) activePill.scrollIntoView({ behavior: 'smooth', inline: 'center' });
     }
@@ -1090,7 +1096,7 @@
         showToast(`${movedWarungs.length} warung dipindahkan ke ${targetRoute.name}`);
     }
 
-    // --- QUICK ACTION MODAL (BOTTOM SHEET) ---
+    // --- QUICK ACTION MODAL ---
     function openWarungActionModal(routeId, warungId) {
         triggerHaptic();
         activeRouteId = routeId;
@@ -1143,10 +1149,15 @@
         showToast(`+${pt} poin berhasil ditambahkan!`);
     }
 
-    // --- TOUCH & SWIPE LOGIC ---
+    // --- ACCURATE ANTI-LEAK NAVIGATION LOGIC ---
     let startX = 0, isDragging = false;
     const swipeContainer = document.getElementById('swipe-container');
-    
+
+    // Mendapatkan lebar piksel presisi tanpa distorsi subpixel atau scrollbar
+    function getPageWidth() {
+        return swipeContainer.offsetWidth || document.documentElement.clientWidth || window.innerWidth;
+    }
+
     swipeContainer.addEventListener('touchstart', (e) => {
         if (['INPUT', 'BUTTON', 'SELECT', 'A', 'I', 'LABEL'].includes(e.target.tagName)) return;
         startX = e.touches[0].clientX;
@@ -1166,11 +1177,29 @@
         currentPage = index;
         const totalPages = state.routes.length + 1;
         if (currentPage >= totalPages) currentPage = totalPages - 1;
-        swipeContainer.style.transform = `translateX(-${currentPage * 100}vw)`;
+        if (currentPage < 0) currentPage = 0;
+
+        // Menggunakan kalkulasi piksel akurat (Bebas bocor/geser)
+        const pageWidth = getPageWidth();
+        swipeContainer.style.transform = `translateX(-${currentPage * pageWidth}px)`;
+
         updateIndicators();
         renderRouteTabs();
         document.querySelectorAll('.bottom-nav .nav-item').forEach((el, i) => el.classList.toggle('active', i === 0 && currentPage === 0));
     }
+
+    // Koreksi otomatis jika pengguna merotasi layar smartphone
+    window.addEventListener('resize', () => {
+        swipeContainer.style.transition = 'none';
+        goToPage(currentPage);
+        setTimeout(() => {
+            swipeContainer.style.transition = 'transform 0.28s cubic-bezier(0.25, 1, 0.5, 1)';
+        }, 50);
+    });
+
+    window.addEventListener('orientationchange', () => {
+        setTimeout(() => goToPage(currentPage), 100);
+    });
 
     function updateIndicators() {
         let html = '';
@@ -1266,7 +1295,7 @@
         showToast("Urutan berhasil diubah");
     }
 
-    // --- ACCURATE GPS HANDLER ---
+    // --- ACCURATE GPS ---
     function getWarungGpsLocation() {
         if (!navigator.geolocation) return showToast("Browser tidak mendukung GPS.");
         const btn = event.currentTarget;
@@ -1358,7 +1387,7 @@
         });
     }
 
-    // --- LAPORAN SETOR & EKSPOR ---
+    // --- LAPORAN SETOR ---
     function populateSetorData() {
         const tbody = document.getElementById('setor-tbody');
         tbody.innerHTML = '';
@@ -1589,7 +1618,7 @@
         document.body.removeChild(a);
     }
 
-    // --- KEUANGAN & SALDO HARIAN ---
+    // --- KEUANGAN ---
     function openKeuanganModal() {
         document.getElementById('keq-conv-label').innerText = formatRp(state.profitConversion || 300);
         document.getElementById('input-expense-amount').value = '';
@@ -1721,7 +1750,7 @@
         }
     }
 
-    // --- PENGATURAN & ADMIN ---
+    // --- PENGATURAN ---
     function checkAdminAccess(salesNameValue) {
         const adminSection = document.getElementById('admin-settings-section');
         adminSection.style.display = (salesNameValue.trim().toLowerCase() === 'admin') ? 'block' : 'none';
@@ -1771,7 +1800,7 @@
                 closeModal('modal-settings');
                 showToast("Data cadangan berhasil dipulihkan!");
             } catch (err) {
-                showToast("Format berkas JSON tidak valid!", "danger");
+                showToast("Format berkas JSON tidak valid!");
             }
         };
         reader.readAsText(file);
@@ -1804,7 +1833,7 @@
         if (e.target.id === id) closeModal(id);
     }
 
-    // --- DETEKSI KONEKSI INTERNET ---
+    // --- DETEKSI KONEKSI ---
     function updateOnlineStatus() {
         const statusEl = document.getElementById('network-status');
         if (navigator.onLine) {
@@ -1821,16 +1850,16 @@
     window.addEventListener('offline', updateOnlineStatus);
     if (!navigator.onLine) updateOnlineStatus();
 
-    // Inisialisasi Service Worker PWA
+    // PWA Service Worker
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('./sw.js')
-                .then(reg => console.log('PWA Service Worker siap:', reg.scope))
+                .then(reg => console.log('SW siap:', reg.scope))
                 .catch(err => console.warn('SW Registrasi ditunda:', err));
         });
     }
 
-    // Eksekusi Render Pertama
+    // Render Awal
     renderApp();
 </script>
 </body>
