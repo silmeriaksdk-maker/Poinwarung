@@ -1930,4 +1930,53 @@
             document.getElementById('input-conv-setor').value = state.setorConversion;
             document.getElementById('input-conv-terpal').value = state.terpalConversion || 50;
             document.getElementById('input-conv-profit').value = state.profitConversion || 300;
-            document.getElementById('
+            document.getElementById('input-allow-manual-setor').checked = state.allowManualSetorEdit || false;
+            document.getElementById('input-setting-sales').value = state.salesName || '';
+            checkAdminAccess(state.salesName || '');
+        } else if (id === 'modal-add-warung') {
+            document.getElementById('input-warung-name').value = '';
+            document.getElementById('input-warung-maps').value = '';
+            updateRouteDropdowns();
+        }
+        document.getElementById(id).classList.add('active');
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('active');
+    }
+
+    function closeModalOnBackdrop(e, id) {
+        if (e.target.id === id) closeModal(id);
+    }
+
+    // --- DETEKSI KONEKSI ---
+    function updateOnlineStatus() {
+        const statusEl = document.getElementById('network-status');
+        if (navigator.onLine) {
+            statusEl.textContent = 'Online — Tersambung kembali ke internet.';
+            statusEl.className = 'network-status online';
+            setTimeout(() => { if (navigator.onLine) statusEl.classList.remove('online'); }, 2500);
+        } else {
+            statusEl.textContent = 'Mode Luar Jaringan (Offline) — Data tetap aman di HP.';
+            statusEl.className = 'network-status offline';
+        }
+    }
+
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+    if (!navigator.onLine) updateOnlineStatus();
+
+    // PWA Service Worker
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then(reg => console.log('SW siap:', reg.scope))
+                .catch(err => console.warn('SW Registrasi ditunda:', err));
+        });
+    }
+
+    // Render Awal
+    renderApp();
+</script>
+</body>
+</html>
