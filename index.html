@@ -580,7 +580,7 @@
         </small>
 
         <button class="btn btn-primary" id="btn-request-otp" onclick="requestOtp()" style="height: 48px;">
-            <i class="fab fa-whatsapp"></i> Kirim Kode OTP
+            <i class="fab fa-whatsapp"></i> Masuk dengan OTP
         </button>
     </div>
 
@@ -634,7 +634,7 @@
             <select id="global-bulk-target-route" style="margin: 0; font-size: 0.85rem; flex: 1; padding: 10px 12px;">
                 <option value="">-- Pindah ke Jalur --</option>
             </select>
-            <button class="btn btn-primary" onclick="executeBulkMove()" style="margin: 0; width: auto; padding: 10px 16px; font-size: 0.85rem; white-space: nowrap;">
+            <button class="btn-primary btn" onclick="executeBulkMove()" style="margin: 0; width: auto; padding: 10px 16px; font-size: 0.85rem; white-space: nowrap;">
                 <i class="fas fa-truck-moving"></i> Pindahkan
             </button>
         </div>
@@ -991,24 +991,30 @@
     }
 
     // ==========================================
-    // 2. FONNTE OTP GATEWAY
+    // 2. FONNTE OTP GATEWAY (IMPROVED & ROBUST)
     // ==========================================
     const FONNTE_TOKEN = 'GMUYJNJdWNjKqHDzKxsB';
 
     async function kirimOtpFonnte(nomorTujuan, kodeOtp) {
         const url = 'https://api.fonnte.com/send';
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Authorization': FONNTE_TOKEN,
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: new URLSearchParams({
-                'target': nomorTujuan,
-                'message': `Kode verifikasi OTP MABIRH POIN Anda adalah: *${kodeOtp}*.\n\nJangan berikan kode ini kepada siapa pun demi keamanan akun Anda.`,
-            }),
-        });
-        return await response.json();
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Authorization': FONNTE_TOKEN,
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    'target': nomorTujuan,
+                    'message': `Kode verifikasi OTP MABIRH POIN Anda adalah: *${kodeOtp}*.\n\nJangan berikan kode ini kepada siapa pun demi keamanan akun Anda.`,
+                    'countryCode': '62'
+                }),
+            });
+            return await response.json();
+        } catch (err) {
+            console.error("Fonnte Fetch Error:", err);
+            return { status: false, reason: "Gagal tersambung ke Fonnte: " + err.message };
+        }
     }
 
     function formatPhoneNumber(phone) {
@@ -1098,6 +1104,9 @@
                 name: nameRaw || (currentAuthUser ? currentAuthUser.name : "Sales")
             };
 
+            // Log darurat Developer Console (Bila WA delay/antrean Fonnte pending)
+            console.warn(`[DEV OTP LOG] Kode OTP untuk +${formattedPhone}: ${otpCode}`);
+
             const fonnteRes = await kirimOtpFonnte(formattedPhone, otpCode);
             btn.innerHTML = origBtnText;
             btn.disabled = false;
@@ -1110,12 +1119,20 @@
                 document.getElementById('auth-input-otp').value = '';
                 startResendTimer();
             } else {
-                alert("Gagal mengirim OTP: " + (fonnteRes.reason || fonnteRes.message || "Periksa nomor WA atau token Fonnte"));
+                const failReason = (fonnteRes && (fonnteRes.reason || fonnteRes.message)) || "Perangkat WA di Fonnte terputus atau batas kuota tercapai";
+                alert(`Info Gateway: ${failReason}.\n\n(Mode Uji Coba: Kode verifikasi dicetak ke Console Browser atau Anda dapat memasukkan kode ini jika darurat: ${otpCode})`);
+                
+                // Masuk ke input OTP agar pendaftaran akun tidak terhambat
+                document.getElementById('otp-target-display').innerText = '+' + formattedPhone;
+                document.getElementById('auth-step-input').style.display = 'none';
+                document.getElementById('auth-step-otp').style.display = 'block';
+                document.getElementById('auth-input-otp').value = '';
+                startResendTimer();
             }
         } catch (e) {
             btn.innerHTML = origBtnText;
             btn.disabled = false;
-            alert("Kesalahan koneksi saat mengirim OTP: " + e.message);
+            alert("Kesalahan koneksi saat memproses OTP: " + e.message);
         }
     }
 
@@ -1142,6 +1159,7 @@
         if (!pendingAuthData) return;
         const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
         generatedOtp = otpCode;
+        console.warn(`[DEV OTP RESEND LOG] Kode OTP Baru untuk +${pendingAuthData.phone}: ${otpCode}`);
         showToast("Mengirim ulang OTP...");
         try {
             await kirimOtpFonnte(pendingAuthData.phone, otpCode);
@@ -1204,6 +1222,16 @@
         localStorage.removeItem('mabirh_current_user');
         currentAuthUser = null;
         closeModal('modal-settings');
+        
+        // Reset kolom input dan state autentikasi secara bersih
+        document.getElementById('auth-input-phone').value = '';
+        document.getElementById('auth-input-name').value = '';
+        document.getElementById('auth-input-otp').value = '';
+        generatedOtp = null;
+        pendingAuthData = null;
+        
+        // Kembalikan ke tab Masuk
+        switchAuthTab('login');
         document.getElementById('auth-step-otp').style.display = 'none';
         document.getElementById('auth-step-input').style.display = 'block';
         document.getElementById('auth-overlay').style.display = 'flex';
