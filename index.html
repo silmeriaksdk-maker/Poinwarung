@@ -23,6 +23,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <!-- Firebase SDK (Compat Version) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     
     <style>
         :root {
@@ -474,6 +478,71 @@
         .page-indicator { display: flex; justify-content: center; gap: 6px; padding: 6px; background: transparent; }
         .dot { width: 6px; height: 6px; background: #cbd5e1; border-radius: 50%; transition: 0.25s; }
         .dot.active { background: var(--primary); width: 18px; border-radius: 4px; }
+
+        /* Fullscreen Auth Modal */
+        #auth-overlay {
+            position: fixed;
+            inset: 0;
+            background: #ffffff;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 24px;
+            max-width: 440px;
+            margin: auto;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+        .auth-brand {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .auth-brand i {
+            font-size: 2.8rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        .auth-brand h2 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--dark);
+        }
+        .auth-brand p {
+            color: var(--text-sub);
+            font-size: 0.85rem;
+            margin-top: 4px;
+        }
+        .auth-tabs {
+            display: flex;
+            background: #f1f5f9;
+            padding: 4px;
+            border-radius: var(--radius-md);
+            margin-bottom: 18px;
+        }
+        .auth-tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: transparent;
+            font-weight: 700;
+            font-size: 0.88rem;
+            color: var(--text-sub);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .auth-tab-btn.active {
+            background: #ffffff;
+            color: var(--primary);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+        }
+        .otp-box {
+            letter-spacing: 0.35em;
+            text-align: center;
+            font-size: 1.5rem !important;
+            font-weight: 800;
+        }
     </style>
 </head>
 <body>
@@ -483,6 +552,65 @@
 
 <!-- Toast Box -->
 <div id="toast" class="toast"><i class="fas fa-info-circle"></i><span id="toast-msg">Notifikasi</span></div>
+
+<!-- ==================== AUTH OVERLAY (LOGIN / DAFTAR + OTP) ==================== -->
+<div id="auth-overlay" style="display: none;">
+    <div class="auth-brand">
+        <i class="fas fa-layer-group"></i>
+        <h2>MABIRH POIN PRO</h2>
+        <p>Aplikasi Distribusi & Poin Penjualan</p>
+    </div>
+
+    <!-- Mode Step 1: Form Input Data -->
+    <div id="auth-step-input">
+        <div class="auth-tabs">
+            <button class="auth-tab-btn active" id="tab-btn-login" onclick="switchAuthTab('login')">Masuk</button>
+            <button class="auth-tab-btn" id="tab-btn-register" onclick="switchAuthTab('register')">Daftar Baru</button>
+        </div>
+
+        <div id="auth-group-name" style="display: none;">
+            <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-sub);">Nama Lengkap Sales</label>
+            <input type="text" id="auth-input-name" placeholder="Misal: Ahmad Fauzi" autocomplete="name">
+        </div>
+
+        <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-sub);">Nomor WhatsApp (Aktif)</label>
+        <input type="tel" id="auth-input-phone" placeholder="08xxxxxxxxxx atau 628xxxxxxxxxx" inputmode="tel" autocomplete="tel">
+        <small style="color: var(--text-sub); font-size: 0.72rem; margin-top: -4px; display: block; margin-bottom: 12px;">
+            Kode OTP verifikasi akan otomatis dikirimkan ke WhatsApp Anda.
+        </small>
+
+        <button class="btn btn-primary" id="btn-request-otp" onclick="requestOtp()" style="height: 48px;">
+            <i class="fab fa-whatsapp"></i> Kirim Kode OTP
+        </button>
+    </div>
+
+    <!-- Mode Step 2: Konfirmasi OTP -->
+    <div id="auth-step-otp" style="display: none;">
+        <div style="text-align: center; margin-bottom: 16px;">
+            <span class="badge" style="background:#e0f2fe; color:var(--primary); font-size:0.8rem; padding:6px 12px;">
+                <i class="fas fa-shield-alt"></i> Verifikasi OTP Fonnte
+            </span>
+            <p style="font-size: 0.84rem; color: var(--text-sub); margin-top: 8px;">
+                Masukkan 6 angka OTP yang kami kirimkan ke <br><strong id="otp-target-display" style="color:var(--text-main);"></strong>
+            </p>
+        </div>
+
+        <input type="number" inputmode="numeric" id="auth-input-otp" class="otp-box" placeholder="••••••" maxlength="6">
+
+        <button class="btn btn-success" id="btn-verify-otp" onclick="verifyOtp()" style="height: 48px; margin-top: 8px;">
+            <i class="fas fa-check-circle"></i> Konfirmasi & Masuk
+        </button>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px;">
+            <button class="btn-icon" onclick="backToAuthInput()" style="font-size: 0.8rem; color: var(--text-sub); font-weight: 600;">
+                <i class="fas fa-arrow-left"></i> Ganti Nomor
+            </button>
+            <button class="btn-icon" id="btn-resend-otp" onclick="resendOtp()" style="font-size: 0.8rem; color: var(--primary); font-weight: 700;">
+                Kirim Ulang OTP
+            </button>
+        </div>
+    </div>
+</div>
 
 <div id="app">
     <!-- Horizontal Route Pill Nav -->
@@ -773,6 +901,20 @@
             <button class="btn-icon" onclick="closeModal('modal-settings')"><i class="fas fa-times"></i></button>
         </div>
 
+        <!-- Profil Sales Login Info -->
+        <div style="background: #f1f5f9; padding: 12px; border-radius: var(--radius-md); margin-bottom: 14px; border: 1px solid var(--border);">
+            <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: var(--text-sub); margin-bottom: 4px;">Akun Aktif</div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <strong id="settings-current-user" style="font-size: 0.95rem; color: var(--primary);">Sales</strong>
+                    <div id="settings-current-phone" style="font-size: 0.8rem; color: var(--text-sub); font-weight: 600;">-</div>
+                </div>
+                <button class="btn btn-outline" style="width: auto; padding: 6px 12px; font-size: 0.78rem; color: var(--danger); border-color: #fca5a5;" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Keluar
+                </button>
+            </div>
+        </div>
+
         <!-- Tombol Instal Aplikasi PWA Manual -->
         <div id="pwa-install-banner" style="display:none; margin-bottom: 14px;">
             <button class="btn btn-success" onclick="triggerPWAInstall()" style="height: 48px;">
@@ -781,7 +923,7 @@
         </div>
         
         <label style="font-size:0.8rem; font-weight:600; color:var(--text-sub);">Nama Profil Sales</label>
-        <input type="text" id="input-setting-sales" placeholder="Ketik nama Anda (Ketik 'admin' untuk akses penuh)" oninput="checkAdminAccess(this.value)">
+        <input type="text" id="input-setting-sales" placeholder="Ketik nama Anda (Ketik 'admin' untuk akses konfigurasi penuh)" oninput="checkAdminAccess(this.value)">
         
         <div id="admin-settings-section" style="display: none; background: #f8fafc; padding: 12px; border-radius: var(--radius-md); border: 1.5px solid #cbd5e1; margin-top: 10px;">
             <div style="font-size: 0.82rem; font-weight: 800; color: var(--danger); margin-bottom: 8px;"><i class="fas fa-shield-alt"></i> MODE PENGATURAN ADMIN</div>
@@ -824,7 +966,253 @@
 </div>
 
 <script>
-    // --- STATE MANAGEMENT ---
+    // ==========================================
+    // 1. FIREBASE CONFIGURATION & INITIALIZATION
+    // ==========================================
+    const firebaseConfig = {
+        apiKey: "AIzaSyCt5feZsUd_RfqnYxya9lk7oU9Oa6_Gkm0",
+        authDomain: "crspoin-7f284.firebaseapp.com",
+        projectId: "crspoin-7f284",
+        storageBucket: "crspoin-7f284.firebasestorage.app",
+        messagingSenderId: "824502029606",
+        appId: "1:824502029606:web:01f76d897a9e68ab7005e7",
+        measurementId: "G-PFNDQRBTJS",
+        databaseURL: "https://crspoin-7f284-default-rtdb.firebaseio.com/"
+    };
+
+    let rtdb = null;
+    try {
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        rtdb = firebase.database();
+    } catch (err) {
+        console.error("Firebase init failed:", err);
+    }
+
+    // ==========================================
+    // 2. FONNTE OTP GATEWAY
+    // ==========================================
+    const FONNTE_TOKEN = 'GMUYJNJdWNjKqHDzKxsB';
+
+    async function kirimOtpFonnte(nomorTujuan, kodeOtp) {
+        const url = 'https://api.fonnte.com/send';
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Authorization': FONNTE_TOKEN,
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                'target': nomorTujuan,
+                'message': `Kode verifikasi OTP MABIRH POIN Anda adalah: *${kodeOtp}*.\n\nJangan berikan kode ini kepada siapa pun demi keamanan akun Anda.`,
+            }),
+        });
+        return await response.json();
+    }
+
+    function formatPhoneNumber(phone) {
+        let clean = phone.replace(/\D/g, '');
+        if (clean.startsWith('0')) {
+            clean = '62' + clean.slice(1);
+        } else if (clean.startsWith('8')) {
+            clean = '628' + clean.slice(1);
+        }
+        return clean;
+    }
+
+    // ==========================================
+    // 3. AUTHENTICATION & SESSION STATE
+    // ==========================================
+    let currentAuthUser = JSON.parse(localStorage.getItem('mabirh_current_user') || 'null');
+    let authMode = 'login'; // 'login' | 'register'
+    let generatedOtp = null;
+    let pendingAuthData = null;
+    let resendTimer = null;
+
+    function initAuth() {
+        if (!currentAuthUser || !currentAuthUser.phone) {
+            document.getElementById('auth-overlay').style.display = 'flex';
+        } else {
+            document.getElementById('auth-overlay').style.display = 'none';
+            loadUserFromCloud(currentAuthUser.phone);
+        }
+    }
+
+    function switchAuthTab(mode) {
+        authMode = mode;
+        document.getElementById('tab-btn-login').classList.toggle('active', mode === 'login');
+        document.getElementById('tab-btn-register').classList.toggle('active', mode === 'register');
+        document.getElementById('auth-group-name').style.display = mode === 'register' ? 'block' : 'none';
+        document.getElementById('btn-request-otp').innerHTML = mode === 'register' 
+            ? '<i class="fab fa-whatsapp"></i> Daftar & Kirim OTP' 
+            : '<i class="fab fa-whatsapp"></i> Masuk dengan OTP';
+    }
+
+    function backToAuthInput() {
+        document.getElementById('auth-step-otp').style.display = 'none';
+        document.getElementById('auth-step-input').style.display = 'block';
+        generatedOtp = null;
+    }
+
+    async function requestOtp() {
+        const phoneRaw = document.getElementById('auth-input-phone').value.trim();
+        const nameRaw = document.getElementById('auth-input-name').value.trim();
+
+        if (!phoneRaw) return showToast("Masukkan nomor WhatsApp Anda!");
+        const formattedPhone = formatPhoneNumber(phoneRaw);
+        if (formattedPhone.length < 10) return showToast("Format nomor WhatsApp tidak valid!");
+
+        if (authMode === 'register' && !nameRaw) {
+            return showToast("Masukkan nama lengkap sales untuk mendaftar!");
+        }
+
+        const btn = document.getElementById('btn-request-otp');
+        const origBtnText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim OTP...';
+        btn.disabled = true;
+
+        try {
+            // Periksa ketersediaan user jika rtdb aktif
+            if (rtdb) {
+                const userSnapshot = await rtdb.ref(`users/${formattedPhone}`).once('value');
+                const userExists = userSnapshot.exists();
+
+                if (authMode === 'register' && userExists) {
+                    btn.innerHTML = origBtnText;
+                    btn.disabled = false;
+                    return alert("Nomor WhatsApp ini sudah terdaftar! Silakan pilih tab 'Masuk'.");
+                }
+                if (authMode === 'login' && !userExists) {
+                    btn.innerHTML = origBtnText;
+                    btn.disabled = false;
+                    return alert("Nomor WhatsApp belum terdaftar! Silakan pilih tab 'Daftar Baru' terlebih dahulu.");
+                }
+            }
+
+            // Generate 6 Digit OTP
+            const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+            generatedOtp = otpCode;
+            pendingAuthData = {
+                phone: formattedPhone,
+                name: nameRaw || (currentAuthUser ? currentAuthUser.name : "Sales")
+            };
+
+            const fonnteRes = await kirimOtpFonnte(formattedPhone, otpCode);
+            btn.innerHTML = origBtnText;
+            btn.disabled = false;
+
+            if (fonnteRes && (fonnteRes.status === true || fonnteRes.status === "true")) {
+                showToast("Kode OTP berhasil dikirim via WhatsApp!");
+                document.getElementById('otp-target-display').innerText = '+' + formattedPhone;
+                document.getElementById('auth-step-input').style.display = 'none';
+                document.getElementById('auth-step-otp').style.display = 'block';
+                document.getElementById('auth-input-otp').value = '';
+                startResendTimer();
+            } else {
+                alert("Gagal mengirim OTP: " + (fonnteRes.reason || fonnteRes.message || "Periksa nomor WA atau token Fonnte"));
+            }
+        } catch (e) {
+            btn.innerHTML = origBtnText;
+            btn.disabled = false;
+            alert("Kesalahan koneksi saat mengirim OTP: " + e.message);
+        }
+    }
+
+    function startResendTimer() {
+        let sec = 60;
+        const btnResend = document.getElementById('btn-resend-otp');
+        btnResend.disabled = true;
+        btnResend.innerText = `Kirim ulang (${sec}s)`;
+        
+        clearInterval(resendTimer);
+        resendTimer = setInterval(() => {
+            sec--;
+            if (sec <= 0) {
+                clearInterval(resendTimer);
+                btnResend.disabled = false;
+                btnResend.innerText = "Kirim Ulang OTP";
+            } else {
+                btnResend.innerText = `Kirim ulang (${sec}s)`;
+            }
+        }, 1000);
+    }
+
+    async function resendOtp() {
+        if (!pendingAuthData) return;
+        const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+        generatedOtp = otpCode;
+        showToast("Mengirim ulang OTP...");
+        try {
+            await kirimOtpFonnte(pendingAuthData.phone, otpCode);
+            startResendTimer();
+            showToast("Kode OTP baru terkirim!");
+        } catch (err) {
+            showToast("Gagal kirim ulang OTP");
+        }
+    }
+
+    async function verifyOtp() {
+        const inputOtp = document.getElementById('auth-input-otp').value.trim();
+        if (!inputOtp || inputOtp.length !== 6) return showToast("Masukkan 6 digit kode OTP!");
+        if (inputOtp !== generatedOtp) return showToast("Kode OTP salah! Periksa kembali WhatsApp Anda.");
+
+        triggerHaptic(30);
+        const btn = document.getElementById('btn-verify-otp');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyiapkan Akun...';
+        btn.disabled = true;
+
+        try {
+            let finalName = pendingAuthData.name;
+            if (rtdb) {
+                if (authMode === 'register') {
+                    await rtdb.ref(`users/${pendingAuthData.phone}`).set({
+                        name: pendingAuthData.name,
+                        phone: pendingAuthData.phone,
+                        registeredAt: Date.now()
+                    });
+                } else {
+                    const snap = await rtdb.ref(`users/${pendingAuthData.phone}`).once('value');
+                    if (snap.exists() && snap.val().name) {
+                        finalName = snap.val().name;
+                    }
+                }
+            }
+
+            currentAuthUser = {
+                phone: pendingAuthData.phone,
+                name: finalName
+            };
+            localStorage.setItem('mabirh_current_user', JSON.stringify(currentAuthUser));
+
+            // Load data akun yang sesuai dari Realtime Database / LocalStorage
+            await loadUserFromCloud(currentAuthUser.phone, finalName);
+
+            document.getElementById('auth-overlay').style.display = 'none';
+            btn.innerHTML = '<i class="fas fa-check-circle"></i> Berhasil Masuk';
+            btn.disabled = false;
+            showToast(`Selamat datang, ${finalName}!`);
+        } catch (e) {
+            btn.innerHTML = '<i class="fas fa-check-circle"></i> Konfirmasi & Masuk';
+            btn.disabled = false;
+            alert("Gagal memverifikasi akun: " + e.message);
+        }
+    }
+
+    function logout() {
+        if (!confirm("Apakah Anda yakin ingin keluar dari akun ini? Data tersimpan aman di server.")) return;
+        localStorage.removeItem('mabirh_current_user');
+        currentAuthUser = null;
+        closeModal('modal-settings');
+        document.getElementById('auth-step-otp').style.display = 'none';
+        document.getElementById('auth-step-input').style.display = 'block';
+        document.getElementById('auth-overlay').style.display = 'flex';
+        showToast("Anda telah keluar akun.");
+    }
+
+    // ==========================================
+    // 4. MULTI-USER STATE & RTDB SYNC
+    // ==========================================
     const DEFAULT_STATE = {
         mainConversion: 30,
         setorConversion: 1200,
@@ -839,26 +1227,56 @@
         salesName: ""
     };
 
-    let state = loadInitialState();
+    let state = { ...DEFAULT_STATE };
     let currentPage = 0;
     let activeRouteId = null;
     let activeWarungId = null;
 
-    function loadInitialState() {
+    async function loadUserFromCloud(phone, fallbackName = "") {
+        const userStorageKey = `warungApp_${phone}`;
+        let localData = null;
         try {
-            const raw = localStorage.getItem('warungApp');
-            if (!raw) return DEFAULT_STATE;
-            const parsed = JSON.parse(raw);
-            return { ...DEFAULT_STATE, ...parsed };
-        } catch (e) {
-            console.error("Gagal membaca LocalStorage:", e);
-            return DEFAULT_STATE;
+            const raw = localStorage.getItem(userStorageKey);
+            if (raw) localData = JSON.parse(raw);
+        } catch (e) { console.error(e); }
+
+        if (rtdb) {
+            try {
+                const snapshot = await rtdb.ref(`data/${phone}`).once('value');
+                if (snapshot.exists()) {
+                    state = { ...DEFAULT_STATE, ...snapshot.val() };
+                } else if (localData) {
+                    state = { ...DEFAULT_STATE, ...localData };
+                    rtdb.ref(`data/${phone}`).set(state);
+                } else {
+                    state = { ...DEFAULT_STATE, salesName: fallbackName || currentAuthUser?.name || "" };
+                    rtdb.ref(`data/${phone}`).set(state);
+                }
+            } catch (err) {
+                console.warn("RTDB offline, pakai data lokal:", err);
+                state = localData ? { ...DEFAULT_STATE, ...localData } : { ...DEFAULT_STATE, salesName: fallbackName };
+            }
+        } else {
+            state = localData ? { ...DEFAULT_STATE, ...localData } : { ...DEFAULT_STATE, salesName: fallbackName };
         }
+
+        if (currentAuthUser && currentAuthUser.name) {
+            state.salesName = currentAuthUser.name;
+        }
+
+        renderApp();
     }
 
     function saveData() {
+        if (!currentAuthUser || !currentAuthUser.phone) return;
+        const userStorageKey = `warungApp_${currentAuthUser.phone}`;
+
         try {
-            localStorage.setItem('warungApp', JSON.stringify(state));
+            localStorage.setItem(userStorageKey, JSON.stringify(state));
+            // Sinkronisasi Realtime Database
+            if (rtdb && navigator.onLine) {
+                rtdb.ref(`data/${currentAuthUser.phone}`).set(state);
+            }
             renderApp();
         } catch (err) {
             showToast("Memori lokal penuh atau gagal disimpan!");
@@ -898,6 +1316,11 @@
 
     function updateSalesName(val) {
         state.salesName = val.trim();
+        if (currentAuthUser) {
+            currentAuthUser.name = state.salesName;
+            localStorage.setItem('mabirh_current_user', JSON.stringify(currentAuthUser));
+            if (rtdb) rtdb.ref(`users/${currentAuthUser.phone}/name`).set(state.salesName);
+        }
         saveData();
     }
 
@@ -914,7 +1337,7 @@
         const container = document.getElementById('swipe-container');
         container.innerHTML = '';
         renderMainPage(container);
-        state.routes.forEach((route, index) => renderRoutePage(container, route, index + 1));
+        (state.routes || []).forEach((route, index) => renderRoutePage(container, route, index + 1));
         updateRouteDropdowns();
         updateIndicators();
         goToPage(currentPage);
@@ -923,7 +1346,7 @@
     function renderRouteTabs() {
         const wrapper = document.getElementById('route-tabs');
         let html = `<button class="route-tab-pill ${currentPage === 0 ? 'active' : ''}" onclick="goToPage(0)"><i class="fas fa-home"></i> Beranda</button>`;
-        state.routes.forEach((r, idx) => {
+        (state.routes || []).forEach((r, idx) => {
             html += `<button class="route-tab-pill ${currentPage === (idx + 1) ? 'active' : ''}" onclick="goToPage(${idx + 1})">${r.name}</button>`;
         });
         wrapper.innerHTML = html;
@@ -935,9 +1358,9 @@
     function renderMainPage(container) {
         let totalWarung = 0, totalPoin = 0;
         let allWarungs = [];
-        state.routes.forEach(r => {
-            totalWarung += r.warungs.length;
-            r.warungs.forEach(w => {
+        (state.routes || []).forEach(r => {
+            totalWarung += (r.warungs || []).length;
+            (r.warungs || []).forEach(w => {
                 totalPoin += (w.points || 0);
                 allWarungs.push({ routeName: r.name, routeId: r.id, ...w });
             });
@@ -980,7 +1403,7 @@
                 <div class="header-title">
                     <div>
                         <span style="display: flex; align-items: center; gap: 6px;"><i class="fas fa-layer-group"></i> MABIRH POIN</span>
-                        <span style="font-size: 0.75rem; font-weight: 500; opacity: 0.85;"><i class="fas fa-user-circle"></i> Sales: ${state.salesName || '-'}</span>
+                        <span style="font-size: 0.75rem; font-weight: 500; opacity: 0.85;"><i class="fas fa-user-circle"></i> Sales: ${state.salesName || (currentAuthUser?.name) || '-'}</span>
                     </div>
                     <div style="display: flex; gap: 6px;">
                         <button class="btn btn-success" style="width: auto; padding: 7px 12px; font-size: 0.8rem; margin:0;" onclick="openSetorModal()"><i class="fas fa-cash-register"></i> Setor</button>
@@ -998,7 +1421,7 @@
                     <i class="fas fa-search" style="color: #94a3b8; font-size: 0.9rem;"></i>
                     <select id="main-search-route" style="border:none; width:40%; background:transparent; font-size:0.82rem; font-weight:600;" onchange="updateMainWarungSearch()">
                         <option value="">Semua Jalur</option>
-                        ${state.routes.map(r => `<option value="${r.id}">${r.name}</option>`).join('')}
+                        ${(state.routes || []).map(r => `<option value="${r.id}">${r.name}</option>`).join('')}
                     </select>
                     <select id="main-search-warung" style="border:none; width:55%; background:transparent; font-size:0.82rem; font-weight:600;" onchange="executeMainSearch()">
                         <option value="">Pilih Warung Cepat</option>
@@ -1018,6 +1441,7 @@
     }
 
     function renderRoutePage(container, route, pageIndex) {
+        if (!route.warungs) route.warungs = [];
         route.warungs.sort((a, b) => a.order - b.order);
         let rWarung = route.warungs.length;
         let rPoin = route.warungs.reduce((sum, w) => sum + (w.points || 0), 0);
@@ -1168,7 +1592,7 @@
         activeRouteId = routeId;
         activeWarungId = warungId;
         const route = state.routes.find(r => r.id === routeId);
-        const w = route.warungs.find(w => w.id === warungId);
+        const w = route?.warungs.find(w => w.id === warungId);
         if (!w) return;
 
         document.getElementById('action-warung-title').innerText = w.name;
@@ -1219,7 +1643,7 @@
     const swipeContainer = document.getElementById('swipe-container');
 
     function goToPage(index, animate = true) {
-        const totalPages = state.routes.length + 1;
+        const totalPages = (state.routes || []).length + 1;
         if (index >= totalPages) index = totalPages - 1;
         if (index < 0) index = 0;
         currentPage = index;
@@ -1284,7 +1708,7 @@
 
         if (!isHorizontal) return;
 
-        const totalPages = state.routes.length + 1;
+        const totalPages = (state.routes || []).length + 1;
         let dragOffset = diffX;
         if ((currentPage === 0 && diffX > 0) || (currentPage === totalPages - 1 && diffX < 0)) {
             dragOffset = diffX * 0.28;
@@ -1311,7 +1735,7 @@
 
         const diffX = currentX - startX;
         const threshold = 48;
-        const totalPages = state.routes.length + 1;
+        const totalPages = (state.routes || []).length + 1;
 
         if (diffX < -threshold && currentPage < totalPages - 1) {
             goToPage(currentPage + 1, true);
@@ -1327,7 +1751,7 @@
 
     function updateIndicators() {
         let html = '';
-        for (let i = 0; i < state.routes.length + 1; i++) {
+        for (let i = 0; i < (state.routes || []).length + 1; i++) {
             html += `<div class="dot ${i === currentPage ? 'active' : ''}"></div>`;
         }
         document.getElementById('page-indicator').innerHTML = html;
@@ -1338,6 +1762,7 @@
         const input = document.getElementById('input-route-name');
         const name = input.value.trim();
         if (!name) return showToast("Nama jalur tidak boleh kosong!");
+        if (!state.routes) state.routes = [];
         state.routes.push({ id: 'r_' + Date.now(), name: name, warungs: [] });
         input.value = '';
         closeModal('modal-add-route');
@@ -1373,6 +1798,7 @@
         if (!routeId || !name) return showToast("Pilih jalur dan masukkan nama warung!");
 
         const route = state.routes.find(r => r.id === routeId);
+        if (!route.warungs) route.warungs = [];
         route.warungs.push({
             id: 'w_' + Date.now(),
             name: name,
@@ -1461,7 +1887,7 @@
         const select = document.getElementById('select-route-add');
         if (select) {
             select.innerHTML = '<option value="">-- Pilih Jalur --</option>' + 
-                state.routes.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
+                (state.routes || []).map(r => `<option value="${r.id}">${r.name}</option>`).join('');
         }
     }
 
@@ -1470,16 +1896,17 @@
         const wSelect = document.getElementById('main-search-warung');
         if (!rId) {
             let options = '<option value="">Pilih Warung Cepat</option>';
-            state.routes.forEach(r => {
-                r.warungs.forEach(w => {
+            (state.routes || []).forEach(r => {
+                (r.warungs || []).forEach(w => {
                     options += `<option value="${r.id}|${w.id}">${w.name} (${r.name})</option>`;
                 });
             });
             wSelect.innerHTML = options;
             return;
         }
+        const selRoute = state.routes.find(r => r.id === rId);
         wSelect.innerHTML = '<option value="">Pilih Warung Cepat</option>' + 
-            state.routes.find(r => r.id === rId).warungs.map(w => `<option value="${rId}|${w.id}">${w.name}</option>`).join('');
+            (selRoute ? selRoute.warungs.map(w => `<option value="${rId}|${w.id}">${w.name}</option>`).join('') : '');
     }
 
     function executeMainSearch() {
@@ -1517,8 +1944,8 @@
         let count = 1;
         const maxPcs = state.terpalConversion || 50;
 
-        state.routes.forEach(route => {
-            route.warungs.forEach(w => {
+        (state.routes || []).forEach(route => {
+            (route.warungs || []).forEach(w => {
                 if (w.setorPoints && w.setorPoints > 0) {
                     let rp = w.setorPoints * state.setorConversion;
                     let sisa = maxPcs - w.setorPoints;
@@ -1546,7 +1973,7 @@
             tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-sub); padding:18px;">Belum ada data barang disetor.</td></tr>';
         }
 
-        document.getElementById('laporan-sales-name').value = state.salesName || '';
+        document.getElementById('laporan-sales-name').value = state.salesName || (currentAuthUser?.name) || '';
         let today = new Date();
         document.getElementById('setor-date').innerText = `LAPORAN SETORAN (${today.getDate()}/${today.getMonth()+1}/${today.getFullYear()})`;
         calculateSetorTotals();
@@ -1602,8 +2029,8 @@
         let grossTotal = 0, totalTerjual = 0, totalSisa = 0;
         const maxPcs = state.terpalConversion || 50;
 
-        state.routes.forEach(route => {
-            route.warungs.forEach(w => {
+        (state.routes || []).forEach(route => {
+            (route.warungs || []).forEach(w => {
                 if (w.setorPoints && w.setorPoints > 0) {
                     grossTotal += (w.setorPoints * state.setorConversion);
                     totalTerjual += w.setorPoints;
@@ -1646,7 +2073,7 @@
 
     function deleteAllSetor() {
         if (confirm("Reset seluruh data setor dan pengeluaran hari ini?")) {
-            state.routes.forEach(r => r.warungs.forEach(w => w.setorPoints = 0));
+            (state.routes || []).forEach(r => (r.warungs || []).forEach(w => w.setorPoints = 0));
             state.setorExpenses = [];
             saveData();
             populateSetorData();
@@ -1708,7 +2135,7 @@
             <tbody>`;
 
         let count = 1, gt = 0, tt = 0, ts = 0;
-        state.routes.forEach(r => r.warungs.forEach(w => {
+        (state.routes || []).forEach(r => (r.warungs || []).forEach(w => {
             if (w.setorPoints && w.setorPoints > 0) {
                 let rp = w.setorPoints * state.setorConversion;
                 let sisa = maxPcs - w.setorPoints;
@@ -1752,7 +2179,7 @@
 
     function getTotalTerjualPcs() {
         let total = 0;
-        state.routes.forEach(r => r.warungs.forEach(w => {
+        (state.routes || []).forEach(r => (r.warungs || []).forEach(w => {
             if (w.setorPoints && w.setorPoints > 0) total += w.setorPoints;
         }));
         return total;
@@ -1776,7 +2203,7 @@
 
         const expTbody = document.getElementById('expense-tbody');
         expTbody.innerHTML = '';
-        if (state.expenses.length === 0) {
+        if (!state.expenses || state.expenses.length === 0) {
             expTbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-sub); padding:10px;">Belum ada pengeluaran dicatat.</td></tr>';
         } else {
             state.expenses.forEach((ex, idx) => {
@@ -1814,6 +2241,7 @@
 
         if (isNaN(amount) || amount <= 0) return showToast("Masukkan nominal pengeluaran!");
 
+        if (!state.expenses) state.expenses = [];
         state.expenses.push({ category, amount, note });
         saveData();
         renderKeuanganData();
@@ -1840,24 +2268,25 @@
         const saldoAwal = state.saldo || 0;
         
         let totalExpense = 0;
-        state.expenses.forEach(e => totalExpense += Number(e.amount));
+        (state.expenses || []).forEach(e => totalExpense += Number(e.amount));
         const finalSaldo = profit + saldoAwal - totalExpense;
 
         let today = new Date();
         let dateStr = `${today.getDate()}/${today.getMonth()+1}/${today.getFullYear()}`;
 
+        if (!state.history) state.history = [];
         state.history.push({
             date: dateStr,
             profit: profit,
             totalExpense: totalExpense,
             finalSaldo: finalSaldo,
-            expenses: [...state.expenses]
+            expenses: [...(state.expenses || [])]
         });
 
         state.saldo = finalSaldo;
         state.expenses = [];
         state.setorExpenses = [];
-        state.routes.forEach(r => r.warungs.forEach(w => w.setorPoints = 0));
+        (state.routes || []).forEach(r => (r.warungs || []).forEach(w => w.setorPoints = 0));
 
         saveData();
         renderKeuanganData();
@@ -1892,7 +2321,9 @@
         if (!isNaN(t) && t > 0) state.terpalConversion = t;
         if (!isNaN(p) && p >= 0) state.profitConversion = p;
         state.allowManualSetorEdit = manualSetor;
-        if (sales.toLowerCase() !== 'admin') state.salesName = sales;
+        if (sales && sales.toLowerCase() !== 'admin') {
+            updateSalesName(sales);
+        }
 
         saveData();
         closeModal('modal-settings');
@@ -1937,7 +2368,9 @@
             document.getElementById('input-conv-terpal').value = state.terpalConversion || 50;
             document.getElementById('input-conv-profit').value = state.profitConversion || 300;
             document.getElementById('input-allow-manual-setor').checked = state.allowManualSetorEdit || false;
-            document.getElementById('input-setting-sales').value = state.salesName || '';
+            document.getElementById('input-setting-sales').value = state.salesName || (currentAuthUser?.name) || '';
+            document.getElementById('settings-current-user').innerText = state.salesName || (currentAuthUser?.name) || 'Sales';
+            document.getElementById('settings-current-phone').innerText = currentAuthUser?.phone ? ('+' + currentAuthUser.phone) : 'Offline';
             checkAdminAccess(state.salesName || '');
             
             // Cek tombol instal PWA
@@ -1966,9 +2399,12 @@
     function updateOnlineStatus() {
         const statusEl = document.getElementById('network-status');
         if (navigator.onLine) {
-            statusEl.textContent = 'Online — Tersambung kembali ke internet.';
+            statusEl.textContent = 'Online — Tersambung ke Cloud Database.';
             statusEl.className = 'network-status online';
             setTimeout(() => { if (navigator.onLine) statusEl.classList.remove('online'); }, 2500);
+            if (currentAuthUser && currentAuthUser.phone) {
+                saveData(); // Sinkronisasi otomatis saat online kembali
+            }
         } else {
             statusEl.textContent = 'Mode Luar Jaringan (Offline) — Data tetap aman di HP.';
             statusEl.className = 'network-status offline';
@@ -1980,15 +2416,13 @@
     if (!navigator.onLine) updateOnlineStatus();
 
     // ==========================================
-    // PWA INSTALLATION & SERVICE WORKER HANDLER
+    // 5. PWA INSTALLATION & SERVICE WORKER
     // ==========================================
     let deferredPrompt = null;
 
     window.addEventListener('beforeinstallprompt', (e) => {
-        // Cegah Chrome mini-infobar default
         e.preventDefault();
         deferredPrompt = e;
-        console.log('PWA siap dipasang, prompt ditangkap.');
         const banner = document.getElementById('pwa-install-banner');
         if (banner) banner.style.display = 'block';
     });
@@ -2016,21 +2450,16 @@
         if (banner) banner.style.display = 'none';
     });
 
-    // PWA Service Worker Registration
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('./sw.js')
-                .then(reg => {
-                    console.log('SW terdaftar dengan sukses:', reg.scope);
-                    reg.update(); // Selalu periksa pembaharuan SW saat dibuka
-                })
+                .then(reg => reg.update())
                 .catch(err => console.warn('SW Registrasi ditunda:', err));
         });
     }
 
-    // Fungsi Darurat: Bersihkan Seluruh Cache Browser & Reset Service Worker
     async function resetServiceWorkerAndCache() {
-        if (!confirm("Fitur ini akan membersihkan cache browser dan me-refresh aplikasi agar bisa diinstal ulang tanpa macet. Data warung & omset Anda tetap aman.\n\nLanjutkan?")) return;
+        if (!confirm("Fitur ini akan membersihkan cache browser dan me-refresh aplikasi. Data di akun Anda tetap tersimpan aman di Cloud.\n\nLanjutkan?")) return;
         
         try {
             if ('serviceWorker' in navigator) {
@@ -2054,8 +2483,8 @@
         }
     }
 
-    // Inisialisasi Render Awal
-    renderApp();
+    // Jalankan sistem autentikasi awal
+    initAuth();
 </script>
 </body>
 </html>
