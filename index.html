@@ -333,7 +333,7 @@
         .btn-icon.red { color: var(--danger); }
         .btn-icon.blue { color: var(--primary-light); }
 
-        .flex-row { display: flex; gap: 10px; align-items: center; }
+        .flex-row { display: flex; gap: 8px; align-items: center; }
 
         /* Modals */
         .modal {
@@ -691,7 +691,7 @@
     </div>
 </div>
 
-<!-- Modal Warung Action -->
+<!-- Modal Warung Action (Dengan Tombol Lewat & Indikator Kunjungan) -->
 <div class="modal" id="modal-warung-action" onclick="closeModalOnBackdrop(event, 'modal-warung-action')">
     <div class="modal-content">
         <div class="modal-handle"></div>
@@ -703,7 +703,7 @@
             <button class="btn-icon" onclick="closeModal('modal-warung-action')"><i class="fas fa-times"></i></button>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0 6px 0;">
             <div style="text-align: center; background: #eff6ff; padding: 10px; border-radius: var(--radius-md); border: 1px solid #bfdbfe;">
                 <span style="color: var(--primary); font-size: 0.72rem; font-weight: 700; text-transform: uppercase;">Poin Utama</span><br>
                 <strong id="action-warung-points" style="font-size: 1.4rem; color: var(--primary); font-weight: 800;">0</strong>
@@ -711,6 +711,15 @@
             <div style="text-align: center; background: #f0fdf4; padding: 10px; border-radius: var(--radius-md); border: 1px solid #bbf7d0;">
                 <span style="color: var(--success); font-size: 0.72rem; font-weight: 700; text-transform: uppercase;">Setor (Pcs)</span><br>
                 <strong id="action-warung-setor" style="font-size: 1.4rem; color: var(--success); font-weight: 800;">0 Pcs</strong>
+            </div>
+        </div>
+
+        <!-- Rekam Jejak Kunjungan Bayar vs Lewat -->
+        <div style="display: flex; justify-content: space-between; align-items: center; background: #f8fafc; border: 1px solid var(--border); padding: 7px 12px; border-radius: var(--radius-md); margin-bottom: 12px;">
+            <span style="font-size: 0.75rem; font-weight: 600; color: var(--text-sub);"><i class="fas fa-history" style="color: var(--primary);"></i> Rekor Kedisiplinan:</span>
+            <div style="display: flex; gap: 8px; font-size: 0.78rem; font-weight: 800;">
+                <span id="action-warung-bayar" style="color: var(--success);"><i class="fas fa-check-circle"></i> 0x Bayar</span>
+                <span id="action-warung-lewat" style="color: var(--danger);"><i class="fas fa-times-circle"></i> 0x Lewat</span>
             </div>
         </div>
         
@@ -724,9 +733,17 @@
             <button class="chip-btn" onclick="appendInputVal(50)">+50</button>
         </div>
 
-        <div class="flex-row" style="gap: 10px;">
-            <button class="btn btn-primary" onclick="executeAddPoints(false)" style="flex: 1; height: 48px;"><i class="fas fa-plus"></i> Tambah Poin</button>
-            <button class="btn btn-warning" onclick="executeAddPoints(true)" style="flex: 1; height: 48px; font-weight: 800;"><i class="fas fa-dollar-sign"></i> Tombol ($)</button>
+        <!-- 3 Tombol Aksi: Tambah Poin, Setor ($), dan Lewat -->
+        <div class="flex-row" style="gap: 8px; margin-top: 6px;">
+            <button class="btn btn-primary" onclick="executeAddPoints(false)" style="flex: 1; height: 46px; font-size: 0.85rem; padding: 8px 4px;" title="Tambah poin tanpa bayar tunai">
+                <i class="fas fa-plus"></i> Tambah
+            </button>
+            <button class="btn btn-warning" onclick="executeAddPoints(true)" style="flex: 1.1; height: 46px; font-size: 0.85rem; font-weight: 800; padding: 8px 4px;" title="Setor tunai lunas">
+                <i class="fas fa-dollar-sign"></i> Setor ($)
+            </button>
+            <button class="btn btn-danger" onclick="executeLewat()" style="flex: 0.95; height: 46px; font-size: 0.85rem; font-weight: 700; padding: 8px 4px;" title="Catat kunjungan lewat / tidak setor">
+                <i class="fas fa-times-circle"></i> Lewat
+            </button>
         </div>
         
         <hr style="margin: 16px 0; border: 0; border-top: 1px solid var(--border);">
@@ -991,7 +1008,7 @@
     }
 
     // ==========================================
-    // 2. FONNTE OTP GATEWAY (IMPROVED & ROBUST)
+    // 2. FONNTE OTP GATEWAY
     // ==========================================
     const FONNTE_TOKEN = 'GMUYJNJdWNjKqHDzKxsB';
 
@@ -1079,7 +1096,6 @@
         btn.disabled = true;
 
         try {
-            // Periksa ketersediaan user jika rtdb aktif
             if (rtdb) {
                 const userSnapshot = await rtdb.ref(`users/${formattedPhone}`).once('value');
                 const userExists = userSnapshot.exists();
@@ -1096,7 +1112,6 @@
                 }
             }
 
-            // Generate 6 Digit OTP
             const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
             generatedOtp = otpCode;
             pendingAuthData = {
@@ -1104,7 +1119,6 @@
                 name: nameRaw || (currentAuthUser ? currentAuthUser.name : "Sales")
             };
 
-            // Log darurat Developer Console (Bila WA delay/antrean Fonnte pending)
             console.warn(`[DEV OTP LOG] Kode OTP untuk +${formattedPhone}: ${otpCode}`);
 
             const fonnteRes = await kirimOtpFonnte(formattedPhone, otpCode);
@@ -1119,10 +1133,9 @@
                 document.getElementById('auth-input-otp').value = '';
                 startResendTimer();
             } else {
-                const failReason = (fonnteRes && (fonnteRes.reason || fonnteRes.message)) || "Perangkat WA di Fonnte terputus atau batas kuota tercapai";
-                alert(`Info Gateway: ${failReason}.\n\n(Mode Uji Coba: Kode verifikasi dicetak ke Console Browser atau Anda dapat memasukkan kode ini jika darurat: ${otpCode})`);
+                const failReason = (fonnteRes && (fonnteRes.reason || fonnteRes.message)) || "Perangkat WA di Fonnte terputus atau kuota pesan habis";
+                alert(`Info Gateway: ${failReason}.\n\n(Mode Uji Coba: Kode verifikasi: ${otpCode})`);
                 
-                // Masuk ke input OTP agar pendaftaran akun tidak terhambat
                 document.getElementById('otp-target-display').innerText = '+' + formattedPhone;
                 document.getElementById('auth-step-input').style.display = 'none';
                 document.getElementById('auth-step-otp').style.display = 'block';
@@ -1203,7 +1216,6 @@
             };
             localStorage.setItem('mabirh_current_user', JSON.stringify(currentAuthUser));
 
-            // Load data akun yang sesuai dari Realtime Database / LocalStorage
             await loadUserFromCloud(currentAuthUser.phone, finalName);
 
             document.getElementById('auth-overlay').style.display = 'none';
@@ -1223,14 +1235,12 @@
         currentAuthUser = null;
         closeModal('modal-settings');
         
-        // Reset kolom input dan state autentikasi secara bersih
         document.getElementById('auth-input-phone').value = '';
         document.getElementById('auth-input-name').value = '';
         document.getElementById('auth-input-otp').value = '';
         generatedOtp = null;
         pendingAuthData = null;
         
-        // Kembalikan ke tab Masuk
         switchAuthTab('login');
         document.getElementById('auth-step-otp').style.display = 'none';
         document.getElementById('auth-step-input').style.display = 'block';
@@ -1301,7 +1311,7 @@
 
         try {
             localStorage.setItem(userStorageKey, JSON.stringify(state));
-            // Sinkronisasi Realtime Database
+            // Sinkronisasi Realtime Database ke Firebase
             if (rtdb && navigator.onLine) {
                 rtdb.ref(`data/${currentAuthUser.phone}`).set(state);
             }
@@ -1515,6 +1525,9 @@
         
         const renameBtn = `<button class="btn-icon blue" onclick="event.stopPropagation(); renameWarung('${routeId}', '${w.id}')" title="Ubah Nama"><i class="fas fa-pen-square"></i></button>`;
 
+        const bayarCount = w.bayarCount || 0;
+        const lewatCount = w.lewatCount || 0;
+
         return `
             <div class="card warung-item" data-name="${w.name.toLowerCase()}" onclick="openWarungActionModal('${routeId}', '${w.id}')">
                 <div class="card-header">
@@ -1531,6 +1544,12 @@
                     <div>
                         <span style="font-size: 0.7rem; color: var(--text-sub); font-weight:600; text-transform:uppercase;">Poin Utama</span>
                         <strong style="font-size: 1.05rem; color: var(--primary); display:block; font-weight:800;">${w.points}</strong>
+                    </div>
+                    <div style="text-align: center;">
+                        <span style="font-size: 0.7rem; color: var(--text-sub); font-weight:600; text-transform:uppercase;">Disiplin</span>
+                        <span style="font-size: 0.75rem; font-weight: 700; display:block; color: var(--text-main);">
+                            <span style="color:var(--success);">${bayarCount}x Bayar</span> / <span style="color:var(--danger);">${lewatCount}x Lewat</span>
+                        </span>
                     </div>
                     <div style="text-align: right;">
                         <span style="font-size: 0.7rem; color: var(--text-sub); font-weight:600; text-transform:uppercase;">Angka Setor</span>
@@ -1627,6 +1646,8 @@
         document.getElementById('action-warung-route').innerText = `Jalur: ${route.name}`;
         document.getElementById('action-warung-points').innerText = w.points;
         document.getElementById('action-warung-setor').innerText = (w.setorPoints || 0) + ' Pcs';
+        document.getElementById('action-warung-bayar').innerHTML = `<i class="fas fa-check-circle"></i> ${(w.bayarCount || 0)}x Bayar`;
+        document.getElementById('action-warung-lewat').innerHTML = `<i class="fas fa-times-circle"></i> ${(w.lewatCount || 0)}x Lewat`;
         document.getElementById('input-action-pt').value = '';
 
         document.getElementById('btn-action-maps').onclick = () => { editMaps(routeId, warungId); refreshActionModal(routeId, warungId); };
@@ -1642,6 +1663,8 @@
         if (w) {
             document.getElementById('action-warung-points').innerText = w.points;
             document.getElementById('action-warung-setor').innerText = (w.setorPoints || 0) + ' Pcs';
+            document.getElementById('action-warung-bayar').innerHTML = `<i class="fas fa-check-circle"></i> ${(w.bayarCount || 0)}x Bayar`;
+            document.getElementById('action-warung-lewat').innerHTML = `<i class="fas fa-times-circle"></i> ${(w.lewatCount || 0)}x Lewat`;
         }
     }
 
@@ -1659,12 +1682,32 @@
         if (isDollarButton) {
             if (w.setorPoints === undefined) w.setorPoints = 0;
             w.setorPoints += pt;
+
+            if (w.bayarCount === undefined) w.bayarCount = 0;
+            w.bayarCount += 1;
         }
 
         saveData();
         refreshActionModal(activeRouteId, activeWarungId);
         ptInput.value = '';
-        showToast(`+${pt} poin berhasil ditambahkan!`);
+        showToast(isDollarButton ? `+${pt} poin & setor ($) berhasil dicatat!` : `+${pt} poin berhasil ditambahkan!`);
+    }
+
+    function executeLewat() {
+        triggerHaptic(30);
+        const route = state.routes.find(r => r.id === activeRouteId);
+        const w = route?.warungs.find(w => w.id === activeWarungId);
+        if (!w) return;
+
+        if (!confirm(`Catat status LEWAT (tidak setor/tunda bayar) untuk toko "${w.name}"?`)) return;
+
+        if (w.lewatCount === undefined) w.lewatCount = 0;
+        w.lewatCount += 1;
+
+        saveData();
+        refreshActionModal(activeRouteId, activeWarungId);
+        closeModal('modal-warung-action');
+        showToast(`Status LEWAT tercatat untuk "${w.name}"!`);
     }
 
     // --- TRANSITION ENGINE ---
@@ -1832,6 +1875,8 @@
             name: name,
             points: 0,
             setorPoints: 0,
+            bayarCount: 0,
+            lewatCount: 0,
             maps: maps,
             order: route.warungs.length + 1
         });
@@ -1845,7 +1890,8 @@
 
     function resetPoints(rId, wId) {
         if (confirm("Reset poin warung ini kembali ke 0?")) {
-            state.routes.find(r => r.id === rId).warungs.find(w => w.id === wId).points = 0;
+            const w = state.routes.find(r => r.id === rId).warungs.find(w => w.id === wId);
+            w.points = 0;
             saveData();
             showToast("Poin direset!");
         }
@@ -2401,7 +2447,6 @@
             document.getElementById('settings-current-phone').innerText = currentAuthUser?.phone ? ('+' + currentAuthUser.phone) : 'Offline';
             checkAdminAccess(state.salesName || '');
             
-            // Cek tombol instal PWA
             const installBanner = document.getElementById('pwa-install-banner');
             if (deferredPrompt) {
                 installBanner.style.display = 'block';
@@ -2431,7 +2476,7 @@
             statusEl.className = 'network-status online';
             setTimeout(() => { if (navigator.onLine) statusEl.classList.remove('online'); }, 2500);
             if (currentAuthUser && currentAuthUser.phone) {
-                saveData(); // Sinkronisasi otomatis saat online kembali
+                saveData();
             }
         } else {
             statusEl.textContent = 'Mode Luar Jaringan (Offline) — Data tetap aman di HP.';
