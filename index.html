@@ -284,9 +284,11 @@
             letter-spacing: 0.03em;
         }
         .grade-s { background: linear-gradient(135deg, #7c3aed, #4f46e5); color: #ffffff; box-shadow: 0 2px 6px rgba(124,58,237,0.3); }
-        .grade-a { background: linear-gradient(135deg, #d97706, #f59e0b); color: #ffffff; box-shadow: 0 2px 6px rgba(245,158,11,0.3); }
+        .grade-a { background: linear-gradient(135deg, #059669, #10b981); color: #ffffff; box-shadow: 0 2px 6px rgba(16,185,129,0.3); }
         .grade-b { background: linear-gradient(135deg, #0284c7, #38bdf8); color: #ffffff; }
-        .grade-c { background: #e2e8f0; color: #475569; }
+        .grade-c { background: linear-gradient(135deg, #d97706, #f59e0b); color: #ffffff; }
+        .grade-d { background: #ea580c; color: #ffffff; }
+        .grade-e { background: #dc2626; color: #ffffff; }
 
         input, select {
             width: 100%;
@@ -1427,13 +1429,72 @@
         input.value = cur + val;
     }
 
-    // Hitung Grade Warung (Diamond/Grade S, Platinum/Grade A, Gold/Grade B, Silver/Grade C)
-    function getWarungGrade(points) {
-        const pts = points || 0;
-        if (pts >= 300) return { grade: 'Grade S', icon: 'fa-gem', class: 'grade-s' };
-        if (pts >= 150) return { grade: 'Grade A', icon: 'fa-crown', class: 'grade-a' };
-        if (pts >= 50)  return { grade: 'Grade B', icon: 'fa-star', class: 'grade-b' };
-        return { grade: 'Grade C', icon: 'fa-shield-alt', class: 'grade-c' };
+    // ========================================================
+    // PERHITUNGAN GRADE BERTINGKAT BERDASARKAN TOMBOL ($) VS LEWAT
+    // ========================================================
+    function calculateWarungWinrate(warung) {
+        const bayar = warung.bayarCount || 0;
+        const lewat = warung.lewatCount || 0;
+        const total = bayar + lewat;
+
+        if (total === 0) return 0;
+
+        // Jika konsisten bayar tanpa ada lewat:
+        // 1x s/d 10x bayar = 100%, ketika mencapai 11x tanpa lewat mencapai 110% (batas tertinggi)
+        if (lewat === 0) {
+            return bayar >= 11 ? 110 : 100;
+        }
+
+        // Jika ada lewat, rumus winrate: (bayar / total) * 100 (misal: 1x bayar - 1x lewat = 50%)
+        let rate = (bayar / total) * 100;
+        return Math.round(rate * 10) / 10;
+    }
+
+    function getWarungGrade(warungOrPoints) {
+        let rate = 0;
+        if (typeof warungOrPoints === 'object' && warungOrPoints !== null) {
+            rate = calculateWarungWinrate(warungOrPoints);
+        } else {
+            rate = Number(warungOrPoints) || 0;
+        }
+
+        let grade = 'Grade E';
+        let icon = 'fa-arrow-down';
+        let cls = 'grade-e';
+
+        if (rate >= 110) {
+            grade = 'Grade S';
+            icon = 'fa-gem';
+            cls = 'grade-s';
+        } else if (rate >= 100) {
+            grade = 'Grade A';
+            icon = 'fa-crown';
+            cls = 'grade-a';
+        } else if (rate >= 90) {
+            grade = 'Grade B';
+            icon = 'fa-star';
+            cls = 'grade-b';
+        } else if (rate >= 70) {
+            grade = 'Grade C';
+            icon = 'fa-shield-alt';
+            cls = 'grade-c';
+        } else if (rate >= 50) {
+            grade = 'Grade D';
+            icon = 'fa-exclamation-triangle';
+            cls = 'grade-d';
+        } else {
+            grade = 'Grade E';
+            icon = 'fa-times-circle';
+            cls = 'grade-e';
+        }
+
+        return {
+            grade: `${grade} (${rate}%)`,
+            rawGrade: grade,
+            rate: rate,
+            icon: icon,
+            class: cls
+        };
     }
 
     // --- RENDER APP & ROUTE TABS ---
@@ -1472,7 +1533,14 @@
         });
         let totalRp = totalPoin * state.mainConversion;
 
-        allWarungs.sort((a, b) => b.points - a.points);
+        // Top 5 diurutkan berdasarkan winrate kedisiplinan setor ($)
+        allWarungs.sort((a, b) => {
+            let rB = calculateWarungWinrate(b);
+            let rA = calculateWarungWinrate(a);
+            if (rB !== rA) return rB - rA;
+            return (b.points || 0) - (a.points || 0);
+        });
+
         let top5 = allWarungs.slice(0, 5);
         let top5Html = top5.map((w, i) => {
             let badgeBg = '#f1f5f9';
@@ -1480,7 +1548,7 @@
             if (i === 0) { badgeBg = 'var(--gold)'; badgeColor = '#ffffff'; }
             else if (i === 1) { badgeBg = 'var(--silver)'; badgeColor = '#ffffff'; }
             else if (i === 2) { badgeBg = 'var(--bronze)'; badgeColor = '#ffffff'; }
-            const gradeObj = getWarungGrade(w.points);
+            const gradeObj = getWarungGrade(w);
 
             return `
                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9;" onclick="openWarungActionModal('${w.routeId}', '${w.id}')">
@@ -1491,7 +1559,7 @@
                                 <span style="font-weight: 700; color: var(--text-main); line-height: 1.2;">${w.name}</span>
                                 <span class="grade-badge ${gradeObj.class}"><i class="fas ${gradeObj.icon}"></i> ${gradeObj.grade}</span>
                             </div>
-                            <small style="color: var(--text-sub); font-size: 0.72rem; display:block;">Jalur: ${w.routeName}</small>
+                            <small style="color: var(--text-sub); font-size: 0.72rem; display:block;">Jalur: ${w.routeName} • ${w.bayarCount || 0}x Setor / ${w.lewatCount || 0}x Lewat</small>
                         </div>
                     </div>
                     <div style="font-weight: 800; color: var(--primary); font-size: 1.05rem;">
@@ -1540,7 +1608,7 @@
                 <div class="card" style="margin-top: 10px;">
                     <div class="card-header" style="margin-bottom: 6px;">
                         <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
-                            <i class="fas fa-trophy" style="color: var(--gold);"></i> 5 Poin Tertinggi
+                            <i class="fas fa-trophy" style="color: var(--gold);"></i> 5 Performa Kedisiplinan Tertinggi
                         </h3>
                     </div>
                     <div>${top5Html}</div>
@@ -1567,19 +1635,15 @@
                 <div class="header-title">
                     <span style="font-size: 1.05rem;"><i class="fas fa-route"></i> ${route.name}</span>
                     <div style="display: flex; gap: 6px; align-items: center;">
-                        <!-- Tombol Tandai Mode Seleksi -->
                         <button class="btn-icon ${isSelectionActive ? 'active-mode' : ''}" onclick="toggleRouteSelectionMode('${route.id}')" title="Tampilkan Kotak Tandai" style="color:white; font-size:1.05rem;">
                             <i class="fas fa-check-square"></i>
                         </button>
-                        <!-- Tombol Tandai Semua -->
                         <button class="btn-icon" onclick="toggleSelectAllRoute('${route.id}')" title="Tandai Semua" style="color:white; font-size:1.05rem;">
                             <i class="fas fa-check-double"></i>
                         </button>
-                        <!-- Tombol Ubah Nama Jalur -->
                         <button class="btn-icon" onclick="editRouteName('${route.id}')" title="Ubah Nama Jalur" style="color:white; font-size:1.05rem;">
                             <i class="fas fa-pen"></i>
                         </button>
-                        <!-- Tombol Hapus Jalur -->
                         <button class="btn-icon" onclick="deleteRoute('${route.id}')" title="Hapus Jalur Ini" style="color:#fca5a5; font-size:1.05rem;">
                             <i class="fas fa-trash-alt"></i>
                         </button>
@@ -1606,7 +1670,7 @@
     function generateWarungCard(routeId, w, index) {
         if (w.setorPoints === undefined) w.setorPoints = 0;
         const totalRpUtama = (w.points || 0) * state.mainConversion;
-        const gradeObj = getWarungGrade(w.points);
+        const gradeObj = getWarungGrade(w);
         
         const mapsButton = w.maps && w.maps.trim() !== "" 
             ? `<button class="btn-icon red" onclick="openMapsLink(event, '${w.maps}')" title="Buka Google Maps"><i class="fas fa-map-marked-alt"></i></button>`
@@ -1636,7 +1700,7 @@
                         <strong style="font-size: 1.05rem; color: var(--primary); display:block; font-weight:800;">${w.points}</strong>
                     </div>
                     <div style="text-align: center;">
-                        <span style="font-size: 0.7rem; color: var(--text-sub); font-weight:600; text-transform:uppercase;">Disiplin</span>
+                        <span style="font-size: 0.7rem; color: var(--text-sub); font-weight:600; text-transform:uppercase;">Disiplin Setor</span>
                         <span style="font-size: 0.75rem; font-weight: 700; display:block; color: var(--text-main);">
                             <span style="color:var(--success);">${bayarCount}x Bayar</span> / <span style="color:var(--danger);">${lewatCount}x Lewat</span>
                         </span>
@@ -1686,7 +1750,6 @@
 
     function toggleSelectAllRoute(routeId) {
         triggerHaptic();
-        // Aktifkan mode seleksi terlebih dahulu agar checkbox tampil
         selectionModeRoutes[routeId] = true;
         const pageEl = document.getElementById(`route-page-${routeId}`);
         if (pageEl) pageEl.classList.add('selection-mode-active');
@@ -1749,7 +1812,7 @@
         const w = route?.warungs.find(w => w.id === warungId);
         if (!w) return;
 
-        const gradeObj = getWarungGrade(w.points);
+        const gradeObj = getWarungGrade(w);
         document.getElementById('action-warung-title').innerText = w.name;
         document.getElementById('action-warung-grade').innerHTML = `<span class="grade-badge ${gradeObj.class}"><i class="fas ${gradeObj.icon}"></i> ${gradeObj.grade}</span>`;
         document.getElementById('action-warung-route').innerText = `Jalur: ${route.name}`;
@@ -1808,7 +1871,7 @@
     function refreshActionModal(routeId, warungId) {
         const w = state.routes.find(r => r.id === routeId)?.warungs.find(w => w.id === warungId);
         if (w) {
-            const gradeObj = getWarungGrade(w.points);
+            const gradeObj = getWarungGrade(w);
             document.getElementById('action-warung-grade').innerHTML = `<span class="grade-badge ${gradeObj.class}"><i class="fas ${gradeObj.icon}"></i> ${gradeObj.grade}</span>`;
             document.getElementById('action-warung-points').innerText = w.points;
             document.getElementById('action-warung-setor').innerText = (w.setorPoints || 0) + ' Pcs';
@@ -1833,7 +1896,7 @@
             w.setorPoints += pt;
 
             if (w.bayarCount === undefined) w.bayarCount = 0;
-            w.bayarCount += 1;
+            w.bayarCount += 1; // Poin masuk dari Tombol ($) menambah rekam bayar/setor
         }
 
         saveData();
@@ -2147,16 +2210,13 @@
 
         const oldOrder = cw.order;
 
-        // Geser nomor warung lain yang terdampak
         if (newOrder > oldOrder) {
-            // Warung berpindah ke bawah: geser warung di antaranya satu tingkat ke atas (-1)
             route.warungs.forEach(w => {
                 if (w.id !== cw.id && w.order > oldOrder && w.order <= newOrder) {
                     w.order -= 1;
                 }
             });
         } else {
-            // Warung berpindah ke atas: geser warung di antaranya satu tingkat ke bawah (+1)
             route.warungs.forEach(w => {
                 if (w.id !== cw.id && w.order >= newOrder && w.order < oldOrder) {
                     w.order += 1;
@@ -2165,7 +2225,6 @@
         }
         cw.order = newOrder;
 
-        // Sort ulang untuk memastikan integritas urutan 1..N
         route.warungs.sort((a, b) => a.order - b.order);
         route.warungs.forEach((w, idx) => w.order = idx + 1);
 
@@ -2251,7 +2310,7 @@
         const w = r?.warungs.find(w => w.id === wId);
         if (!w) return;
 
-        const gradeObj = getWarungGrade(w.points);
+        const gradeObj = getWarungGrade(w);
 
         resDiv.innerHTML = `
             <div class="card" style="border: 2px solid var(--primary); margin-bottom: 12px; cursor: pointer;" onclick="openWarungActionModal('${rId}', '${w.id}')">
