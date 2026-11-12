@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
-    <title>MABIRH POIN PRO</title>
+    <title>CRSPOIN - Consignment Retail System</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1e3a8a">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="MABIRH POIN">
+    <meta name="apple-mobile-web-app-title" content="CRSPOIN">
     
     <!-- Favicon & PWA Icons -->
     <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
@@ -74,7 +74,6 @@
             height: 100vh;
         }
 
-        /* App Container */
         #app {
             width: 100%;
             height: 100%;
@@ -84,7 +83,6 @@
             position: relative;
         }
 
-        /* Horizontal Route Tabs (Pill Bar) */
         .route-tabs-wrapper {
             background: var(--primary-dark);
             padding: 8px 12px;
@@ -119,7 +117,6 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
 
-        /* 60 FPS Virtual Viewport Container */
         #swipe-container {
             position: relative;
             width: 100%;
@@ -130,7 +127,6 @@
             background: var(--bg);
         }
 
-        /* Independent Virtual Coordinate Page */
         .page {
             position: absolute;
             top: 0;
@@ -149,7 +145,6 @@
             touch-action: pan-y;
         }
 
-        /* Header Modern High Contrast */
         .header {
             background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
             color: #ffffff;
@@ -183,7 +178,6 @@
         .stat-label { font-size: 0.72rem; color: #cbd5e1; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; }
         .stat-value { display: block; font-weight: 800; font-size: 1.05rem; color: #ffffff; margin-top: 2px; }
 
-        /* Global Floating Bulk Action Bar */
         .global-bulk-bar {
             position: fixed;
             bottom: 68px;
@@ -208,7 +202,6 @@
             pointer-events: auto;
         }
 
-        /* Bottom Nav */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -240,7 +233,6 @@
         .nav-item span { font-size: 0.7rem; margin-top: 4px; font-weight: 600; }
         .nav-item.active { color: var(--primary); }
 
-        /* Cards */
         .container { padding: 14px 16px; }
         .card {
             background: var(--card-bg);
@@ -264,20 +256,38 @@
             color: var(--text-main);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             flex-wrap: wrap;
         }
         .badge {
             background: #f1f5f9;
-            padding: 4px 9px;
+            padding: 3px 8px;
             border-radius: 30px;
             font-size: 0.72rem;
             font-weight: 700;
             color: var(--primary);
             border: 1px solid rgba(0,0,0,0.05);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
         }
 
-        /* Inputs & Controls */
+        /* Grade Badges */
+        .grade-badge {
+            font-size: 0.68rem;
+            font-weight: 800;
+            padding: 2px 7px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            letter-spacing: 0.03em;
+        }
+        .grade-s { background: linear-gradient(135deg, #7c3aed, #4f46e5); color: #ffffff; box-shadow: 0 2px 6px rgba(124,58,237,0.3); }
+        .grade-a { background: linear-gradient(135deg, #d97706, #f59e0b); color: #ffffff; box-shadow: 0 2px 6px rgba(245,158,11,0.3); }
+        .grade-b { background: linear-gradient(135deg, #0284c7, #38bdf8); color: #ffffff; }
+        .grade-c { background: #e2e8f0; color: #475569; }
+
         input, select {
             width: 100%;
             padding: 12px 14px;
@@ -332,10 +342,10 @@
         .btn-icon:active { transform: scale(0.85); background: rgba(0,0,0,0.05); }
         .btn-icon.red { color: var(--danger); }
         .btn-icon.blue { color: var(--primary-light); }
+        .btn-icon.active-mode { background: rgba(255,255,255,0.25); color: #facc15; }
 
         .flex-row { display: flex; gap: 8px; align-items: center; }
 
-        /* Modals */
         .modal {
             display: none;
             position: fixed;
@@ -504,13 +514,14 @@
             margin-bottom: 10px;
         }
         .auth-brand h2 {
-            font-size: 1.4rem;
+            font-size: 1.5rem;
             font-weight: 800;
             color: var(--dark);
+            letter-spacing: -0.02em;
         }
         .auth-brand p {
             color: var(--text-sub);
-            font-size: 0.85rem;
+            font-size: 0.82rem;
             margin-top: 4px;
         }
         .auth-tabs {
@@ -543,6 +554,26 @@
             font-size: 1.5rem !important;
             font-weight: 800;
         }
+
+        /* Checkbox Warung visibility toggle */
+        .warung-checkbox {
+            display: none;
+        }
+        .selection-mode-active .warung-checkbox {
+            display: inline-block;
+        }
+
+        /* Satelit Pulse Animation */
+        @keyframes satelliteBlink {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.6; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .gps-tracking-active {
+            animation: satelliteBlink 0.8s infinite ease-in-out;
+            color: var(--primary) !important;
+            border-color: var(--primary) !important;
+        }
     </style>
 </head>
 <body>
@@ -557,30 +588,25 @@
 <div id="auth-overlay" style="display: none;">
     <div class="auth-brand">
         <i class="fas fa-layer-group"></i>
-        <h2>MABIRH POIN PRO</h2>
-        <p>Aplikasi Distribusi & Poin Penjualan</p>
+        <h2>CRSPOIN</h2>
+        <p>Consignment Retail System (CRS)</p>
     </div>
 
-    <!-- Mode Step 1: Form Input Data -->
+    <!-- Mode Step 1: Input Nama Sales -->
     <div id="auth-step-input">
         <div class="auth-tabs">
             <button class="auth-tab-btn active" id="tab-btn-login" onclick="switchAuthTab('login')">Masuk</button>
             <button class="auth-tab-btn" id="tab-btn-register" onclick="switchAuthTab('register')">Daftar Baru</button>
         </div>
 
-        <div id="auth-group-name" style="display: none;">
-            <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-sub);">Nama Lengkap Sales</label>
-            <input type="text" id="auth-input-name" placeholder="Misal: Ahmad Fauzi" autocomplete="name">
-        </div>
-
-        <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-sub);">Nomor WhatsApp (Aktif)</label>
-        <input type="tel" id="auth-input-phone" placeholder="08xxxxxxxxxx atau 628xxxxxxxxxx" inputmode="tel" autocomplete="tel">
-        <small style="color: var(--text-sub); font-size: 0.72rem; margin-top: -4px; display: block; margin-bottom: 12px;">
-            Kode OTP verifikasi akan otomatis dikirimkan ke WhatsApp Anda.
+        <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-sub);">Nama Lengkap Sales</label>
+        <input type="text" id="auth-input-name" placeholder="" autocomplete="off">
+        <small style="color: var(--text-sub); font-size: 0.72rem; margin-top: -4px; display: block; margin-bottom: 14px;">
+            Kode OTP verifikasi akan dikirimkan ke nomor WhatsApp pusat (088223104096).
         </small>
 
         <button class="btn btn-primary" id="btn-request-otp" onclick="requestOtp()" style="height: 48px;">
-            <i class="fab fa-whatsapp"></i> Masuk dengan OTP
+            <i class="fab fa-whatsapp"></i> Minta Kode OTP
         </button>
     </div>
 
@@ -591,11 +617,12 @@
                 <i class="fas fa-shield-alt"></i> Verifikasi OTP Fonnte
             </span>
             <p style="font-size: 0.84rem; color: var(--text-sub); margin-top: 8px;">
-                Masukkan 6 angka OTP yang kami kirimkan ke <br><strong id="otp-target-display" style="color:var(--text-main);"></strong>
+                Masukkan 6 angka OTP yang dikirimkan ke WhatsApp:<br>
+                <strong style="color:var(--text-main);">088223104096</strong>
             </p>
         </div>
 
-        <input type="number" inputmode="numeric" id="auth-input-otp" class="otp-box" placeholder="••••••" maxlength="6">
+        <input type="number" inputmode="numeric" id="auth-input-otp" class="otp-box" placeholder="" maxlength="6" autocomplete="off">
 
         <button class="btn btn-success" id="btn-verify-otp" onclick="verifyOtp()" style="height: 48px; margin-top: 8px;">
             <i class="fas fa-check-circle"></i> Konfirmasi & Masuk
@@ -603,7 +630,7 @@
 
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px;">
             <button class="btn-icon" onclick="backToAuthInput()" style="font-size: 0.8rem; color: var(--text-sub); font-weight: 600;">
-                <i class="fas fa-arrow-left"></i> Ganti Nomor
+                <i class="fas fa-arrow-left"></i> Kembali
             </button>
             <button class="btn-icon" id="btn-resend-otp" onclick="resendOtp()" style="font-size: 0.8rem; color: var(--primary); font-weight: 700;">
                 Kirim Ulang OTP
@@ -660,7 +687,7 @@
             <button class="btn-icon" onclick="closeModal('modal-add-route')"><i class="fas fa-times"></i></button>
         </div>
         <label style="font-size:0.8rem; font-weight:600; color:var(--text-sub);">Nama Jalur Distribusi</label>
-        <input type="text" id="input-route-name" placeholder="Misal: Jalur 1 (Pasar Wage)" autocomplete="off">
+        <input type="text" id="input-route-name" placeholder="" autocomplete="off">
         <button class="btn btn-primary" onclick="addRoute()" style="margin-top: 10px;"><i class="fas fa-plus-circle"></i> Simpan Jalur</button>
     </div>
 </div>
@@ -679,11 +706,11 @@
         </select>
         
         <label style="font-size:0.8rem; font-weight:600; color:var(--text-sub);">Nama Toko / Warung</label>
-        <input type="text" id="input-warung-name" placeholder="Misal: Toko Berkah Barokah" autocomplete="off">
+        <input type="text" id="input-warung-name" placeholder="" autocomplete="off">
         
-        <label style="font-size:0.8rem; font-weight:600; color:var(--text-sub);">Koordinat Lokasi GPS</label>
+        <label style="font-size:0.8rem; font-weight:600; color:var(--text-sub);">Koordinat Lokasi GPS (Otomatis/Manual)</label>
         <div style="display: flex; gap: 8px; align-items: center; margin: 4px 0 14px 0;">
-            <input type="text" id="input-warung-maps" placeholder="Klik GPS saat berada di warung" style="margin: 0; flex: 1;" readonly>
+            <input type="text" id="input-warung-maps" placeholder="" style="margin: 0; flex: 1;" readonly>
             <button type="button" class="btn btn-outline" style="width: auto; margin: 0; padding: 12px 14px; white-space: nowrap;" onclick="getWarungGpsLocation()"><i class="fas fa-crosshairs text-danger" style="color:var(--danger)"></i> GPS</button>
         </div>
         
@@ -691,13 +718,16 @@
     </div>
 </div>
 
-<!-- Modal Warung Action (Dengan Tombol Lewat & Indikator Kunjungan) -->
+<!-- Modal Warung Action -->
 <div class="modal" id="modal-warung-action" onclick="closeModalOnBackdrop(event, 'modal-warung-action')">
     <div class="modal-content">
         <div class="modal-handle"></div>
         <div class="modal-header" style="margin-bottom: 8px;">
             <div style="overflow: hidden;">
-                <h3 id="action-warung-title" style="white-space: nowrap; text-overflow: ellipsis; overflow: hidden; display: block;">Nama Warung</h3>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <h3 id="action-warung-title" style="white-space: nowrap; text-overflow: ellipsis; overflow: hidden; display: block; margin:0;">Nama Warung</h3>
+                    <span id="action-warung-grade"></span>
+                </div>
                 <span id="action-warung-route" style="font-size: 0.78rem; font-weight: 600; color: var(--primary);">Jalur</span>
             </div>
             <button class="btn-icon" onclick="closeModal('modal-warung-action')"><i class="fas fa-times"></i></button>
@@ -724,7 +754,7 @@
         </div>
         
         <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-sub);">Input Nominal Poin / Pcs :</label>
-        <input type="number" inputmode="numeric" id="input-action-pt" placeholder="0" style="font-size: 1.3rem; text-align: center; font-weight: 800; letter-spacing: 0.05em; padding: 8px; margin: 6px 0 2px 0;">
+        <input type="number" inputmode="numeric" id="input-action-pt" placeholder="" style="font-size: 1.3rem; text-align: center; font-weight: 800; letter-spacing: 0.05em; padding: 8px; margin: 6px 0 2px 0;">
         
         <div class="quick-chips">
             <button class="chip-btn" onclick="appendInputVal(5)">+5</button>
@@ -733,13 +763,13 @@
             <button class="chip-btn" onclick="appendInputVal(50)">+50</button>
         </div>
 
-        <!-- 3 Tombol Aksi: Tambah Poin, Setor ($), dan Lewat -->
+        <!-- 3 Tombol Aksi: Tambah Poin, Setor ($) -> Pop Kasir, Lewat -->
         <div class="flex-row" style="gap: 8px; margin-top: 6px;">
             <button class="btn btn-primary" onclick="executeAddPoints(false)" style="flex: 1; height: 46px; font-size: 0.85rem; padding: 8px 4px;" title="Tambah poin tanpa bayar tunai">
                 <i class="fas fa-plus"></i> Tambah
             </button>
-            <button class="btn btn-warning" onclick="executeAddPoints(true)" style="flex: 1.1; height: 46px; font-size: 0.85rem; font-weight: 800; padding: 8px 4px;" title="Setor tunai lunas">
-                <i class="fas fa-dollar-sign"></i> Setor ($)
+            <button class="btn btn-warning" onclick="triggerKasirSetor()" style="flex: 1.1; height: 46px; font-size: 0.85rem; font-weight: 800; padding: 8px 4px;" title="Setor tunai kasir">
+                <i class="fas fa-cash-register"></i> Setor ($)
             </button>
             <button class="btn btn-danger" onclick="executeLewat()" style="flex: 0.95; height: 46px; font-size: 0.85rem; font-weight: 700; padding: 8px 4px;" title="Catat kunjungan lewat / tidak setor">
                 <i class="fas fa-times-circle"></i> Lewat
@@ -749,11 +779,57 @@
         <hr style="margin: 16px 0; border: 0; border-top: 1px solid var(--border);">
         
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-            <button class="btn btn-outline" id="btn-action-maps"><i class="fas fa-map-pin" style="color:var(--danger)"></i> Pin GPS</button>
+            <button class="btn btn-outline" id="btn-action-maps"><i class="fas fa-satellite"></i> Pin GPS</button>
             <button class="btn btn-outline" id="btn-action-order"><i class="fas fa-sort-numeric-down"></i> Atur Nomor</button>
             <button class="btn btn-outline" style="color: var(--danger);" id="btn-action-reset"><i class="fas fa-undo"></i> Reset Poin</button>
             <button class="btn btn-danger" id="btn-action-delete"><i class="fas fa-trash"></i> Hapus Toko</button>
         </div>
+    </div>
+</div>
+
+<!-- Modal Kasir Pembayaran & Hitung Kembalian -->
+<div class="modal" id="modal-kasir" onclick="closeModalOnBackdrop(event, 'modal-kasir')">
+    <div class="modal-content" style="max-width: 440px;">
+        <div class="modal-handle"></div>
+        <div class="modal-header">
+            <h3><i class="fas fa-calculator" style="color:var(--success);"></i> Pembayaran Kasir Warung</h3>
+            <button class="btn-icon" onclick="closeModal('modal-kasir')"><i class="fas fa-times"></i></button>
+        </div>
+
+        <div style="background: #f8fafc; border: 1.5px solid var(--border); padding: 14px; border-radius: var(--radius-md); margin-bottom: 12px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                <span style="color:var(--text-sub); font-size:0.85rem;">Jumlah Laku / Setor:</span>
+                <strong id="kasir-qty-display" style="font-size:0.95rem; color:var(--dark);">0 Pcs</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                <span style="color:var(--text-sub); font-size:0.85rem;">Tarif per Pcs:</span>
+                <span id="kasir-rate-display" style="font-size:0.85rem; font-weight:700; color:var(--primary);">Rp1.500</span>
+            </div>
+            <hr style="margin: 8px 0; border:0; border-top: 1.5px dashed var(--border);">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-weight:700; font-size:0.95rem;">Total Tagihan:</span>
+                <strong id="kasir-total-tagihan" style="font-size:1.35rem; color:var(--primary); font-weight:800;">Rp0</strong>
+            </div>
+        </div>
+
+        <label style="font-size:0.82rem; font-weight:700; color:var(--text-sub);">Uang Tunai Diterima (Rp):</label>
+        <input type="number" inputmode="numeric" id="kasir-input-uang" placeholder="" style="font-size:1.3rem; font-weight:800; text-align:center; margin-top:4px;" oninput="calculateKembalian()">
+
+        <div class="quick-chips" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 12px;">
+            <button class="chip-btn" onclick="setKasirCashExact()">Pas</button>
+            <button class="chip-btn" onclick="setKasirCash(20000)">20k</button>
+            <button class="chip-btn" onclick="setKasirCash(50000)">50k</button>
+            <button class="chip-btn" onclick="setKasirCash(100000)">100k</button>
+        </div>
+
+        <div style="background:#f0fdf4; border: 1.5px solid #86efac; padding:12px; border-radius:var(--radius-md); margin-bottom:14px; text-align:center;">
+            <span style="font-size:0.75rem; font-weight:700; text-transform:uppercase; color:var(--success-dark);">Uang Kembalian</span>
+            <div id="kasir-kembalian-display" style="font-size:1.45rem; font-weight:800; color:var(--success-dark); margin-top:2px;">Rp0</div>
+        </div>
+
+        <button class="btn btn-success" onclick="confirmKasirPayment()" style="height: 48px; font-size: 0.95rem;">
+            <i class="fas fa-check-double"></i> Selesai & Catat Setoran
+        </button>
     </div>
 </div>
 
@@ -771,18 +847,18 @@
                 <i class="fas fa-minus-circle" style="color: var(--danger);"></i> Potongan / Pengeluaran Setoran
             </div>
             <div style="display: flex; gap: 8px; align-items: center;">
-                <input type="text" id="input-setor-expense-note" placeholder="Keterangan (misal: Bensin)" style="margin:0; flex: 1.2; font-size: 0.82rem;">
-                <input type="number" inputmode="numeric" id="input-setor-expense-amount" placeholder="Nominal (Rp)" style="margin:0; flex: 1; font-size: 0.82rem;">
+                <input type="text" id="input-setor-expense-note" placeholder="" style="margin:0; flex: 1.2; font-size: 0.82rem;" autocomplete="off">
+                <input type="number" inputmode="numeric" id="input-setor-expense-amount" placeholder="" style="margin:0; flex: 1; font-size: 0.82rem;">
                 <button class="btn btn-danger" onclick="addSetorExpense()" style="margin:0; width: auto; padding: 10px 14px; font-size: 0.85rem;"><i class="fas fa-plus"></i></button>
             </div>
         </div>
 
         <div id="setor-capture-area" style="background: white; padding: 12px; width: 100%;">
             <div style="text-align: center; margin-bottom: 12px; border-bottom: 2px solid var(--border); padding-bottom: 10px;">
-                <h4 id="setor-date" style="font-size: 1.05rem; font-weight: 800; color: var(--dark);">LAPORAN SETORAN SALES</h4>
+                <h4 id="setor-date" style="font-size: 1.05rem; font-weight: 800; color: var(--dark);">LAPORAN SETORAN CRSPOIN</h4>
                 <div style="display: flex; justify-content: center; align-items: center; gap: 6px; font-size: 0.85rem; margin-top: 4px;">
-                    <span style="color: var(--text-sub); font-weight: 600;">Petugas:</span>
-                    <input type="text" id="laporan-sales-name" class="laporan-input" placeholder="Isi nama..." style="width: 140px;" onchange="updateSalesName(this.value)">
+                    <span style="color: var(--text-sub); font-weight: 600;">Petugas Sales:</span>
+                    <input type="text" id="laporan-sales-name" class="laporan-input" placeholder="" style="width: 140px;" onchange="updateSalesName(this.value)">
                 </div>
             </div>
 
@@ -869,9 +945,9 @@
                 <option value="Obat">Kesehatan / Obat</option>
                 <option value="Takterduga">Takterduga</option>
             </select>
-            <input type="number" inputmode="numeric" id="input-expense-amount" placeholder="Nominal Rp" style="margin:0;">
+            <input type="number" inputmode="numeric" id="input-expense-amount" placeholder="" style="margin:0;">
         </div>
-        <input type="text" id="input-expense-note" placeholder="Catatan tambahan (Opsional)" style="margin: 6px 0 10px 0;">
+        <input type="text" id="input-expense-note" placeholder="" style="margin: 6px 0 10px 0;" autocomplete="off">
         <button class="btn btn-outline" onclick="addExpense()" style="margin-bottom: 14px; border-color: var(--danger); color: var(--danger);"><i class="fas fa-plus"></i> Catat Pengeluaran</button>
 
         <h4 style="font-size: 0.85rem; font-weight: 700; margin-bottom: 6px;"><i class="fas fa-list-ul"></i> Catatan Biaya Hari Ini</h4>
@@ -914,17 +990,17 @@
     <div class="modal-content" style="max-width: 420px;">
         <div class="modal-handle"></div>
         <div class="modal-header">
-            <h3><i class="fas fa-cog" style="color:var(--text-sub);"></i> Setelan Aplikasi</h3>
+            <h3><i class="fas fa-cog" style="color:var(--text-sub);"></i> Setelan CRSPOIN</h3>
             <button class="btn-icon" onclick="closeModal('modal-settings')"><i class="fas fa-times"></i></button>
         </div>
 
         <!-- Profil Sales Login Info -->
         <div style="background: #f1f5f9; padding: 12px; border-radius: var(--radius-md); margin-bottom: 14px; border: 1px solid var(--border);">
-            <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: var(--text-sub); margin-bottom: 4px;">Akun Aktif</div>
+            <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: var(--text-sub); margin-bottom: 4px;">Akun Sales CRS</div>
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <div>
                     <strong id="settings-current-user" style="font-size: 0.95rem; color: var(--primary);">Sales</strong>
-                    <div id="settings-current-phone" style="font-size: 0.8rem; color: var(--text-sub); font-weight: 600;">-</div>
+                    <div id="settings-current-phone" style="font-size: 0.8rem; color: var(--text-sub); font-weight: 600;">+6288223104096</div>
                 </div>
                 <button class="btn btn-outline" style="width: auto; padding: 6px 12px; font-size: 0.78rem; color: var(--danger); border-color: #fca5a5;" onclick="logout()">
                     <i class="fas fa-sign-out-alt"></i> Keluar
@@ -940,22 +1016,25 @@
         </div>
         
         <label style="font-size:0.8rem; font-weight:600; color:var(--text-sub);">Nama Profil Sales</label>
-        <input type="text" id="input-setting-sales" placeholder="Ketik nama Anda (Ketik 'admin' untuk akses konfigurasi penuh)" oninput="checkAdminAccess(this.value)">
+        <input type="text" id="input-setting-sales" placeholder="" oninput="checkAdminAccess(this.value)" autocomplete="off">
         
         <div id="admin-settings-section" style="display: none; background: #f8fafc; padding: 12px; border-radius: var(--radius-md); border: 1.5px solid #cbd5e1; margin-top: 10px;">
-            <div style="font-size: 0.82rem; font-weight: 800; color: var(--danger); margin-bottom: 8px;"><i class="fas fa-shield-alt"></i> MODE PENGATURAN ADMIN</div>
+            <div style="font-size: 0.82rem; font-weight: 800; color: var(--danger); margin-bottom: 8px;"><i class="fas fa-shield-alt"></i> MODE PENGATURAN ADMIN (CRS)</div>
             
             <label style="font-size:0.75rem; font-weight:600;">Nilai Poin Utama (1 Poin = Rp)</label>
-            <input type="number" id="input-conv-main" placeholder="30">
+            <input type="number" id="input-conv-main" placeholder="">
             
-            <label style="font-size:0.75rem; font-weight:600;">Nilai Setor (1 Pcs = Rp)</label>
-            <input type="number" id="input-conv-setor" placeholder="1200">
+            <label style="font-size:0.75rem; font-weight:600;">Nilai Setor Laporan (1 Pcs = Rp)</label>
+            <input type="number" id="input-conv-setor" placeholder="">
+
+            <label style="font-size:0.75rem; font-weight:600; color:var(--success-dark);">Nilai Kasir Pembayaran (1 Pcs = Rp)</label>
+            <input type="number" id="input-conv-kasir" placeholder="">
             
             <label style="font-size:0.75rem; font-weight:600;">Kapasitas Terpal (1 Terpal = Pcs)</label>
-            <input type="number" id="input-conv-terpal" placeholder="50">
+            <input type="number" id="input-conv-terpal" placeholder="">
             
             <label style="font-size:0.75rem; font-weight:600;">Komisi Sales (1 Pcs = Rp)</label>
-            <input type="number" id="input-conv-profit" placeholder="300">
+            <input type="number" id="input-conv-profit" placeholder="">
             
             <label style="display: flex; align-items: center; gap: 8px; margin: 10px 0; cursor: pointer; font-size: 0.82rem; font-weight: 600;">
                 <input type="checkbox" id="input-allow-manual-setor" style="width: auto; margin: 0; transform: scale(1.15);">
@@ -984,7 +1063,7 @@
 
 <script>
     // ==========================================
-    // 1. FIREBASE CONFIGURATION & INITIALIZATION
+    // 1. FIREBASE CONFIGURATION
     // ==========================================
     const firebaseConfig = {
         apiKey: "AIzaSyCt5feZsUd_RfqnYxya9lk7oU9Oa6_Gkm0",
@@ -1008,11 +1087,12 @@
     }
 
     // ==========================================
-    // 2. FONNTE OTP GATEWAY
+    // 2. FONNTE OTP GATEWAY (LOCKED TO 088223104096)
     // ==========================================
     const FONNTE_TOKEN = 'GMUYJNJdWNjKqHDzKxsB';
+    const FIXED_WA_PHONE = '6288223104096'; // Paten & tidak bisa diubah
 
-    async function kirimOtpFonnte(nomorTujuan, kodeOtp) {
+    async function kirimOtpFonnte(kodeOtp, namaSales) {
         const url = 'https://api.fonnte.com/send';
         try {
             const response = await fetch(url, {
@@ -1022,8 +1102,8 @@
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
                 body: new URLSearchParams({
-                    'target': nomorTujuan,
-                    'message': `Kode verifikasi OTP MABIRH POIN Anda adalah: *${kodeOtp}*.\n\nJangan berikan kode ini kepada siapa pun demi keamanan akun Anda.`,
+                    'target': FIXED_WA_PHONE,
+                    'message': `Kode verifikasi OTP CRSPOIN (Sales: *${namaSales}*) adalah: *${kodeOtp}*.\n\nDikembangkan oleh CRS (Consignment Retail System).`,
                     'countryCode': '62'
                 }),
             });
@@ -1034,31 +1114,21 @@
         }
     }
 
-    function formatPhoneNumber(phone) {
-        let clean = phone.replace(/\D/g, '');
-        if (clean.startsWith('0')) {
-            clean = '62' + clean.slice(1);
-        } else if (clean.startsWith('8')) {
-            clean = '628' + clean.slice(1);
-        }
-        return clean;
-    }
-
     // ==========================================
     // 3. AUTHENTICATION & SESSION STATE
     // ==========================================
-    let currentAuthUser = JSON.parse(localStorage.getItem('mabirh_current_user') || 'null');
-    let authMode = 'login'; // 'login' | 'register'
+    let currentAuthUser = JSON.parse(localStorage.getItem('crspoin_current_user') || 'null');
+    let authMode = 'login';
     let generatedOtp = null;
     let pendingAuthData = null;
     let resendTimer = null;
 
     function initAuth() {
-        if (!currentAuthUser || !currentAuthUser.phone) {
+        if (!currentAuthUser || !currentAuthUser.name) {
             document.getElementById('auth-overlay').style.display = 'flex';
         } else {
             document.getElementById('auth-overlay').style.display = 'none';
-            loadUserFromCloud(currentAuthUser.phone);
+            loadUserFromCloud(currentAuthUser.name);
         }
     }
 
@@ -1066,7 +1136,6 @@
         authMode = mode;
         document.getElementById('tab-btn-login').classList.toggle('active', mode === 'login');
         document.getElementById('tab-btn-register').classList.toggle('active', mode === 'register');
-        document.getElementById('auth-group-name').style.display = mode === 'register' ? 'block' : 'none';
         document.getElementById('btn-request-otp').innerHTML = mode === 'register' 
             ? '<i class="fab fa-whatsapp"></i> Daftar & Kirim OTP' 
             : '<i class="fab fa-whatsapp"></i> Masuk dengan OTP';
@@ -1078,70 +1147,62 @@
         generatedOtp = null;
     }
 
+    function sanitizeKey(str) {
+        return (str || '').replace(/[.#$\[\]/]/g, '_').trim().toLowerCase();
+    }
+
     async function requestOtp() {
-        const phoneRaw = document.getElementById('auth-input-phone').value.trim();
         const nameRaw = document.getElementById('auth-input-name').value.trim();
-
-        if (!phoneRaw) return showToast("Masukkan nomor WhatsApp Anda!");
-        const formattedPhone = formatPhoneNumber(phoneRaw);
-        if (formattedPhone.length < 10) return showToast("Format nomor WhatsApp tidak valid!");
-
-        if (authMode === 'register' && !nameRaw) {
-            return showToast("Masukkan nama lengkap sales untuk mendaftar!");
-        }
+        if (!nameRaw) return showToast("Masukkan nama lengkap sales!");
 
         const btn = document.getElementById('btn-request-otp');
         const origBtnText = btn.innerHTML;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim OTP...';
         btn.disabled = true;
 
+        const userKey = sanitizeKey(nameRaw);
+
         try {
             if (rtdb) {
-                const userSnapshot = await rtdb.ref(`users/${formattedPhone}`).once('value');
+                const userSnapshot = await rtdb.ref(`crs_sales/${userKey}`).once('value');
                 const userExists = userSnapshot.exists();
 
                 if (authMode === 'register' && userExists) {
                     btn.innerHTML = origBtnText;
                     btn.disabled = false;
-                    return alert("Nomor WhatsApp ini sudah terdaftar! Silakan pilih tab 'Masuk'.");
+                    return alert("Nama sales ini sudah terdaftar! Silakan pilih tab 'Masuk'.");
                 }
                 if (authMode === 'login' && !userExists) {
                     btn.innerHTML = origBtnText;
                     btn.disabled = false;
-                    return alert("Nomor WhatsApp belum terdaftar! Silakan pilih tab 'Daftar Baru' terlebih dahulu.");
+                    return alert("Nama sales belum terdaftar! Silakan pilih tab 'Daftar Baru' terlebih dahulu.");
                 }
             }
 
             const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
             generatedOtp = otpCode;
             pendingAuthData = {
-                phone: formattedPhone,
-                name: nameRaw || (currentAuthUser ? currentAuthUser.name : "Sales")
+                name: nameRaw,
+                phone: FIXED_WA_PHONE
             };
 
-            console.warn(`[DEV OTP LOG] Kode OTP untuk +${formattedPhone}: ${otpCode}`);
+            console.warn(`[CRSPOIN DEV OTP LOG] Kode OTP untuk ${nameRaw}: ${otpCode}`);
 
-            const fonnteRes = await kirimOtpFonnte(formattedPhone, otpCode);
+            const fonnteRes = await kirimOtpFonnte(otpCode, nameRaw);
             btn.innerHTML = origBtnText;
             btn.disabled = false;
 
             if (fonnteRes && (fonnteRes.status === true || fonnteRes.status === "true")) {
-                showToast("Kode OTP berhasil dikirim via WhatsApp!");
-                document.getElementById('otp-target-display').innerText = '+' + formattedPhone;
-                document.getElementById('auth-step-input').style.display = 'none';
-                document.getElementById('auth-step-otp').style.display = 'block';
-                document.getElementById('auth-input-otp').value = '';
-                startResendTimer();
+                showToast("Kode OTP berhasil dikirim ke WhatsApp 088223104096!");
             } else {
-                const failReason = (fonnteRes && (fonnteRes.reason || fonnteRes.message)) || "Perangkat WA di Fonnte terputus atau kuota pesan habis";
-                alert(`Info Gateway: ${failReason}.\n\n(Mode Uji Coba: Kode verifikasi: ${otpCode})`);
-                
-                document.getElementById('otp-target-display').innerText = '+' + formattedPhone;
-                document.getElementById('auth-step-input').style.display = 'none';
-                document.getElementById('auth-step-otp').style.display = 'block';
-                document.getElementById('auth-input-otp').value = '';
-                startResendTimer();
+                const failReason = (fonnteRes && (fonnteRes.reason || fonnteRes.message)) || "Perangkat WA di Fonnte terputus";
+                alert(`Info Gateway: ${failReason}.\n\n(Mode Pengujian: Kode OTP Anda adalah ${otpCode})`);
             }
+
+            document.getElementById('auth-step-input').style.display = 'none';
+            document.getElementById('auth-step-otp').style.display = 'block';
+            document.getElementById('auth-input-otp').value = '';
+            startResendTimer();
         } catch (e) {
             btn.innerHTML = origBtnText;
             btn.disabled = false;
@@ -1172,10 +1233,10 @@
         if (!pendingAuthData) return;
         const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
         generatedOtp = otpCode;
-        console.warn(`[DEV OTP RESEND LOG] Kode OTP Baru untuk +${pendingAuthData.phone}: ${otpCode}`);
-        showToast("Mengirim ulang OTP...");
+        console.warn(`[CRSPOIN RESEND OTP] Kode OTP: ${otpCode}`);
+        showToast("Mengirim ulang OTP ke WhatsApp...");
         try {
-            await kirimOtpFonnte(pendingAuthData.phone, otpCode);
+            await kirimOtpFonnte(otpCode, pendingAuthData.name);
             startResendTimer();
             showToast("Kode OTP baru terkirim!");
         } catch (err) {
@@ -1186,7 +1247,7 @@
     async function verifyOtp() {
         const inputOtp = document.getElementById('auth-input-otp').value.trim();
         if (!inputOtp || inputOtp.length !== 6) return showToast("Masukkan 6 digit kode OTP!");
-        if (inputOtp !== generatedOtp) return showToast("Kode OTP salah! Periksa kembali WhatsApp Anda.");
+        if (inputOtp !== generatedOtp) return showToast("Kode OTP salah! Periksa WhatsApp 088223104096.");
 
         triggerHaptic(30);
         const btn = document.getElementById('btn-verify-otp');
@@ -1194,29 +1255,25 @@
         btn.disabled = true;
 
         try {
-            let finalName = pendingAuthData.name;
+            const finalName = pendingAuthData.name;
+            const userKey = sanitizeKey(finalName);
+
             if (rtdb) {
                 if (authMode === 'register') {
-                    await rtdb.ref(`users/${pendingAuthData.phone}`).set({
-                        name: pendingAuthData.name,
-                        phone: pendingAuthData.phone,
+                    await rtdb.ref(`crs_sales/${userKey}`).set({
+                        name: finalName,
                         registeredAt: Date.now()
                     });
-                } else {
-                    const snap = await rtdb.ref(`users/${pendingAuthData.phone}`).once('value');
-                    if (snap.exists() && snap.val().name) {
-                        finalName = snap.val().name;
-                    }
                 }
             }
 
             currentAuthUser = {
-                phone: pendingAuthData.phone,
-                name: finalName
+                name: finalName,
+                phone: FIXED_WA_PHONE
             };
-            localStorage.setItem('mabirh_current_user', JSON.stringify(currentAuthUser));
+            localStorage.setItem('crspoin_current_user', JSON.stringify(currentAuthUser));
 
-            await loadUserFromCloud(currentAuthUser.phone, finalName);
+            await loadUserFromCloud(finalName);
 
             document.getElementById('auth-overlay').style.display = 'none';
             btn.innerHTML = '<i class="fas fa-check-circle"></i> Berhasil Masuk';
@@ -1230,12 +1287,11 @@
     }
 
     function logout() {
-        if (!confirm("Apakah Anda yakin ingin keluar dari akun ini? Data tersimpan aman di server.")) return;
-        localStorage.removeItem('mabirh_current_user');
+        if (!confirm("Apakah Anda yakin ingin keluar dari akun sales CRSPOIN ini?")) return;
+        localStorage.removeItem('crspoin_current_user');
         currentAuthUser = null;
         closeModal('modal-settings');
         
-        document.getElementById('auth-input-phone').value = '';
         document.getElementById('auth-input-name').value = '';
         document.getElementById('auth-input-otp').value = '';
         generatedOtp = null;
@@ -1245,7 +1301,7 @@
         document.getElementById('auth-step-otp').style.display = 'none';
         document.getElementById('auth-step-input').style.display = 'block';
         document.getElementById('auth-overlay').style.display = 'flex';
-        showToast("Anda telah keluar akun.");
+        showToast("Anda telah keluar.");
     }
 
     // ==========================================
@@ -1254,6 +1310,7 @@
     const DEFAULT_STATE = {
         mainConversion: 30,
         setorConversion: 1200,
+        kasirConversion: 1500, // Nilai default 1 pcs = Rp1500 di kasir
         terpalConversion: 50,
         profitConversion: 300,
         allowManualSetorEdit: false,
@@ -1269,9 +1326,11 @@
     let currentPage = 0;
     let activeRouteId = null;
     let activeWarungId = null;
+    let selectionModeRoutes = {}; // Pelacak status toggle 'Tandai' per jalur
 
-    async function loadUserFromCloud(phone, fallbackName = "") {
-        const userStorageKey = `warungApp_${phone}`;
+    async function loadUserFromCloud(salesName) {
+        const userKey = sanitizeKey(salesName);
+        const userStorageKey = `crsData_${userKey}`;
         let localData = null;
         try {
             const raw = localStorage.getItem(userStorageKey);
@@ -1280,22 +1339,22 @@
 
         if (rtdb) {
             try {
-                const snapshot = await rtdb.ref(`data/${phone}`).once('value');
+                const snapshot = await rtdb.ref(`data_crs/${userKey}`).once('value');
                 if (snapshot.exists()) {
                     state = { ...DEFAULT_STATE, ...snapshot.val() };
                 } else if (localData) {
                     state = { ...DEFAULT_STATE, ...localData };
-                    rtdb.ref(`data/${phone}`).set(state);
+                    rtdb.ref(`data_crs/${userKey}`).set(state);
                 } else {
-                    state = { ...DEFAULT_STATE, salesName: fallbackName || currentAuthUser?.name || "" };
-                    rtdb.ref(`data/${phone}`).set(state);
+                    state = { ...DEFAULT_STATE, salesName: salesName };
+                    rtdb.ref(`data_crs/${userKey}`).set(state);
                 }
             } catch (err) {
                 console.warn("RTDB offline, pakai data lokal:", err);
-                state = localData ? { ...DEFAULT_STATE, ...localData } : { ...DEFAULT_STATE, salesName: fallbackName };
+                state = localData ? { ...DEFAULT_STATE, ...localData } : { ...DEFAULT_STATE, salesName: salesName };
             }
         } else {
-            state = localData ? { ...DEFAULT_STATE, ...localData } : { ...DEFAULT_STATE, salesName: fallbackName };
+            state = localData ? { ...DEFAULT_STATE, ...localData } : { ...DEFAULT_STATE, salesName: salesName };
         }
 
         if (currentAuthUser && currentAuthUser.name) {
@@ -1306,14 +1365,14 @@
     }
 
     function saveData() {
-        if (!currentAuthUser || !currentAuthUser.phone) return;
-        const userStorageKey = `warungApp_${currentAuthUser.phone}`;
+        if (!currentAuthUser || !currentAuthUser.name) return;
+        const userKey = sanitizeKey(currentAuthUser.name);
+        const userStorageKey = `crsData_${userKey}`;
 
         try {
             localStorage.setItem(userStorageKey, JSON.stringify(state));
-            // Sinkronisasi Realtime Database ke Firebase
             if (rtdb && navigator.onLine) {
-                rtdb.ref(`data/${currentAuthUser.phone}`).set(state);
+                rtdb.ref(`data_crs/${userKey}`).set(state);
             }
             renderApp();
         } catch (err) {
@@ -1356,8 +1415,7 @@
         state.salesName = val.trim();
         if (currentAuthUser) {
             currentAuthUser.name = state.salesName;
-            localStorage.setItem('mabirh_current_user', JSON.stringify(currentAuthUser));
-            if (rtdb) rtdb.ref(`users/${currentAuthUser.phone}/name`).set(state.salesName);
+            localStorage.setItem('crspoin_current_user', JSON.stringify(currentAuthUser));
         }
         saveData();
     }
@@ -1367,6 +1425,15 @@
         const input = document.getElementById('input-action-pt');
         const cur = parseInt(input.value) || 0;
         input.value = cur + val;
+    }
+
+    // Hitung Grade Warung (Diamond/Grade S, Platinum/Grade A, Gold/Grade B, Silver/Grade C)
+    function getWarungGrade(points) {
+        const pts = points || 0;
+        if (pts >= 300) return { grade: 'Grade S', icon: 'fa-gem', class: 'grade-s' };
+        if (pts >= 150) return { grade: 'Grade A', icon: 'fa-crown', class: 'grade-a' };
+        if (pts >= 50)  return { grade: 'Grade B', icon: 'fa-star', class: 'grade-b' };
+        return { grade: 'Grade C', icon: 'fa-shield-alt', class: 'grade-c' };
     }
 
     // --- RENDER APP & ROUTE TABS ---
@@ -1413,13 +1480,17 @@
             if (i === 0) { badgeBg = 'var(--gold)'; badgeColor = '#ffffff'; }
             else if (i === 1) { badgeBg = 'var(--silver)'; badgeColor = '#ffffff'; }
             else if (i === 2) { badgeBg = 'var(--bronze)'; badgeColor = '#ffffff'; }
+            const gradeObj = getWarungGrade(w.points);
 
             return `
                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9;" onclick="openWarungActionModal('${w.routeId}', '${w.id}')">
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <span class="badge" style="background: ${badgeBg}; color: ${badgeColor}; min-width: 26px; height: 26px; display:flex; align-items:center; justify-content:center; border-radius: 8px;">#${i+1}</span>
                         <div>
-                            <span style="font-weight: 700; color: var(--text-main); line-height: 1.2;">${w.name}</span>
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <span style="font-weight: 700; color: var(--text-main); line-height: 1.2;">${w.name}</span>
+                                <span class="grade-badge ${gradeObj.class}"><i class="fas ${gradeObj.icon}"></i> ${gradeObj.grade}</span>
+                            </div>
                             <small style="color: var(--text-sub); font-size: 0.72rem; display:block;">Jalur: ${w.routeName}</small>
                         </div>
                     </div>
@@ -1440,8 +1511,8 @@
             <div class="header">
                 <div class="header-title">
                     <div>
-                        <span style="display: flex; align-items: center; gap: 6px;"><i class="fas fa-layer-group"></i> MABIRH POIN</span>
-                        <span style="font-size: 0.75rem; font-weight: 500; opacity: 0.85;"><i class="fas fa-user-circle"></i> Sales: ${state.salesName || (currentAuthUser?.name) || '-'}</span>
+                        <span style="display: flex; align-items: center; gap: 6px;"><i class="fas fa-layer-group"></i> CRSPOIN</span>
+                        <span style="font-size: 0.73rem; font-weight: 500; opacity: 0.85;">Consignment Retail System | Sales: ${state.salesName || (currentAuthUser?.name) || '-'}</span>
                     </div>
                     <div style="display: flex; gap: 6px;">
                         <button class="btn btn-success" style="width: auto; padding: 7px 12px; font-size: 0.8rem; margin:0;" onclick="openSetorModal()"><i class="fas fa-cash-register"></i> Setor</button>
@@ -1485,16 +1556,33 @@
         let rPoin = route.warungs.reduce((sum, w) => sum + (w.points || 0), 0);
         let rRp = rPoin * state.mainConversion;
 
+        const isSelectionActive = !!selectionModeRoutes[route.id];
+
         const div = document.createElement('div');
-        div.className = 'page';
+        div.className = `page ${isSelectionActive ? 'selection-mode-active' : ''}`;
+        div.id = `route-page-${route.id}`;
         div.setAttribute('data-page-index', pageIndex);
         div.innerHTML = `
             <div class="header" style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);">
                 <div class="header-title">
                     <span style="font-size: 1.05rem;"><i class="fas fa-route"></i> ${route.name}</span>
-                    <div style="display: flex; gap: 4px; align-items: center;">
-                        <button class="btn-icon" onclick="toggleSelectAllRoute('${route.id}')" title="Centang Semua" style="color:white; font-size:1.05rem;"><i class="fas fa-check-double"></i></button>
-                        <button class="btn-icon" onclick="editRouteName('${route.id}')" style="color:white; font-size:1.05rem;"><i class="fas fa-pen"></i></button>
+                    <div style="display: flex; gap: 6px; align-items: center;">
+                        <!-- Tombol Tandai Mode Seleksi -->
+                        <button class="btn-icon ${isSelectionActive ? 'active-mode' : ''}" onclick="toggleRouteSelectionMode('${route.id}')" title="Tampilkan Kotak Tandai" style="color:white; font-size:1.05rem;">
+                            <i class="fas fa-check-square"></i>
+                        </button>
+                        <!-- Tombol Tandai Semua -->
+                        <button class="btn-icon" onclick="toggleSelectAllRoute('${route.id}')" title="Tandai Semua" style="color:white; font-size:1.05rem;">
+                            <i class="fas fa-check-double"></i>
+                        </button>
+                        <!-- Tombol Ubah Nama Jalur -->
+                        <button class="btn-icon" onclick="editRouteName('${route.id}')" title="Ubah Nama Jalur" style="color:white; font-size:1.05rem;">
+                            <i class="fas fa-pen"></i>
+                        </button>
+                        <!-- Tombol Hapus Jalur -->
+                        <button class="btn-icon" onclick="deleteRoute('${route.id}')" title="Hapus Jalur Ini" style="color:#fca5a5; font-size:1.05rem;">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
                     </div>
                 </div>
                 <div class="header-stats">
@@ -1506,7 +1594,7 @@
             <div class="container">
                 <div class="search-box">
                     <i class="fas fa-search" style="color: #94a3b8;"></i>
-                    <input type="text" placeholder="Ketik nama warung..." onkeyup="filterRouteWarung('${route.id}', this.value)">
+                    <input type="text" placeholder="" onkeyup="filterRouteWarung('${route.id}', this.value)" autocomplete="off">
                 </div>
                 <div id="list-warung-${route.id}">
                     ${route.warungs.map((w, index) => generateWarungCard(route.id, w, index)).join('')}
@@ -1518,10 +1606,11 @@
     function generateWarungCard(routeId, w, index) {
         if (w.setorPoints === undefined) w.setorPoints = 0;
         const totalRpUtama = (w.points || 0) * state.mainConversion;
+        const gradeObj = getWarungGrade(w.points);
         
         const mapsButton = w.maps && w.maps.trim() !== "" 
             ? `<button class="btn-icon red" onclick="openMapsLink(event, '${w.maps}')" title="Buka Google Maps"><i class="fas fa-map-marked-alt"></i></button>`
-            : `<button class="btn-icon" style="color: #cbd5e1; cursor: not-allowed;" disabled><i class="fas fa-map-marker-alt"></i></button>`;
+            : `<button class="btn-icon" style="color: #cbd5e1; cursor: not-allowed;" disabled title="Lokasi belum ada"><i class="fas fa-map-marker-alt"></i></button>`;
         
         const renameBtn = `<button class="btn-icon blue" onclick="event.stopPropagation(); renameWarung('${routeId}', '${w.id}')" title="Ubah Nama"><i class="fas fa-pen-square"></i></button>`;
 
@@ -1532,9 +1621,10 @@
             <div class="card warung-item" data-name="${w.name.toLowerCase()}" onclick="openWarungActionModal('${routeId}', '${w.id}')">
                 <div class="card-header">
                     <div class="card-title" style="flex: 1;">
-                        <input type="checkbox" class="warung-checkbox-${routeId}" data-route-id="${routeId}" data-warung-id="${w.id}" onclick="event.stopPropagation()" onchange="handleWarungSelection('${routeId}')" style="width: 18px; height: 18px; margin-right: 6px; cursor: pointer; accent-color: var(--primary);">
-                        <span class="badge">${index + 1}</span> 
+                        <input type="checkbox" class="warung-checkbox warung-checkbox-${routeId}" data-route-id="${routeId}" data-warung-id="${w.id}" onclick="event.stopPropagation()" onchange="handleWarungSelection('${routeId}')" style="width: 18px; height: 18px; margin-right: 6px; cursor: pointer; accent-color: var(--primary);">
+                        <span class="badge">#${index + 1}</span> 
                         <span style="font-weight:700;">${w.name}</span> 
+                        <span class="grade-badge ${gradeObj.class}"><i class="fas ${gradeObj.icon}"></i> ${gradeObj.grade}</span>
                         ${renameBtn} 
                         ${mapsButton} 
                     </div>
@@ -1559,7 +1649,19 @@
             </div>`;
     }
 
-    // --- BULK OPERATIONS ---
+    // --- BULK OPERATIONS & SELECTION MODE ---
+    function toggleRouteSelectionMode(routeId) {
+        triggerHaptic();
+        selectionModeRoutes[routeId] = !selectionModeRoutes[routeId];
+        const pageEl = document.getElementById(`route-page-${routeId}`);
+        if (pageEl) {
+            pageEl.classList.toggle('selection-mode-active', selectionModeRoutes[routeId]);
+        }
+        if (!selectionModeRoutes[routeId]) {
+            clearRouteSelection(routeId);
+        }
+    }
+
     function handleWarungSelection(routeId) {
         const checkboxes = document.querySelectorAll(`.warung-checkbox-${routeId}:checked`);
         const globalBar = document.getElementById('global-bulk-bar');
@@ -1584,6 +1686,11 @@
 
     function toggleSelectAllRoute(routeId) {
         triggerHaptic();
+        // Aktifkan mode seleksi terlebih dahulu agar checkbox tampil
+        selectionModeRoutes[routeId] = true;
+        const pageEl = document.getElementById(`route-page-${routeId}`);
+        if (pageEl) pageEl.classList.add('selection-mode-active');
+
         const checkboxes = document.querySelectorAll(`.warung-checkbox-${routeId}`);
         const allChecked = Array.from(checkboxes).every(cb => cb.checked);
         checkboxes.forEach(cb => cb.checked = !allChecked);
@@ -1633,7 +1740,7 @@
         showToast(`${movedWarungs.length} warung dipindahkan ke ${targetRoute.name}!`);
     }
 
-    // --- QUICK ACTION MODAL ---
+    // --- QUICK ACTION MODAL & AUTO LOCATION GPS ---
     function openWarungActionModal(routeId, warungId) {
         triggerHaptic();
         activeRouteId = routeId;
@@ -1642,7 +1749,9 @@
         const w = route?.warungs.find(w => w.id === warungId);
         if (!w) return;
 
+        const gradeObj = getWarungGrade(w.points);
         document.getElementById('action-warung-title').innerText = w.name;
+        document.getElementById('action-warung-grade').innerHTML = `<span class="grade-badge ${gradeObj.class}"><i class="fas ${gradeObj.icon}"></i> ${gradeObj.grade}</span>`;
         document.getElementById('action-warung-route').innerText = `Jalur: ${route.name}`;
         document.getElementById('action-warung-points').innerText = w.points;
         document.getElementById('action-warung-setor').innerText = (w.setorPoints || 0) + ' Pcs';
@@ -1650,17 +1759,57 @@
         document.getElementById('action-warung-lewat').innerHTML = `<i class="fas fa-times-circle"></i> ${(w.lewatCount || 0)}x Lewat`;
         document.getElementById('input-action-pt').value = '';
 
-        document.getElementById('btn-action-maps').onclick = () => { editMaps(routeId, warungId); refreshActionModal(routeId, warungId); };
+        const btnMaps = document.getElementById('btn-action-maps');
+        btnMaps.className = 'btn btn-outline';
+        btnMaps.innerHTML = '<i class="fas fa-satellite"></i> Pin GPS';
+        btnMaps.onclick = () => { editMaps(routeId, warungId); };
+
         document.getElementById('btn-action-order').onclick = () => { changeOrder(routeId, warungId); refreshActionModal(routeId, warungId); };
         document.getElementById('btn-action-reset').onclick = () => { resetPoints(routeId, warungId); refreshActionModal(routeId, warungId); };
         document.getElementById('btn-action-delete').onclick = () => { deleteWarung(routeId, warungId); closeModal('modal-warung-action'); };
         
         openModal('modal-warung-action');
+
+        // FITUR: Auto GPS Location jika warung belum memiliki titik koordinat
+        if (!w.maps || w.maps.trim() === "") {
+            autoTrackWarungGps(routeId, warungId);
+        }
+    }
+
+    function autoTrackWarungGps(routeId, warungId) {
+        if (!navigator.geolocation) return;
+        const btnMaps = document.getElementById('btn-action-maps');
+        if (!btnMaps) return;
+
+        btnMaps.classList.add('gps-tracking-active');
+        btnMaps.innerHTML = '<i class="fas fa-satellite fa-spin"></i> Melacak GPS...';
+
+        navigator.geolocation.getCurrentPosition((pos) => {
+            const newLink = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
+            const targetRoute = state.routes.find(r => r.id === routeId);
+            const targetW = targetRoute?.warungs.find(w => w.id === warungId);
+            if (targetW && (!targetW.maps || targetW.maps.trim() === "")) {
+                targetW.maps = newLink;
+                saveData();
+                if (btnMaps) {
+                    btnMaps.classList.remove('gps-tracking-active');
+                    btnMaps.innerHTML = '<i class="fas fa-map-pin text-success" style="color:var(--success)"></i> Lokasi Terkunci';
+                }
+                showToast(`Lokasi GPS ${targetW.name} otomatis tersimpan!`);
+            }
+        }, (err) => {
+            if (btnMaps) {
+                btnMaps.classList.remove('gps-tracking-active');
+                btnMaps.innerHTML = '<i class="fas fa-satellite"></i> Pin GPS';
+            }
+        }, { enableHighAccuracy: true, timeout: 9000 });
     }
 
     function refreshActionModal(routeId, warungId) {
         const w = state.routes.find(r => r.id === routeId)?.warungs.find(w => w.id === warungId);
         if (w) {
+            const gradeObj = getWarungGrade(w.points);
+            document.getElementById('action-warung-grade').innerHTML = `<span class="grade-badge ${gradeObj.class}"><i class="fas ${gradeObj.icon}"></i> ${gradeObj.grade}</span>`;
             document.getElementById('action-warung-points').innerText = w.points;
             document.getElementById('action-warung-setor').innerText = (w.setorPoints || 0) + ' Pcs';
             document.getElementById('action-warung-bayar').innerHTML = `<i class="fas fa-check-circle"></i> ${(w.bayarCount || 0)}x Bayar`;
@@ -1690,7 +1839,70 @@
         saveData();
         refreshActionModal(activeRouteId, activeWarungId);
         ptInput.value = '';
-        showToast(isDollarButton ? `+${pt} poin & setor ($) berhasil dicatat!` : `+${pt} poin berhasil ditambahkan!`);
+        showToast(isDollarButton ? `+${pt} poin & setor dicatat!` : `+${pt} poin berhasil ditambahkan!`);
+    }
+
+    // --- POPUP KASIR WARUNG & PERHITUNGAN KEMBALIAN ---
+    let pendingKasirQty = 0;
+    let pendingKasirTagihan = 0;
+
+    function triggerKasirSetor() {
+        triggerHaptic(25);
+        const ptInput = document.getElementById('input-action-pt');
+        const pt = parseInt(ptInput.value);
+        if (isNaN(pt) || pt <= 0) return showToast("Masukkan nominal laku/setor pcs!");
+
+        pendingKasirQty = pt;
+        const rateKasir = state.kasirConversion || 1500;
+        pendingKasirTagihan = pendingKasirQty * rateKasir;
+
+        document.getElementById('kasir-qty-display').innerText = `${pendingKasirQty} Pcs`;
+        document.getElementById('kasir-rate-display').innerText = formatRp(rateKasir);
+        document.getElementById('kasir-total-tagihan').innerText = formatRp(pendingKasirTagihan);
+        
+        document.getElementById('kasir-input-uang').value = '';
+        document.getElementById('kasir-kembalian-display').innerText = formatRp(0);
+        document.getElementById('kasir-kembalian-display').style.color = 'var(--success-dark)';
+
+        openModal('modal-kasir');
+    }
+
+    function calculateKembalian() {
+        const cash = parseInt(document.getElementById('kasir-input-uang').value) || 0;
+        const change = cash - pendingKasirTagihan;
+        const disp = document.getElementById('kasir-kembalian-display');
+        
+        if (cash === 0) {
+            disp.innerText = formatRp(0);
+            disp.style.color = 'var(--text-sub)';
+        } else if (change < 0) {
+            disp.innerText = `Kurang ${formatRp(Math.abs(change))}`;
+            disp.style.color = 'var(--danger)';
+        } else {
+            disp.innerText = formatRp(change);
+            disp.style.color = 'var(--success-dark)';
+        }
+    }
+
+    function setKasirCashExact() {
+        document.getElementById('kasir-input-uang').value = pendingKasirTagihan;
+        calculateKembalian();
+    }
+
+    function setKasirCash(amount) {
+        document.getElementById('kasir-input-uang').value = amount;
+        calculateKembalian();
+    }
+
+    function confirmKasirPayment() {
+        const cash = parseInt(document.getElementById('kasir-input-uang').value) || 0;
+        if (cash < pendingKasirTagihan) {
+            if (!confirm(`Uang tunai kurang ${formatRp(pendingKasirTagihan - cash)}. Tetap konfirmasi setoran?`)) return;
+        }
+
+        executeAddPoints(true);
+        closeModal('modal-kasir');
+        showToast("Pembayaran kasir selesai!");
     }
 
     function executeLewat() {
@@ -1828,7 +2040,7 @@
         document.getElementById('page-indicator').innerHTML = html;
     }
 
-    // --- CRUD ---
+    // --- CRUD ROUTE & WARUNG ---
     function addRoute() {
         const input = document.getElementById('input-route-name');
         const name = input.value.trim();
@@ -1850,6 +2062,19 @@
             saveData();
             showToast("Nama jalur diperbarui");
         }
+    }
+
+    function deleteRoute(routeId) {
+        const route = state.routes.find(r => r.id === routeId);
+        if (!route) return;
+        const totalW = (route.warungs || []).length;
+        if (!confirm(`Hapus seluruh jalur "${route.name}" beserta ${totalW} warung di dalamnya?`)) return;
+
+        state.routes = state.routes.filter(r => r.id !== routeId);
+        delete selectionModeRoutes[routeId];
+        saveData();
+        goToPage(0);
+        showToast(`Jalur "${route.name}" telah dihapus!`);
     }
 
     function renameWarung(rId, wId) {
@@ -1907,16 +2132,45 @@
         }
     }
 
+    // MEKANISME REORDER ATUR NOMOR SECARA MENYELURUH (SHIFT URUTAN)
     function changeOrder(rId, wId) {
         const route = state.routes.find(r => r.id === rId);
+        if (!route || !route.warungs) return;
+        const total = route.warungs.length;
         const cw = route.warungs.find(w => w.id === wId);
-        let newOrder = parseInt(prompt(`Pindah ke urutan nomor berapa? (1 - ${route.warungs.length})`));
-        if (isNaN(newOrder) || newOrder < 1 || newOrder > route.warungs.length || newOrder === cw.order) return;
-        const tw = route.warungs.find(w => w.order === newOrder);
-        if (tw) tw.order = cw.order;
+        if (!cw) return;
+
+        let inputVal = prompt(`Pindahkan "${cw.name}" (urutan sekarang: ${cw.order}) ke nomor urut berapa? (1 - ${total})`, cw.order);
+        if (inputVal === null) return;
+        let newOrder = parseInt(inputVal);
+        if (isNaN(newOrder) || newOrder < 1 || newOrder > total || newOrder === cw.order) return;
+
+        const oldOrder = cw.order;
+
+        // Geser nomor warung lain yang terdampak
+        if (newOrder > oldOrder) {
+            // Warung berpindah ke bawah: geser warung di antaranya satu tingkat ke atas (-1)
+            route.warungs.forEach(w => {
+                if (w.id !== cw.id && w.order > oldOrder && w.order <= newOrder) {
+                    w.order -= 1;
+                }
+            });
+        } else {
+            // Warung berpindah ke atas: geser warung di antaranya satu tingkat ke bawah (+1)
+            route.warungs.forEach(w => {
+                if (w.id !== cw.id && w.order >= newOrder && w.order < oldOrder) {
+                    w.order += 1;
+                }
+            });
+        }
         cw.order = newOrder;
+
+        // Sort ulang untuk memastikan integritas urutan 1..N
+        route.warungs.sort((a, b) => a.order - b.order);
+        route.warungs.forEach((w, idx) => w.order = idx + 1);
+
         saveData();
-        showToast("Urutan berhasil diubah");
+        showToast(`Urutan warung diperbarui ke nomor #${newOrder}`);
     }
 
     // --- ACCURATE GPS ---
@@ -1944,15 +2198,20 @@
         if (!navigator.geolocation) return showToast("Browser tidak mendukung GPS.");
         if (!confirm("Perbarui titik koordinat Maps dengan posisi Anda sekarang?")) return;
 
+        const btnMaps = document.getElementById('btn-action-maps');
+        btnMaps.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Membaca GPS...';
+
         navigator.geolocation.getCurrentPosition((pos) => {
             const newLink = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
             const w = state.routes.find(r => r.id === rId)?.warungs.find(w => w.id === wId);
             if (w) {
                 w.maps = newLink;
                 saveData();
+                btnMaps.innerHTML = '<i class="fas fa-check text-success"></i> Tersimpan';
                 showToast("Lokasi Maps diperbarui!");
             }
         }, (err) => {
+            btnMaps.innerHTML = '<i class="fas fa-satellite"></i> Pin GPS';
             showToast("Gagal mengambil GPS: " + err.message);
         }, { enableHighAccuracy: true, timeout: 8000 });
     }
@@ -1992,11 +2251,14 @@
         const w = r?.warungs.find(w => w.id === wId);
         if (!w) return;
 
+        const gradeObj = getWarungGrade(w.points);
+
         resDiv.innerHTML = `
             <div class="card" style="border: 2px solid var(--primary); margin-bottom: 12px; cursor: pointer;" onclick="openWarungActionModal('${rId}', '${w.id}')">
                 <div class="card-header">
                     <div class="card-title">
                         <span>${w.name}</span>
+                        <span class="grade-badge ${gradeObj.class}"><i class="fas ${gradeObj.icon}"></i> ${gradeObj.grade}</span>
                         <span class="badge" style="background:var(--primary); color:white;">${r.name}</span>
                     </div>
                     <i class="fas fa-chevron-right text-primary"></i>
@@ -2049,7 +2311,7 @@
 
         document.getElementById('laporan-sales-name').value = state.salesName || (currentAuthUser?.name) || '';
         let today = new Date();
-        document.getElementById('setor-date').innerText = `LAPORAN SETORAN (${today.getDate()}/${today.getMonth()+1}/${today.getFullYear()})`;
+        document.getElementById('setor-date').innerText = `LAPORAN SETORAN CRSPOIN (${today.getDate()}/${today.getMonth()+1}/${today.getFullYear()})`;
         calculateSetorTotals();
     }
 
@@ -2181,10 +2443,10 @@
                 const link = document.createElement('a');
                 let today = new Date();
                 let sName = state.salesName ? state.salesName.replace(/\s+/g, '_') : 'Sales';
-                link.download = `Setor_${sName}_${today.getDate()}-${today.getMonth()+1}-${today.getFullYear()}.jpg`;
+                link.download = `CRSPOIN_${sName}_${today.getDate()}-${today.getMonth()+1}-${today.getFullYear()}.jpg`;
                 link.href = canvas.toDataURL('image/jpeg', 0.95);
                 link.click();
-                if (!isAuto) showToast("Gambar JPG berhasil diunduh!");
+                if (!isAuto) showToast("Laporan JPG berhasil diunduh!");
                 resolve();
             }).catch(err => {
                 console.error(err);
@@ -2199,7 +2461,7 @@
         const maxPcs = state.terpalConversion || 50;
         let html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
         <head><meta charset="UTF-8"></head><body>
-        <h2>LAPORAN SETORAN</h2><p>Sales: <b>${state.salesName || '-'}</b></p>
+        <h2>LAPORAN SETORAN CRSPOIN</h2><p>Sales: <b>${state.salesName || '-'}</b></p>
         <table border="1">
             <thead>
                 <tr style="background:#1e40af; color:#fff;">
@@ -2235,7 +2497,7 @@
         let a = document.createElement('a');
         let today = new Date();
         let sName = state.salesName ? state.salesName.replace(/\s+/g, '_') : 'Sales';
-        a.download = `Setor_${sName}_${today.getDate()}-${today.getMonth()+1}.xls`;
+        a.download = `CRSPOIN_${sName}_${today.getDate()}-${today.getMonth()+1}.xls`;
         a.href = url;
         document.body.appendChild(a);
         a.click();
@@ -2385,6 +2647,7 @@
     function saveSettings() {
         const m = parseInt(document.getElementById('input-conv-main').value);
         const s = parseInt(document.getElementById('input-conv-setor').value);
+        const k = parseInt(document.getElementById('input-conv-kasir').value);
         const t = parseInt(document.getElementById('input-conv-terpal').value);
         const p = parseInt(document.getElementById('input-conv-profit').value);
         const manualSetor = document.getElementById('input-allow-manual-setor').checked;
@@ -2392,6 +2655,7 @@
 
         if (m > 0) state.mainConversion = m;
         if (s > 0) state.setorConversion = s;
+        if (k > 0) state.kasirConversion = k;
         if (!isNaN(t) && t > 0) state.terpalConversion = t;
         if (!isNaN(p) && p >= 0) state.profitConversion = p;
         state.allowManualSetorEdit = manualSetor;
@@ -2408,8 +2672,8 @@
         const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
         const a = document.createElement('a');
         let today = new Date();
-        let name = state.salesName ? state.salesName.replace(/\s+/g, '_') : 'Data';
-        a.download = `MabirhBackup_${name}_${today.getDate()}-${today.getMonth()+1}.json`;
+        let name = state.salesName ? state.salesName.replace(/\s+/g, '_') : 'CRSData';
+        a.download = `CRSPOIN_Backup_${name}_${today.getDate()}-${today.getMonth()+1}.json`;
         a.href = window.URL.createObjectURL(blob);
         document.body.appendChild(a);
         a.click();
@@ -2439,12 +2703,13 @@
         if (id === 'modal-settings') {
             document.getElementById('input-conv-main').value = state.mainConversion;
             document.getElementById('input-conv-setor').value = state.setorConversion;
+            document.getElementById('input-conv-kasir').value = state.kasirConversion || 1500;
             document.getElementById('input-conv-terpal').value = state.terpalConversion || 50;
             document.getElementById('input-conv-profit').value = state.profitConversion || 300;
             document.getElementById('input-allow-manual-setor').checked = state.allowManualSetorEdit || false;
             document.getElementById('input-setting-sales').value = state.salesName || (currentAuthUser?.name) || '';
             document.getElementById('settings-current-user').innerText = state.salesName || (currentAuthUser?.name) || 'Sales';
-            document.getElementById('settings-current-phone').innerText = currentAuthUser?.phone ? ('+' + currentAuthUser.phone) : 'Offline';
+            document.getElementById('settings-current-phone').innerText = '+6288223104096';
             checkAdminAccess(state.salesName || '');
             
             const installBanner = document.getElementById('pwa-install-banner');
@@ -2472,14 +2737,14 @@
     function updateOnlineStatus() {
         const statusEl = document.getElementById('network-status');
         if (navigator.onLine) {
-            statusEl.textContent = 'Online — Tersambung ke Cloud Database.';
+            statusEl.textContent = 'Online — CRS Cloud Database Tersambung.';
             statusEl.className = 'network-status online';
             setTimeout(() => { if (navigator.onLine) statusEl.classList.remove('online'); }, 2500);
-            if (currentAuthUser && currentAuthUser.phone) {
+            if (currentAuthUser && currentAuthUser.name) {
                 saveData();
             }
         } else {
-            statusEl.textContent = 'Mode Luar Jaringan (Offline) — Data tetap aman di HP.';
+            statusEl.textContent = 'Mode Luar Jaringan (Offline) — Data tersimpan aman di perangkat.';
             statusEl.className = 'network-status offline';
         }
     }
@@ -2502,13 +2767,13 @@
 
     function triggerPWAInstall() {
         if (!deferredPrompt) {
-            showToast("Buka menu titik 3 Chrome -> Tambahkan ke Layar Utama");
+            showToast("Buka menu browser -> Tambahkan ke Layar Utama");
             return;
         }
         deferredPrompt.prompt();
         deferredPrompt.userChoice.then((choiceResult) => {
             if (choiceResult.outcome === 'accepted') {
-                showToast("Aplikasi sedang dipasang...");
+                showToast("Aplikasi CRSPOIN sedang dipasang...");
                 deferredPrompt = null;
                 const banner = document.getElementById('pwa-install-banner');
                 if (banner) banner.style.display = 'none';
@@ -2517,7 +2782,7 @@
     }
 
     window.addEventListener('appinstalled', () => {
-        showToast("MABIRH POIN PRO sukses terpasang!");
+        showToast("CRSPOIN sukses terpasang!");
         deferredPrompt = null;
         const banner = document.getElementById('pwa-install-banner');
         if (banner) banner.style.display = 'none';
@@ -2532,7 +2797,7 @@
     }
 
     async function resetServiceWorkerAndCache() {
-        if (!confirm("Fitur ini akan membersihkan cache browser dan me-refresh aplikasi. Data di akun Anda tetap tersimpan aman di Cloud.\n\nLanjutkan?")) return;
+        if (!confirm("Fitur ini akan membersihkan cache browser dan me-refresh aplikasi. Data aman di Cloud.\n\nLanjutkan?")) return;
         
         try {
             if ('serviceWorker' in navigator) {
