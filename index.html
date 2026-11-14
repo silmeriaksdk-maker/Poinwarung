@@ -500,7 +500,7 @@
         .dot.active { background: var(--primary); width: 18px; border-radius: 4px; }
 
         /* =========================================================
-           STYLING VIDEO LOGO & AMBIENT BACKGROUND (SILMERIAKSDK-MAKER/POINWARUNG)
+           STYLING VIDEO LOGO & AMBIENT BACKGROUND
            ========================================================= */
         #auth-overlay {
             position: fixed;
@@ -630,7 +630,7 @@
 <!-- Toast Box -->
 <div id="toast" class="toast"><i class="fas fa-info-circle"></i><span id="toast-msg">Notifikasi</span></div>
 
-<!-- ==================== AUTH OVERLAY DENGAN LINK GITHUB ANDA ==================== -->
+<!-- ==================== AUTH OVERLAY ==================== -->
 <div id="auth-overlay" style="display: none;">
     <!-- Ambient Background Video -->
     <video class="auth-bg-ambient" src="https://raw.githubusercontent.com/silmeriaksdk-maker/PoinWarung/main/logo-video.mp4" autoplay muted loop playsinline></video>
@@ -1565,7 +1565,7 @@
         let top5Html = top5.map((w, i) => {
             let badgeBg = '#f1f5f9';
             let badgeColor = 'var(--text-sub)';
-            if (i === 0) { badgeBg = 'var(--gold)'; badgeColor = '#ffffff'; }
+            if (i === 0) { badgeBg = 'var(--gold);'; badgeColor = '#ffffff'; }
             else if (i === 1) { badgeBg = 'var(--silver)'; badgeColor = '#ffffff'; }
             else if (i === 2) { badgeBg = 'var(--bronze)'; badgeColor = '#ffffff'; }
             const gradeObj = getWarungGrade(w);
