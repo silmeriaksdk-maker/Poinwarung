@@ -500,7 +500,7 @@
         .dot.active { background: var(--primary); width: 18px; border-radius: 4px; }
 
         /* =========================================================
-           STYLING BARU: VIDEO LOGO & LATAR BELAKANG MENGIKUTI WARNA VIDEO
+           STYLING VIDEO LOGO & AMBIENT BACKGROUND (SILMERIAKSDK-MAKER/POINWARUNG)
            ========================================================= */
         #auth-overlay {
             position: fixed;
@@ -516,7 +516,6 @@
             overflow: hidden;
         }
 
-        /* Latar belakang video ambient yang mengikuti warna & transisi video */
         .auth-bg-ambient {
             position: absolute;
             inset: 0;
@@ -546,7 +545,6 @@
             overflow-y: auto;
         }
 
-        /* Video yang bertindak sebagai Logo Aplikasi */
         .auth-video-logo {
             width: 76px;
             height: 76px;
@@ -632,17 +630,15 @@
 <!-- Toast Box -->
 <div id="toast" class="toast"><i class="fas fa-info-circle"></i><span id="toast-msg">Notifikasi</span></div>
 
-<!-- ==================== AUTH OVERLAY DENGAN VIDEO GITHUB & AMBIENT BACKGROUND ==================== -->
+<!-- ==================== AUTH OVERLAY DENGAN LINK GITHUB ANDA ==================== -->
 <div id="auth-overlay" style="display: none;">
-    <!-- Video Latar Belakang (Ambient Background) yang mengikuti warna/tampilan video -->
-    <!-- Ganti URL src di bawah dengan tautan video raw GitHub Anda -->
-    <video class="auth-bg-ambient" src="https://raw.githubusercontent.com/NAMA_USER/NAMA_REPO/main/logo-video.mp4" autoplay muted loop playsinline></video>
+    <!-- Ambient Background Video -->
+    <video class="auth-bg-ambient" src="https://raw.githubusercontent.com/silmeriaksdk-maker/PoinWarung/main/logo-video.mp4" autoplay muted loop playsinline></video>
 
     <div class="auth-content-box">
         <div class="auth-brand">
             <!-- Video Logo Aplikasi -->
-            <!-- Ganti URL src di bawah dengan tautan video raw GitHub Anda -->
-            <video class="auth-video-logo" src="https://raw.githubusercontent.com/NAMA_USER/NAMA_REPO/main/logo-video.mp4" autoplay muted loop playsinline></video>
+            <video class="auth-video-logo" src="https://raw.githubusercontent.com/silmeriaksdk-maker/PoinWarung/main/logo-video.mp4" autoplay muted loop playsinline></video>
             <h2>CRSPOIN</h2>
             <p>Consignment Retail System (CRS)</p>
         </div>
