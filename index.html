@@ -178,7 +178,6 @@
         .stat-label { font-size: 0.72rem; color: #cbd5e1; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; }
         .stat-value { display: block; font-weight: 800; font-size: 1.05rem; color: #ffffff; margin-top: 2px; }
 
-        /* Floating Sticky Search Bar di Halaman Jalur */
         .route-sticky-search-wrapper {
             position: sticky;
             top: 0;
@@ -282,7 +281,6 @@
             gap: 4px;
         }
 
-        /* Grade Badges S, A, B, C, D, E */
         .grade-badge {
             font-size: 0.68rem;
             font-weight: 800;
@@ -501,47 +499,87 @@
         .dot { width: 6px; height: 6px; background: #cbd5e1; border-radius: 50%; transition: 0.25s; }
         .dot.active { background: var(--primary); width: 18px; border-radius: 4px; }
 
-        /* Fullscreen Auth Modal */
+        /* =========================================================
+           STYLING BARU: VIDEO LOGO & LATAR BELAKANG MENGIKUTI WARNA VIDEO
+           ========================================================= */
         #auth-overlay {
             position: fixed;
             inset: 0;
-            background: #ffffff;
+            background: #0f172a;
             z-index: 9999;
             display: flex;
             flex-direction: column;
             justify-content: center;
+            align-items: center;
             padding: 24px;
-            max-width: 440px;
-            margin: auto;
             box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        /* Latar belakang video ambient yang mengikuti warna & transisi video */
+        .auth-bg-ambient {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: blur(40px) saturate(190%) brightness(0.65);
+            opacity: 0.5;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .auth-content-box {
+            position: relative;
+            z-index: 1;
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 28px 24px;
+            border-radius: var(--radius-xl);
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-sizing: border-box;
+            max-height: 90vh;
             overflow-y: auto;
         }
+
+        /* Video yang bertindak sebagai Logo Aplikasi */
+        .auth-video-logo {
+            width: 76px;
+            height: 76px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 10px auto;
+            display: block;
+            box-shadow: 0 8px 22px rgba(30, 64, 175, 0.35);
+            border: 3px solid var(--primary);
+        }
+
         .auth-brand {
             text-align: center;
-            margin-bottom: 24px;
-        }
-        .auth-brand i {
-            font-size: 2.8rem;
-            color: var(--primary);
-            margin-bottom: 10px;
+            margin-bottom: 20px;
         }
         .auth-brand h2 {
-            font-size: 1.5rem;
+            font-size: 1.45rem;
             font-weight: 800;
             color: var(--dark);
             letter-spacing: -0.02em;
         }
         .auth-brand p {
             color: var(--text-sub);
-            font-size: 0.82rem;
-            margin-top: 4px;
+            font-size: 0.8rem;
+            margin-top: 2px;
         }
+
         .auth-tabs {
             display: flex;
             background: #f1f5f9;
             padding: 4px;
             border-radius: var(--radius-md);
-            margin-bottom: 18px;
+            margin-bottom: 16px;
         }
         .auth-tab-btn {
             flex: 1;
@@ -567,7 +605,6 @@
             font-weight: 800;
         }
 
-        /* Checkbox Warung visibility toggle */
         .warung-checkbox {
             display: none;
         }
@@ -575,7 +612,6 @@
             display: inline-block;
         }
 
-        /* Satelit Pulse Animation */
         @keyframes satelliteBlink {
             0% { transform: scale(1); opacity: 1; }
             50% { transform: scale(1.2); opacity: 0.6; }
@@ -596,57 +632,65 @@
 <!-- Toast Box -->
 <div id="toast" class="toast"><i class="fas fa-info-circle"></i><span id="toast-msg">Notifikasi</span></div>
 
-<!-- ==================== AUTH OVERLAY ==================== -->
+<!-- ==================== AUTH OVERLAY DENGAN VIDEO GITHUB & AMBIENT BACKGROUND ==================== -->
 <div id="auth-overlay" style="display: none;">
-    <div class="auth-brand">
-        <i class="fas fa-layer-group"></i>
-        <h2>CRSPOIN</h2>
-        <p>Consignment Retail System (CRS)</p>
-    </div>
+    <!-- Video Latar Belakang (Ambient Background) yang mengikuti warna/tampilan video -->
+    <!-- Ganti URL src di bawah dengan tautan video raw GitHub Anda -->
+    <video class="auth-bg-ambient" src="https://raw.githubusercontent.com/NAMA_USER/NAMA_REPO/main/logo-video.mp4" autoplay muted loop playsinline></video>
 
-    <!-- Mode Step 1: Input Nama Sales -->
-    <div id="auth-step-input">
-        <div class="auth-tabs">
-            <button class="auth-tab-btn active" id="tab-btn-login" onclick="switchAuthTab('login')">Masuk</button>
-            <button class="auth-tab-btn" id="tab-btn-register" onclick="switchAuthTab('register')">Daftar Baru</button>
+    <div class="auth-content-box">
+        <div class="auth-brand">
+            <!-- Video Logo Aplikasi -->
+            <!-- Ganti URL src di bawah dengan tautan video raw GitHub Anda -->
+            <video class="auth-video-logo" src="https://raw.githubusercontent.com/NAMA_USER/NAMA_REPO/main/logo-video.mp4" autoplay muted loop playsinline></video>
+            <h2>CRSPOIN</h2>
+            <p>Consignment Retail System (CRS)</p>
         </div>
 
-        <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-sub);">Nama Lengkap Sales</label>
-        <input type="text" id="auth-input-name" placeholder="" autocomplete="off">
-        <small style="color: var(--text-sub); font-size: 0.72rem; margin-top: -4px; display: block; margin-bottom: 14px;">
-            Kode OTP verifikasi akan dikirimkan ke nomor WhatsApp pusat (088223104096).
-        </small>
+        <!-- Mode Step 1: Input Nama Sales -->
+        <div id="auth-step-input">
+            <div class="auth-tabs">
+                <button class="auth-tab-btn active" id="tab-btn-login" onclick="switchAuthTab('login')">Masuk</button>
+                <button class="auth-tab-btn" id="tab-btn-register" onclick="switchAuthTab('register')">Daftar Baru</button>
+            </div>
 
-        <button class="btn btn-primary" id="btn-request-otp" onclick="requestOtp()" style="height: 48px;">
-            <i class="fab fa-whatsapp"></i> Minta Kode OTP
-        </button>
-    </div>
+            <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-sub);">Nama Lengkap Sales</label>
+            <input type="text" id="auth-input-name" placeholder="" autocomplete="off">
+            <small style="color: var(--text-sub); font-size: 0.72rem; margin-top: -4px; display: block; margin-bottom: 14px;">
+                Kode OTP verifikasi akan dikirimkan ke nomor WhatsApp pusat (088223104096).
+            </small>
 
-    <!-- Mode Step 2: Konfirmasi OTP -->
-    <div id="auth-step-otp" style="display: none;">
-        <div style="text-align: center; margin-bottom: 16px;">
-            <span class="badge" style="background:#e0f2fe; color:var(--primary); font-size:0.8rem; padding:6px 12px;">
-                <i class="fas fa-shield-alt"></i> Verifikasi OTP Fonnte
-            </span>
-            <p style="font-size: 0.84rem; color: var(--text-sub); margin-top: 8px;">
-                Masukkan 6 angka OTP yang dikirimkan ke WhatsApp:<br>
-                <strong style="color:var(--text-main);">088223104096</strong>
-            </p>
+            <button class="btn btn-primary" id="btn-request-otp" onclick="requestOtp()" style="height: 48px;">
+                <i class="fab fa-whatsapp"></i> Minta Kode OTP
+            </button>
         </div>
 
-        <input type="number" inputmode="numeric" id="auth-input-otp" class="otp-box" placeholder="" maxlength="6" autocomplete="off">
+        <!-- Mode Step 2: Konfirmasi OTP -->
+        <div id="auth-step-otp" style="display: none;">
+            <div style="text-align: center; margin-bottom: 16px;">
+                <span class="badge" style="background:#e0f2fe; color:var(--primary); font-size:0.8rem; padding:6px 12px;">
+                    <i class="fas fa-shield-alt"></i> Verifikasi OTP Fonnte
+                </span>
+                <p style="font-size: 0.84rem; color: var(--text-sub); margin-top: 8px;">
+                    Masukkan 6 angka OTP yang dikirimkan ke WhatsApp:<br>
+                    <strong style="color:var(--text-main);">088223104096</strong>
+                </p>
+            </div>
 
-        <button class="btn btn-success" id="btn-verify-otp" onclick="verifyOtp()" style="height: 48px; margin-top: 8px;">
-            <i class="fas fa-check-circle"></i> Konfirmasi & Masuk
-        </button>
+            <input type="number" inputmode="numeric" id="auth-input-otp" class="otp-box" placeholder="" maxlength="6" autocomplete="off">
 
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px;">
-            <button class="btn-icon" onclick="backToAuthInput()" style="font-size: 0.8rem; color: var(--text-sub); font-weight: 600;">
-                <i class="fas fa-arrow-left"></i> Kembali
+            <button class="btn btn-success" id="btn-verify-otp" onclick="verifyOtp()" style="height: 48px; margin-top: 8px;">
+                <i class="fas fa-check-circle"></i> Konfirmasi & Masuk
             </button>
-            <button class="btn-icon" id="btn-resend-otp" onclick="resendOtp()" style="font-size: 0.8rem; color: var(--primary); font-weight: 700;">
-                Kirim Ulang OTP
-            </button>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px;">
+                <button class="btn-icon" onclick="backToAuthInput()" style="font-size: 0.8rem; color: var(--text-sub); font-weight: 600;">
+                    <i class="fas fa-arrow-left"></i> Kembali
+                </button>
+                <button class="btn-icon" id="btn-resend-otp" onclick="resendOtp()" style="font-size: 0.8rem; color: var(--primary); font-weight: 700;">
+                    Kirim Ulang OTP
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -756,7 +800,6 @@
             </div>
         </div>
 
-        <!-- Rekam Jejak Kunjungan Bayar vs Lewat & Persentase Winrate -->
         <div style="display: flex; justify-content: space-between; align-items: center; background: #f8fafc; border: 1px solid var(--border); padding: 7px 12px; border-radius: var(--radius-md); margin-bottom: 12px;">
             <span style="font-size: 0.75rem; font-weight: 600; color: var(--text-sub);"><i class="fas fa-history" style="color: var(--primary);"></i> Penilaian Bayar:</span>
             <div style="display: flex; gap: 8px; font-size: 0.78rem; font-weight: 800;">
@@ -775,7 +818,6 @@
             <button class="chip-btn" onclick="appendInputVal(50)">+50</button>
         </div>
 
-        <!-- 3 Tombol Aksi: Tambah Poin, Setor ($) -> Pop Kasir, Lewat -->
         <div class="flex-row" style="gap: 8px; margin-top: 6px;">
             <button class="btn btn-primary" onclick="executeAddPoints(false)" style="flex: 1; height: 46px; font-size: 0.85rem; padding: 8px 4px;" title="Tambah poin tanpa bayar tunai">
                 <i class="fas fa-plus"></i> Tambah
@@ -1334,16 +1376,6 @@
     let activeWarungId = null;
     let selectionModeRoutes = {};
 
-    // ==========================================
-    // SISTEM PENILAIAN GRADE WARUNG & WINRATE
-    // ==========================================
-    // Rumus:
-    // S ketika %tase warung 110% (11x bayar berturut-turut tanpa lewat batas tertinggi)
-    // A ketika %tase warung 100% ke atas (1x bayar tanpa lewat = 100%)
-    // B ketika %tase warung 90% ke atas
-    // C ketika %tase warung 70% ke atas
-    // D ketika %tase warung 50% ke atas (misal 1x bayar - lewat = 50%)
-    // E ketika %tase warung 40% ke bawah (< 50%)
     function calculateWarungPercentage(w) {
         if (!w) return 0;
         const bayar = w.bayarCount || 0;
@@ -1353,12 +1385,9 @@
         if (total === 0) return 0;
 
         if (lewat === 0) {
-            // Jika tidak ada lewat sama sekali:
-            // 1x = 100%, 11x = 110% (batas tertinggi)
             if (bayar >= 11) return 110;
-            return 100 + Math.max(0, bayar - 1); // 1x=100%, 2x=101%, ..., 11x=110%
+            return 100 + Math.max(0, bayar - 1);
         } else {
-            // Ada lewat: hitung winrate rasio pembayaran mirip match game
             const wr = Math.round((bayar / total) * 100);
             return Math.min(110, wr);
         }
@@ -1382,8 +1411,6 @@
         }
     }
 
-    // Migrasi Poin Warung Lama: Hanya berlaku sekali untuk warung yang sudah memiliki poin sebelum sistem ini diterapkan.
-    // Poin dibagi 25 (mewakili 1x setor). Contoh: 2500 poin = 100x setor.
     function migrateLegacyPointsOnce() {
         let changed = false;
         (state.routes || []).forEach(r => {
@@ -1456,7 +1483,6 @@
         }
     }
 
-    // --- UTILITIES & ERGONOMICS ---
     function formatRp(angka) {
         return "Rp" + (angka || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     }
@@ -1503,7 +1529,6 @@
         input.value = cur + val;
     }
 
-    // --- RENDER APP & ROUTE TABS ---
     function renderApp() {
         renderRouteTabs();
         const container = document.getElementById('swipe-container');
@@ -1539,7 +1564,6 @@
         });
         let totalRp = totalPoin * state.mainConversion;
 
-        // Peringkat di halaman utama TETAP berdasarkan poin terbanyak
         allWarungs.sort((a, b) => b.points - a.points);
         let top5 = allWarungs.slice(0, 5);
         let top5Html = top5.map((w, i) => {
@@ -1644,7 +1668,6 @@
                     <div class="stat-item"><span class="stat-label">Nilai</span><span class="stat-value">${formatRp(rRp)}</span></div>
                 </div>
             </div>
-            <!-- Sticky Search Bar: Mengambang di atas saat daftar digeser -->
             <div class="route-sticky-search-wrapper">
                 <div class="search-box" style="margin: 0; background: #ffffff;">
                     <i class="fas fa-search" style="color: #94a3b8;"></i>
@@ -1705,7 +1728,6 @@
             </div>`;
     }
 
-    // --- BULK OPERATIONS & SELECTION MODE ---
     function toggleRouteSelectionMode(routeId) {
         triggerHaptic();
         selectionModeRoutes[routeId] = !selectionModeRoutes[routeId];
@@ -1795,7 +1817,6 @@
         showToast(`${movedWarungs.length} warung dipindahkan ke ${targetRoute.name}!`);
     }
 
-    // --- QUICK ACTION MODAL & AUTO LOCATION GPS ---
     function openWarungActionModal(routeId, warungId) {
         triggerHaptic();
         activeRouteId = routeId;
@@ -1887,7 +1908,7 @@
             w.setorPoints += pt;
 
             if (w.bayarCount === undefined) w.bayarCount = 0;
-            w.bayarCount += 1; // Poin masuk dari Tombol ($) menambah rekam bayar/winrate
+            w.bayarCount += 1;
         }
 
         saveData();
@@ -1896,7 +1917,6 @@
         showToast(isDollarButton ? `+${pt} poin & setor dicatat!` : `+${pt} poin berhasil ditambahkan!`);
     }
 
-    // --- POPUP KASIR WARUNG & PERHITUNGAN KEMBALIAN ---
     let pendingKasirQty = 0;
     let pendingKasirTagihan = 0;
 
@@ -1976,7 +1996,6 @@
         showToast(`Status LEWAT tercatat untuk "${w.name}"!`);
     }
 
-    // --- TRANSITION ENGINE ---
     const swipeContainer = document.getElementById('swipe-container');
 
     function goToPage(index, animate = true) {
@@ -2094,7 +2113,6 @@
         document.getElementById('page-indicator').innerHTML = html;
     }
 
-    // --- CRUD ROUTE & WARUNG ---
     function addRoute() {
         const input = document.getElementById('input-route-name');
         const name = input.value.trim();
@@ -2223,7 +2241,6 @@
         showToast(`Urutan warung diperbarui ke nomor #${newOrder}`);
     }
 
-    // --- ACCURATE GPS ---
     function getWarungGpsLocation() {
         if (!navigator.geolocation) return showToast("Browser tidak mendukung GPS.");
         const btn = event.currentTarget;
@@ -2281,7 +2298,6 @@
         });
     }
 
-    // --- LAPORAN SETOR ---
     function populateSetorData() {
         const tbody = document.getElementById('setor-tbody');
         tbody.innerHTML = '';
@@ -2512,7 +2528,6 @@
         document.body.removeChild(a);
     }
 
-    // --- KEUANGAN ---
     function openKeuanganModal() {
         document.getElementById('keq-conv-label').innerText = formatRp(state.profitConversion || 300);
         document.getElementById('input-expense-amount').value = '';
@@ -2646,7 +2661,6 @@
         }
     }
 
-    // --- PENGATURAN ---
     function checkAdminAccess(salesNameValue) {
         const adminSection = document.getElementById('admin-settings-section');
         adminSection.style.display = (salesNameValue.trim().toLowerCase() === 'admin') ? 'block' : 'none';
@@ -2762,9 +2776,6 @@
     window.addEventListener('offline', updateOnlineStatus);
     if (!navigator.onLine) updateOnlineStatus();
 
-    // ==========================================
-    // 5. PWA INSTALLATION & SERVICE WORKER
-    // ==========================================
     let deferredPrompt = null;
 
     window.addEventListener('beforeinstallprompt', (e) => {
